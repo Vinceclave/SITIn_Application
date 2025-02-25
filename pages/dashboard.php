@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 // Fetch user details
 $user_id = $_SESSION['user_id'];
 $query = "SELECT * FROM students WHERE id = ?";
-$stmt = $conn->prepare($query);
+$stmt = $conn->prepare($query); 
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
