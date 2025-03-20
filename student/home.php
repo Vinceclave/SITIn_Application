@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 // Fetch user details
 $user_id = $_SESSION['user_id'];
-$query = "SELECT * FROM students WHERE id = ?";
+$query = "SELECT * FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -21,27 +21,18 @@ $user = $result->fetch_assoc();
 // Ensure role is set
 $role = isset($user['role']) ? $user['role'] : 'student';
 
-// Fetch announcements and rules from a static file or database
-$announcements = [
-    [
+// Fetch announcements from database
+$query = "SELECT * FROM announcements ORDER BY date DESC";
+$result = mysqli_query($conn, $query);
+$announcements = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $announcements[] = [
         'title' => 'Announcement',
-        'date' => '2025-Feb-25',
-        'content' => 'UC did it again.',
-        'author' => 'CCS Admin'
-    ],
-    [
-        'title' => 'Announcement',
-        'date' => '2025-Feb-03',
-        'content' => 'The College of Computer Studies will open the registration of students for the Sit-in privilege starting tomorrow. Thank you! Lab Supervisor',
-        'author' => 'CCS Admin'
-    ],
-    [
-        'title' => 'Important Announcement',
-        'date' => '2024-May-08',
-        'content' => 'We are excited to announce the launch of our new website! 🎉 Explore our latest products and services now!',
-        'author' => 'CCS Admin'
-    ]
-];
+        'date' => date('Y-M-d', strtotime($row['date'])),
+        'content' => $row['message'],
+        'author' => $row['admin_name']
+    ];
+}
 
 $rules = [
     'University of Cebu COLLEGE OF INFORMATION & COMPUTER STUDIES',
@@ -71,7 +62,7 @@ $rules = [
 
 ?>
     <?php include '../shared/aside.php'; ?>
-    <main class="pl-72 p-4">
+    <main class="">
 
     
         <section class="px-10 py-4">
@@ -82,13 +73,20 @@ $rules = [
                 <div class="flex-1">
                     <h2 class="text-2xl font-semibold mb-2">Announcements</h2>
                     <div class="overflow-y-auto max-h-96 p-4 bg-gray-100 rounded-lg shadow-md">
-                        <?php foreach ($announcements as $announcement): ?>
-                            <div class="mb-4 p-2 border-b border-gray-300">
-                                <strong class="block text-lg"><?php echo htmlspecialchars($announcement['title']); ?></strong>
-                                <span class="text-sm text-gray-600"><?php echo htmlspecialchars($announcement['author']); ?> | <?php echo htmlspecialchars($announcement['date']); ?></span>
-                                <p class="mt-2"><?php echo htmlspecialchars($announcement['content']); ?></p>
-                            </div>
-                        <?php endforeach; ?>
+                        <?php if (empty($announcements)): ?>
+                            <p class="text-gray-500 text-center py-4">No announcements available.</p>
+                        <?php else: ?>
+                            <?php foreach ($announcements as $announcement): ?>
+                                <div class="mb-4 p-4 bg-white rounded-lg shadow">
+                                    <strong class="block text-lg"><?php echo htmlspecialchars($announcement['title']); ?></strong>
+                                    <span class="text-sm text-gray-600">
+                                        <?php echo htmlspecialchars($announcement['author']); ?> | 
+                                        <?php echo htmlspecialchars($announcement['date']); ?>
+                                    </span>
+                                    <p class="mt-2"><?php echo nl2br(htmlspecialchars($announcement['content'])); ?></p>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                 </div>  
                 <div class="flex-1">

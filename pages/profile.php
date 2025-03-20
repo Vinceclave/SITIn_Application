@@ -37,15 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             mkdir($uploads_dir, 0777, true);
         }
         $image_path = $uploads_dir . '/' . basename($_FILES['image']['name']);
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $image_path)) {
-            // Update the image path in the database
-            $update_query = "UPDATE students SET image_path = ? WHERE id = ?";
-            $stmt = $conn->prepare($update_query);
-            $stmt->bind_param("si", $image_path, $user_id);
-            $stmt->execute();
-        } else {
-            $image_path = $user['image_path'];
-        }
+        move_uploaded_file($_FILES['image']['tmp_name'], $image_path);
     } else {
         $image_path = $user['image_path'];
     }
@@ -64,61 +56,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 ?>
+
+<div class="container mx-auto p-4 flex">
     <?php include '../shared/aside.php'; ?>
     <main class="pl-72 p-4">
-        <section class="relative px-10 py-4">
-            <h1 class="text-4xl font-bold mb-4">Profile</h1>
-            <p class="mb-8">Welcome to your profile, <?php echo htmlspecialchars($user['username']); ?>!</p>
-            <form method="POST" enctype="multipart/form-data">
-                <div class="flex">
-                    <div class="mb-4">
-                        <label for="lastname" class="block text-gray-700">Last Name</label>
-                        <input type="text" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['lastname']); ?>" class="mt-1 block w-full">
-                    </div>
-                    <div class="mb-4">
-                        <label for="firstname" class="block text-gray-700">First Name</label>
-                        <input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['firstname']); ?>" class="mt-1 block w-full">
-                    </div>
-                    <div class="mb-4">
-                        <label for="middlename" class="block text-gray-700">Middle Name</label>
-                        <input type="text" id="middlename" name="middlename" value="<?php echo htmlspecialchars($user['middlename']); ?>" class="mt-1 block w-full">
-                    </div>
-                </div>
-                <div class="mb-4">
-                    <label for="course" class="block text-gray-700">Course</label>
-                    <input type="text" id="course" name="course" value="<?php echo htmlspecialchars($user['course']); ?>" class="mt-1 block w-full" >
-                </div>
-                <div class="mb-4">
-                    <label for="year_level" class="block text-gray-700">Year Level</label>
-                    <input type="number" id="year_level" name="year_level"  value="<?php echo htmlspecialchars($user['year_level']); ?>" class="mt-1 block w-full">
-                </div>
-                <div class="mb-4">
-                    <label for="username" class="block text-gray-700">Username</label>
-                    <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" class="mt-1 block w-full">
-                </div>
-                <div class="mb-4">
-                    <label for="image" class="block text-gray-700">Profile Image</label>
-                    <input type="file" id="image" name="image" class="mt-1 block w-full">
-                    <?php if ($user['image_path']): ?>
-                        <img src="<?php echo htmlspecialchars($user['image_path']); ?>" alt="Profile Image" class="mt-2 w-32 h-32 object-cover">
-                    <?php endif; ?>
-                </div>
-                <button type="submit" class="bg-blue-500 text-white px-4 py-2">Update Profile</button>
-            </form>
-        </section>
-
-        <div class="absolute top-10 right-10 flex items-center space-x-2">
-            <!-- Icon -->
-            <svg class="w-6 h-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-
-            <!-- Text -->
-            <h4 class="text-lg font-semibold text-gray-800">
-                Remaining Sessions: <span class="text-red-500">0</span>
-            </h4>
-        </div>
+        <h1 class="text-4xl font-bold mb-4">Profile</h1>
+        <p>Welcome to your profile, <?php echo htmlspecialchars($user['username']); ?>!</p>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="lastname" class="block text-gray-700">Last Name</label>
+                <input type="text" id="lastname" name="lastname" value="<?php echo htmlspecialchars($user['lastname']); ?>" class="mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="firstname" class="block text-gray-700">First Name</label>
+                <input type="text" id="firstname" name="firstname" value="<?php echo htmlspecialchars($user['firstname']); ?>" class="mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="middlename" class="block text-gray-700">Middle Name</label>
+                <input type="text" id="middlename" name="middlename" value="<?php echo htmlspecialchars($user['middlename']); ?>" class="mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="course" class="block text-gray-700">Course</label>
+                <input type="text" id="course" name="course" value="<?php echo htmlspecialchars($user['course']); ?>" class="mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="year_level" class="block text-gray-700">Year Level</label>
+                <input type="number" id="year_level" name="year_level" value="<?php echo htmlspecialchars($user['year_level']); ?>" class="mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="username" class="block text-gray-700">Username</label>
+                <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($user['username']); ?>" class="mt-1 block w-full">
+            </div>
+            <div class="mb-4">
+                <label for="image" class="block text-gray-700">Profile Image</label>
+                <input type="file" id="image" name="image" class="mt-1 block w-full">
+                <?php if ($user['image_path']): ?>
+                    <img src="<?php echo htmlspecialchars($user['image_path']); ?>" alt="Profile Image" class="mt-2 w-32 h-32 object-cover">
+                <?php endif; ?>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2">Update Profile</button>
+        </form>
     </main>
+</div>
+
 <?php
 require_once '../shared/footer.php';
 ?>

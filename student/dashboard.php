@@ -11,33 +11,24 @@ if (!isset($_SESSION['user_id'])) {
 
 // Fetch user details
 $user_id = $_SESSION['user_id'];
-$query = "SELECT * FROM students WHERE id = ?";
-$stmt = $conn->prepare($query);
+$query = "SELECT * FROM users WHERE id = ?";
+$stmt = $conn->prepare($query); 
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
-// Ensure role is set
+// Ensure role is set correctly
 $role = isset($user['role']) ? $user['role'] : 'student';
-
-// Check if user is admin
-if ($role != 'admin') {
-    header("Location: home.php");
-    exit;
-}
-
 ?>
 
-<div class="container mx-auto p-4 flex">
+<div class="container mx-auto flex">
     <?php include '../shared/aside.php'; ?>
     <main class="pl-72 p-4">
-        <h1 class="text-4xl font-bold mb-4">Admin Dashboard</h1>
-        <p>Welcome to the admin section, <?php echo htmlspecialchars($user['username']); ?>!</p>
-        <!-- Admin-specific content -->
+        <h1 class="text-4xl font-bold mb-4">Dashboard</h1>
+        <p>Welcome, <?php echo htmlspecialchars($user['username']); ?>!</p>
+
     </main>
 </div>
 
-<?php
-require_once '../shared/footer.php';
-?>
+<?php require_once '../shared/footer.php'; ?>
