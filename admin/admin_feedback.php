@@ -9,46 +9,83 @@ require_once '../config/config.php';
 require_once '../shared/header.php';
 ?>
 
-<div class="p-6 ml-64 bg-white min-h-screen">
+<div class="flex min-h-screen bg-gray-50 text-gray-900">
     <?php include '../shared/aside.php'; ?>
+    <main class="flex-1 p-4 ml-64">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-800">Feedback Records</h1>
+                    <p class="text-lg text-gray-600">View and manage student feedback</p>
+                </div>
+            </div>
 
-    <h2 class="text-2xl font-semibold text-darkblue mb-6">Feedback Records</h2>
+            <!-- Search & Filters -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-laptop text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="searchLab" 
+                               placeholder="Search by Lab"
+                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </div>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-id-card text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="searchIdno" 
+                               placeholder="Search by Student ID"
+                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <button id="clearFilters" 
+                                class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-eraser mr-2"></i>Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Search & Filters -->
-    <div class="flex gap-4 mb-6">
-        <input type="text" id="searchLab" placeholder="Search by Lab"
-               class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-steelblue w-1/3">
-        <input type="text" id="searchIdno" placeholder="Search by Student ID"
-               class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-steelblue w-1/3">
-        <button id="clearFilters" class="bg-darkblue text-white px-5 py-3 rounded-md hover:bg-navy">
-            Clear
-        </button>
-    </div>
+            <!-- Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feedback ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feedbackTable" class="divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+            </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto bg-white">
-        <table class="w-full border-collapse">
-            <thead class="bg-darkblue text-white">
-                <tr>
-                    <th class="p-4">Feedback ID</th>
-                    <th class="p-4">Student ID</th>
-                    <th class="p-4">Lab</th>
-                    <th class="p-4">Date</th>
-                    <th class="p-4">Message</th>
-                </tr>
-            </thead>
-            <tbody id="feedbackTable" class="text-gray-700"></tbody>
-        </table>
-    </div>
-
-    <!-- Pagination -->
-    <div id="pagination" class="flex justify-center mt-6 space-x-2"></div>
+            <!-- Pagination -->
+            <div id="pagination" class="flex justify-center mt-6 space-x-2"></div>
+        </div>
+    </main>
 </div>
 
-<?php require_once '../shared/footer.php'; ?>
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    // Function to fetch feedback with debounce
+    let searchTimeout;
+    function debounceSearch(func, wait) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(func, wait);
+    }
+
     function fetchFeedback(page = 1) {
         let lab = document.getElementById("searchLab").value;
         let idno = document.getElementById("searchIdno").value;
@@ -58,11 +95,20 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(data => {
                 document.getElementById("feedbackTable").innerHTML = data;
             })
-            .catch(error => console.error("Error fetching data:", error));
+            .catch(error => {
+                console.error("Error fetching data:", error);
+                // You can add Notiflix notification here if you want
+            });
+
     }
 
-    document.getElementById("searchLab").addEventListener("input", fetchFeedback);
-    document.getElementById("searchIdno").addEventListener("input", fetchFeedback);
+    // Add debounce to search inputs
+    document.getElementById("searchLab").addEventListener("input", function() {
+        debounceSearch(fetchFeedback, 300);
+    });
+    document.getElementById("searchIdno").addEventListener("input", function() {
+        debounceSearch(fetchFeedback, 300);
+    });
 
     document.getElementById("clearFilters").addEventListener("click", function () {
         document.getElementById("searchLab").value = "";
@@ -70,6 +116,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetchFeedback();
     });
 
+    // Initial fetch
     fetchFeedback();
 });
 </script>
@@ -79,12 +126,14 @@ tailwind.config = {
     theme: {
         extend: {
             colors: {
-                navy: "#0D1B2A",
-                darkblue: "#1B263B",
-                steelblue: "#415A77",
-                bluegray: "#778DA9",
+                navy: "#24292e",
+                darkblue: "#0366d6",
+                steelblue: "#f6f8fa",
+                bluegray: "#6a737d"
             }
         }
     }
 }
 </script>
+
+<?php require_once '../shared/footer.php'; ?><?php require_once '../shared/footer.php'; ?>

@@ -29,6 +29,22 @@ if (isset($_SESSION['idno'])) {
 session_unset();
 session_destroy();
 
-header("Location: login.php");
+// Replace header redirection with HTML and Notiflix alert
+?>
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+</head>
+<body>
+<script>
+Notiflix.Notify.success('Logged out successfully!');
+setTimeout(function() {
+    window.location.href = 'login.php';
+}, 2000);
+</script>
+</body>
+</html>
+<?php
 exit;
 ?>

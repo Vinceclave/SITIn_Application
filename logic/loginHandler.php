@@ -29,16 +29,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($result->num_rows == 1) {
         $user = $result->fetch_assoc();
         if (password_verify($password, $user['password'])) {
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['role'] = $user['role'];
-
+            // Check role and set session variables accordingly.
             if ($user['role'] == 'Admin') {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role'] = $user['role'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['success'] = "Admin login successful.";
                 header("Location: ../admin/dashboard.php");
                 exit;
             } elseif ($user['role'] == 'Student') {
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['role'] = $user['role'];
                 $_SESSION['idno'] = $user['idno'];
-
+                $_SESSION['success'] = "Student login successful.";
                 // 🔥 Update only `in_time` where it's NULL (most recent record)
                 $updateTimeStmt = $conn->prepare("
                     UPDATE sit_in 
@@ -49,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $updateTimeStmt->bind_param("s", $user['idno']);
                 $updateTimeStmt->execute();
 
+                // Changed redirect to student dashboard so the success alert is shown
                 header("Location: ../student/home.php");
                 exit;
             } else {

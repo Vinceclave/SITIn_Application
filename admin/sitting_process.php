@@ -2,6 +2,28 @@
 require_once '../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // New branch to end an active session without updating sit_date
+    if (isset($_POST['action']) && $_POST['action'] === 'end') {
+        $idno = isset($_POST['idno']) ? $_POST['idno'] : '';
+        $updateQuery = "UPDATE sit_in SET out_time = NOW(), status = 0 WHERE idno = ? AND out_time IS NULL";
+        $stmt = $conn->prepare($updateQuery);
+        $stmt->bind_param("s", $idno);
+        $stmt->execute();
+        if ($stmt->affected_rows > 0) {
+            echo json_encode([
+                'status' => 'success',
+                'message' => 'Session ended successfully.'
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'There is no active session to end.'
+            ]);
+        }
+        exit;
+    }
+
     $idno = isset($_POST['idno']) ? $_POST['idno'] : '';
     $full_name = isset($_POST['full_name']) ? $_POST['full_name'] : '';
     $lab = isset($_POST['lab']) ? $_POST['lab'] : '';
@@ -21,8 +43,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'message' => 'This student already has a pending sit-in session.'
         ]);
     } else {
-        // Insert new sit-in record
-        $insertQuery = "INSERT INTO sit_in (idno, full_name, lab, reason, in_time) VALUES (?, ?, ?, ?, NOW())";
+        // Insert new sit-in record with sit_date
+        $insertQuery = "INSERT INTO sit_in (idno, full_name, lab, reason, in_time, out_time, status, sit_date) VALUES (?, ?, ?, ?, NOW(), NULL, 1, CURDATE())";
         $stmt = $conn->prepare($insertQuery);
         $stmt->bind_param("ssss", $idno, $full_name, $lab, $reason);
         if ($stmt->execute()) {

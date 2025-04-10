@@ -1,28 +1,64 @@
 <?php if ($_SESSION['role'] == 'Student'): ?>
-<header class="bg-navy text-offwhite p-4 shadow-md flex justify-between items-center relative">
-    <!-- Logo & Title -->
-    <div class="flex items-center space-x-2">
-        <img src="logo.png" alt="Logo" class="h-8">
-        <h1 class="text-lg font-medium">Student Panel</h1>
+<header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
+    <div class="container max-w-[1400px] mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <!-- Mobile Menu Button -->
+            <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+            
+            <!-- Desktop Navigation -->
+            <nav class="hidden md:flex items-center space-x-6">
+                <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-home mr-2"></i>Home
+                </a>
+                <a href="profile.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-user mr-2"></i>Profile
+                </a>
+                <a href="history.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-history mr-2"></i>History
+                </a>
+                <a href="reservation.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-calendar-check mr-2"></i>Reservation
+                </a>
+            </nav>
+            
+            <!-- Logout Button -->
+            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+            </a>
+        </div>
     </div>
-
-    <!-- Mobile Menu Button -->
-    <button id="menuToggle" class="md:hidden p-2 text-offwhite focus:outline-none">
-        ☰
-    </button>
-
-    <!-- Navigation -->
-    <nav id="studentNav"
-        class="absolute md:relative top-full left-0 w-full md:w-auto bg-navy md:bg-transparent md:flex flex-col md:flex-row md:space-x-4 shadow-md md:shadow-none hidden md:block transition-all duration-300">
-        <a href="home.php" class="block py-2 px-4 hover:text-bluegray transition">Home</a>
-        <a href="profile.php" class="block py-2 px-4 hover:text-bluegray transition">Profile</a>
-        <a href="history.php" class="block py-2 px-4 hover:text-bluegray transition">History</a>
-        <a href="reservation.php" class="block py-2 px-4 hover:text-bluegray transition">Reservation</a>
-        <a href="../logout.php" class="block py-2 px-4 text-danger hover:text-red-700 transition">Log Out</a>
+    
+    <!-- Mobile Navigation -->
+    <nav id="studentNav" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="container max-w-[1400px] mx-auto px-4 py-2">
+            <a href="home.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-home mr-3 w-6"></i>Home
+            </a>
+            <a href="profile.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-user mr-3 w-6"></i>Profile
+            </a>
+            <a href="history.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-history mr-3 w-6"></i>History
+            </a>
+            <a href="reservation.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-calendar-check mr-3 w-6"></i>Reservation
+            </a>
+        </div>
     </nav>
 </header>
 
 <script>
+    window.addEventListener('scroll', function () {
+        const header = document.getElementById('studentHeader');
+        if (window.scrollY > 50) {
+            header.classList.add('bg-white/80');
+        } else {
+            header.classList.remove('bg-white/80');
+        }
+    });
+    
     document.getElementById('menuToggle').addEventListener('click', function () {
         let menu = document.getElementById('studentNav');
         menu.classList.toggle('hidden');
@@ -30,107 +66,126 @@
 </script>
 <?php endif; ?>
 
-
 <?php if ($_SESSION['role'] == 'Admin'): ?>
-<aside class="z-30 fixed h-screen top-0 left-0 bg-navy w-60 p-5 shadow-md flex flex-col">
+<aside class="fixed h-screen top-0 left-0 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
     <!-- Logo Section -->
-    <div class="flex items-center space-x-2 mb-6">
-        <img src="logo.png" alt="Logo" class="h-10"> 
-        <h2 class="text-xl font-semibold text-white">Admin Panel</h2>
+    <div class="p-6 border-b border-gray-200/50">
+        <div class="flex items-center space-x-3">
+            <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg">
+            <h2 class="text-xl font-semibold text-gray-800">Admin Panel</h2>
+        </div>
     </div>
-
+    
     <!-- Navigation -->
-    <ul class="space-y-2 flex-1">
-        <li>
-            <a href="dashboard.php" class="block p-3 text-white hover:bg-bluegray hover:bg-opacity-80 rounded-md transition">
-                📊 Dashboard
-            </a>
-        </li>
-        <li>
-            <a href="manage_users.php" class="block p-3 text-white hover:bg-bluegray hover:bg-opacity-80 rounded-md transition">
-                👥 Manage Users
-            </a>
-        </li>
-        <li>
-            <a href="reports.php" class="block p-3 text-white hover:bg-bluegray hover:bg-opacity-80 rounded-md transition">
-                📁 Reports
-            </a>
-        </li>
-        <li>
-            <a href="sitting_records.php" class="block p-3 text-white hover:bg-bluegray hover:bg-opacity-80 rounded-md transition">
-                🪑 Sitting Records
-            </a>
-        </li>
-        <li>
-            <button id="openSearchModal" class="w-full text-left block p-3 text-white hover:bg-bluegray hover:bg-opacity-80 rounded-md transition">
-                🔍 Search Student
-            </button>
-        </li>
-        <li>
-            <a href="admin_feedback.php" class="block p-3 text-white hover:bg-bluegray hover:bg-opacity-80 rounded-md transition">
-                📝 View Feedback
-            </a>
-        </li>
-
-    </ul>
-
+    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+        <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+            <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
+        </a>
+        <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+            <i class="fas fa-users mr-3 w-6"></i>Manage Users
+        </a>
+        <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+            <i class="fas fa-file-alt mr-3 w-6"></i>Reports
+        </a>
+        <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+            <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
+        </a>
+        <button id="openSearchModal" class="w-full flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+            <i class="fas fa-search mr-3 w-6"></i>Search Student
+        </button>
+        <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+            <i class="fas fa-comments mr-3 w-6"></i>View Feedback
+        </a>
+    </nav>
+    
     <!-- Logout Button -->
-    <a href="../logout.php" class="block p-3 text-white bg-red-600 hover:bg-red-700 rounded-md transition">
-        🚪 Log Out
-    </a>
+    <div class="p-4 border-t border-gray-200/50">
+        <a href="../logout.php" class="flex items-center justify-center px-4 py-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+            <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+        </a>
+    </div>
 </aside>
 <?php endif; ?>
 
-
-
-<div id="searchModal" class="z-50 fixed inset-0 bg-darkblue bg-opacity-80 flex items-center justify-center hidden">
-    <div class="bg-white p-4 rounded shadow-md w-80">
-        <h3 class="text-lg font-medium text-navy mb-4">Search Student ID</h3>
-        <input type="text" id="searchInput" class="w-full p-2 border border-steelblue rounded focus:outline-none focus:ring-1 focus:ring-bluegray mb-4" placeholder="Enter Student ID">
-        <div id="searchResult" class="mt-3 text-navy"></div>
-        <div id="studentDetails" class="mt-4 hidden">
-            <div class="mb-2">
-                <label for="fullName" class="block text-sm font-medium text-gray-700">Full Name</label>
-                <input type="text" id="fullName" class="w-full p-2 border border-steelblue rounded bg-gray-100" placeholder="Full Name" readonly>
+<!-- Search Modal -->
+<div id="searchModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden transition-all duration-300">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 transform transition-all">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-xl font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-search text-indigo-600 mr-2"></i>Search Student ID
+                </h3>
+                <button id="cancelButton" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-
-            <div class="mb-2">
-                <label for="remainingSessions" class="block text-sm font-medium text-gray-700">Remaining Sessions</label>
-                <input type="text" id="remainingSessions" class="w-full p-2 border border-steelblue rounded bg-gray-100" placeholder="Remaining Sessions" readonly>
+            
+            <div class="space-y-4">
+                <input type="text" id="searchInput" 
+                       class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                       placeholder="Enter Student ID">
+                
+                <div id="searchResult" class="text-sm text-gray-600"></div>
+                
+                <div id="studentDetails" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="fullName" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                               readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Remaining Sessions</label>
+                        <input type="text" id="remainingSessions" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                               readonly>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+                        <input type="text" id="reason" name="reason" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                               placeholder="Enter Reason">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Lab</label>
+                        <input type="text" id="lab" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                               placeholder="Enter Lab">
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button id="cancelButton" class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button id="sittingButton" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors hidden">
+                        <i class="fas fa-chair mr-2"></i>Sitting
+                    </button>
+                    <button id="searchButton" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                        <i class="fas fa-search mr-2"></i>Search
+                    </button>
+                </div>
             </div>
-
-            <div class="mb-2">
-                <label for="reason" class="block text-sm font-medium text-gray-700">Reason</label>
-                <input type="text" id="reason" name="reason" class="w-full p-2 border border-steelblue rounded" placeholder="Enter Reason">
-            </div>
-
-            <div class="mb-2">
-                <label for="lab" class="block text-sm font-medium text-gray-700">Lab</label>
-                <input type="text" id="lab" class="w-full p-2 border border-steelblue rounded" placeholder="Enter Lab">
-            </div>
-        </div>
-        <div class="mt-3 flex justify-end space-x-2">
-            <button id="cancelButton" class="px-4 py-2 bg-bluegray text-white rounded hover:bg-steelblue hidden">Cancel</button>
-            <button id="sittingButton" class="px-4 py-2 bg-steelblue text-white rounded hover:bg-darkblue hidden">Sitting</button>
-            <button id="searchButton" class="px-4 py-2 bg-steelblue text-white rounded hover:bg-darkblue">Search</button>
         </div>
     </div>
-</div>  
+</div>
 
-<script>    
-    document.getElementById('openSearchModal').addEventListener('click', function() {
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+
+<script>
+    document.getElementById('openSearchModal').addEventListener('click', function () {
         document.getElementById('searchModal').classList.remove('hidden');
     });
-
-    document.getElementById('cancelButton').addEventListener('click', function() {
+    document.getElementById('cancelButton').addEventListener('click', function () {
         document.getElementById('searchModal').classList.add('hidden');
         document.getElementById('searchResult').innerHTML = ""; // Clear previous result
         document.getElementById('studentDetails').classList.add('hidden'); // Hide student details
         document.getElementById('sittingButton').classList.add('hidden'); // Hide Sitting button
         document.getElementById('searchButton').classList.remove('hidden'); // Show Search button again
     });
-
-    document.getElementById('searchButton').addEventListener('click', function() {
+    document.getElementById('searchButton').addEventListener('click', function () {
         let studentIDNO = document.getElementById('searchInput').value.trim();
         let searchResult = document.getElementById('searchResult');
         let studentDetails = document.getElementById('studentDetails');
@@ -163,7 +218,9 @@
                     cancelButton.classList.remove('hidden');
                     sittingButton.classList.remove('hidden');
                 } else {
-                    searchResult.innerHTML = '<p class="text-danger">Student not found.</p>';
+                    // Replacing innerHTML message with Notiflix notification
+                    // searchResult.innerHTML = '<p class="text-danger">Student not found.</p>';
+                    Notiflix.Notify.failure('Student not found.');
                     studentDetails.classList.add('hidden'); // Hide student details if not found
                     sittingButton.classList.add('hidden'); // Hide Sitting button if not found
                     cancelButton.classList.add('hidden'); // Hide Cancel button if not found
@@ -172,53 +229,58 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                searchResult.innerHTML = '<p class="text-danger">Error fetching data.</p>';
+                // Replace error message with Notiflix notification
+                // searchResult.innerHTML = '<p class="text-danger">Error fetching data.</p>';
+                Notiflix.Notify.failure('Error fetching data.');
                 studentDetails.classList.add('hidden'); // Hide student details on error
                 sittingButton.classList.add('hidden'); // Hide Sitting button on error
                 cancelButton.classList.add('hidden'); // Hide Cancel button on error
                 searchButton.classList.remove('hidden'); // Show Search button again
             });
         } else {
-            alert('Please enter a valid Student ID Number.');
+            // Replace alert with Notiflix for validation
+            // alert('Please enter a valid Student ID Number.');
+            Notiflix.Notify.warning('Please enter a valid Student ID Number.');
         }
     });
-    
-    document.getElementById('sittingButton').addEventListener('click', function() {
-    let studentIDNO = document.getElementById('searchInput').value.trim();
-    let fullName = document.getElementById('fullName').value.trim();
-    let lab = document.getElementById('lab').value.trim();
-    let reason = document.getElementById('reason').value.trim();
-    let remainingSessionsField = document.getElementById('remainingSessions');
+    document.getElementById('sittingButton').addEventListener('click', function () {
+        let studentIDNO = document.getElementById('searchInput').value.trim();
+        let fullName = document.getElementById('fullName').value.trim();
+        let lab = document.getElementById('lab').value.trim();
+        let reason = document.getElementById('reason').value.trim();
+        let remainingSessionsField = document.getElementById('remainingSessions');
 
-    if (studentIDNO && fullName && lab && reason) {
-        fetch('sitting_process.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: `idno=${encodeURIComponent(studentIDNO)}&full_name=${encodeURIComponent(fullName)}&lab=${encodeURIComponent(lab)}&reason=${encodeURIComponent(reason)}`
-        })
-        .then(response => response.json()) // Expecting JSON response
-        .then(data => {
-            if (data.status === "success") {
-                alert('Sitting session recorded successfully!');
-                remainingSessionsField.value = data.remaining_sessions;
-                document.getElementById('searchModal').classList.add('hidden');
-            } else {
-                // Handle the error (duplicate session)
-                alert(data.message);  // Display the error message returned from the server
-            }
-        })
-        .catch(error => {
-            console.error('Fetch Error:', error);
-            alert('Error processing request.');
-        });
-    } else {
-        alert('Please fill in all fields.');
-    }
-});
-
-
-
-
-
+        if (studentIDNO && fullName && lab && reason) {
+            fetch('sitting_process.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `idno=${encodeURIComponent(studentIDNO)}&full_name=${encodeURIComponent(fullName)}&lab=${encodeURIComponent(lab)}&reason=${encodeURIComponent(reason)}`
+            })
+            .then(response => response.json()) // Expecting JSON response
+            .then(data => {
+                if (data.status === "success") {
+                    // Replace alert with Notiflix notification
+                    // alert('Sitting session recorded successfully!');
+                    Notiflix.Notify.success('Sitting session recorded successfully!');
+                    remainingSessionsField.value = data.remaining_sessions;
+                    document.getElementById('searchModal').classList.add('hidden');
+                } else {
+                    // Replace alert with Notiflix notification
+                    // alert(data.message);
+                    Notiflix.Notify.failure(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch Error:', error);
+                // Replace alert with Notiflix notification
+                // alert('Error processing request.');
+                Notiflix.Notify.failure('Error processing request.');
+            });
+        } else {
+            // Replace alert with Notiflix notification
+            // alert('Please fill in all fields.');
+            Notiflix.Notify.warning('Please fill in all fields.');
+        }
+    });
 </script>
 

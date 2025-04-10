@@ -1,0 +1,3 @@
+<?php
+// ...existing code or leave empty if not used...
+?>

@@ -55,6 +55,7 @@ if ($stmt->execute()) {
     $checkSession->close();
     $insertSession->close();
 
+    $_SESSION['success'] = "Registration successful. Please log in.";
     header("Location: ../login.php");
     exit;
 } else {

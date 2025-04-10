@@ -8,111 +8,338 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
 require_once '../config/config.php';
 require_once '../shared/header.php';
 
-// Fetch only students from the database
+// Add search & pagination variables
+$search = "";
+if(isset($_GET['search'])) {
+    $search = mysqli_real_escape_string($conn, $_GET['search']);
+}
+$perPage = 10;
+$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $perPage;
+
+// Count total students with filtering
+$countQuery = "SELECT COUNT(*) as total FROM users WHERE role = 'Student'";
+if ($search) {
+    $countQuery .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
+}
+$countResult = mysqli_query($conn, $countQuery);
+$totalRows = mysqli_fetch_assoc($countResult)['total'];
+$totalPages = ceil($totalRows / $perPage);
+
+// Fetch students with search filtering and pagination
 $query = "SELECT id, idno, lastname, firstname, middlename, course, year_level, username 
           FROM users 
-          WHERE role = 'Student' 
-          ORDER BY id DESC";
+          WHERE role = 'Student'";
+if ($search) {
+    $query .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
+}
+$query .= " ORDER BY id DESC LIMIT $offset, $perPage";
 $result = mysqli_query($conn, $query);
 ?>
 
-<?php include '../shared/aside.php'; ?>
+<div class="flex min-h-screen bg-gray-50 text-gray-900 pb-14">
+    <?php include '../shared/aside.php'; ?>
+    <main class="flex-1 p-4 ml-64">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h1 class="text-3xl font-semibold text-gray-800">Manage Students</h1>
+                    <p class="text-lg text-gray-600">View and manage registered students</p>
+                </div>
+                <button onclick="openRegisterModal()" 
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <i class="fas fa-user-plus mr-2"></i>Add Student
+                </button>
+            </div>
 
-<div class="ml-60 min-h-screen p-8"> 
-    <h1 class="text-2xl font-semibold mb-4">Manage Students</h1>
-    <p class="text-gray-600 mb-6">View and manage registered students below.</p>
-    
-    <div class="flex justify-end mb-4">
-        <button onclick="openRegisterModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition">Add Student</button>
-    </div>
-    
-    <!-- Student Management Table -->
-    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-md">
-        <table class="w-full border-collapse">
-            <thead>
-                <tr class="bg-gray-200 text-gray-700">
-                    <th class="px-4 py-2 border">ID</th>
-                    <th class="px-4 py-2 border">ID Number</th>
-                    <th class="px-4 py-2 border">Last Name</th>
-                    <th class="px-4 py-2 border">First Name</th>
-                    <th class="px-4 py-2 border">Middle Name</th>
-                    <th class="px-4 py-2 border">Course</th>
-                    <th class="px-4 py-2 border">Year Level</th>
-                    <th class="px-4 py-2 border">Username</th>
-                    <th class="px-4 py-2 border">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (mysqli_num_rows($result) > 0): ?>
-                    <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                        <tr class="text-center border-t">
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['id']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['idno']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['lastname']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['firstname']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['middlename']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['course']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['year_level']) ?></td>
-                            <td class="px-4 py-2 border"><?= htmlspecialchars($row['username']) ?></td>
-                            <td class="px-4 py-2 border">
-                                <button onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars($row['idno']) ?>', '<?= htmlspecialchars($row['lastname']) ?>', '<?= htmlspecialchars($row['firstname']) ?>', '<?= htmlspecialchars($row['middlename']) ?>', '<?= htmlspecialchars($row['course']) ?>', '<?= htmlspecialchars($row['year_level']) ?>', '<?= htmlspecialchars($row['username']) ?>')" class="text-blue-600 hover:underline">Edit</button> | 
-                                <a href="delete_user.php?id=<?= $row['id'] ?>" class="text-red-600 hover:underline" onclick="return confirm('Are you sure you want to delete this student?');">Delete</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                <?php else: ?>
-                    <tr>
-                        <td colspan="9" class="px-4 py-4 border text-center text-gray-500">No students found.</td>
-                    </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
-    </div>
+            <?php if(isset($_SESSION['error'])): ?>
+                <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-red-700">
+                                <?php 
+                                echo htmlspecialchars($_SESSION['error']);
+                                unset($_SESSION['error']);
+                                ?>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Search Bar -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                <form action="manage_users.php" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-id-card text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               name="search" 
+                               value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
+                               placeholder="Search by ID, Last Name, or First Name" 
+                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="submit" 
+                                class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                            <i class="fas fa-search mr-2"></i>Search
+                        </button>
+                        <button type="button" 
+                                onclick="clearSearch()" 
+                                class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                            <i class="fas fa-eraser mr-2"></i>Clear
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Student Management Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Middle Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <?php if (mysqli_num_rows($result) > 0): ?>
+                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                                    <tr class="hover:bg-gray-50 transition-colors">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['id']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['idno']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['lastname']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['firstname']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['middlename']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['course']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['year_level']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['username']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <div class="flex items-center space-x-3">
+                                                <button onclick="openEditModal(<?= $row['id'] ?>, '<?= htmlspecialchars($row['idno']) ?>', '<?= htmlspecialchars($row['lastname']) ?>', '<?= htmlspecialchars($row['firstname']) ?>', '<?= htmlspecialchars($row['middlename']) ?>', '<?= htmlspecialchars($row['course']) ?>', '<?= htmlspecialchars($row['year_level']) ?>', '<?= htmlspecialchars($row['username']) ?>')" 
+                                                        class="text-indigo-600 hover:text-indigo-900 transition-colors">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <a href="delete_user.php?id=<?= $row['id'] ?>" 
+                                                   class="text-red-600 hover:text-red-900 transition-colors delete-user">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
+                                        <div class="flex flex-col items-center justify-center py-8">
+                                            <i class="fas fa-users-slash text-4xl text-gray-400 mb-2"></i>
+                                            <p>No students found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            <?php if ($totalPages > 1): ?>
+                <div id="pagination" class="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                    <div class="text-sm text-gray-500 mr-4 flex items-center">
+                        Page <?= $page ?> of <?= $totalPages ?> (<?= $totalRows ?> records)
+                    </div>
+                    <div class="flex space-x-2">
+                        <?php if ($page > 1): ?>
+                            <a href="manage_users.php?page=<?= $page - 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
+                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                <i class="fas fa-chevron-left mr-1"></i> Prev
+                            </a>
+                        <?php endif; ?>
+                        
+                        <?php
+                        $maxVisiblePages = 5;
+                        $startPage = max(1, $page - floor($maxVisiblePages / 2));
+                        $endPage = min($totalPages, $startPage + $maxVisiblePages - 1);
+                        
+                        // Adjust startPage if we are showing fewer than maxVisiblePages
+                        if ($endPage - $startPage + 1 < $maxVisiblePages && $startPage > 1) {
+                            $startPage = max(1, $endPage - $maxVisiblePages + 1);
+                        }
+                        
+                        // First page and ellipsis if needed
+                        if ($startPage > 1): ?>
+                            <a href="manage_users.php?page=1<?= $search ? '&search=' . urlencode($search) : '' ?>" 
+                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                1
+                            </a>
+                            <?php if ($startPage > 2): ?>
+                                <span class="px-3 py-2 text-gray-500">...</span>
+                            <?php endif;
+                        endif;
+                        
+                        // Page numbers
+                        for ($i = $startPage; $i <= $endPage; $i++): ?>
+                            <a href="manage_users.php?page=<?= $i ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
+                               class="px-3 py-2 <?= ($i == $page ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300') ?> rounded-md transition-colors">
+                                <?= $i ?>
+                            </a>
+                        <?php endfor;
+                        
+                        // Last page and ellipsis if needed
+                        if ($endPage < $totalPages): 
+                            if ($endPage < $totalPages - 1): ?>
+                                <span class="px-3 py-2 text-gray-500">...</span>
+                            <?php endif; ?>
+                            <a href="manage_users.php?page=<?= $totalPages ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
+                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                <?= $totalPages ?>
+                            </a>
+                        <?php endif;
+                        
+                        // Next button
+                        if ($page < $totalPages): ?>
+                            <a href="manage_users.php?page=<?= $page + 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
+                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                                Next <i class="fas fa-chevron-right ml-1"></i>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </div>
+    </main>
 </div>
 
 <?php include 'register_modal.php'; ?>
 
 <!-- Edit Modal -->
-<div id="editModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-        <h2 class="text-xl font-semibold mb-4">Edit Student</h2>
-        <form action="update_student.php" method="POST" class="space-y-4">
-            <input type="hidden" id="edit_id" name="id">
-
-            <div>
-                <label for="edit_idno" class="block text-sm font-medium text-gray-700">ID Number:</label>
-                <input type="number" id="edit_idno" name="idno" class="w-full px-4 py-2 border rounded-lg">
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 transform transition-all">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-gray-800">Edit Student</h2>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+            <form action="update_student.php" method="POST" class="space-y-4">
+                <input type="hidden" id="edit_id" name="id">
 
-            <div class="grid gap-4 grid-cols-1 md:grid-cols-3">
                 <div>
-                    <label for="edit_lastname" class="block text-sm font-medium text-gray-700">Last Name:</label>
-                    <input type="text" id="edit_lastname" name="lastname" class="w-full px-4 py-2 border rounded-lg">
+                    <label for="edit_idno" class="block text-sm font-medium text-gray-700 mb-1">ID Number</label>
+                    <input type="text" id="edit_idno" name="idno" 
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
                 </div>
-                <div>
-                    <label for="edit_firstname" class="block text-sm font-medium text-gray-700">First Name:</label>
-                    <input type="text" id="edit_firstname" name="firstname" class="w-full px-4 py-2 border rounded-lg">
-                </div>
-                <div>
-                    <label for="edit_middlename" class="block text-sm font-medium text-gray-700">Middle Name:</label>
-                    <input type="text" id="edit_middlename" name="middlename" class="w-full px-4 py-2 border rounded-lg">
-                </div>
-            </div>
 
-            <div>
-                <label for="edit_username" class="block text-sm font-medium text-gray-700">Username:</label>
-                <input type="text" id="edit_username" name="username" class="w-full px-4 py-2 border rounded-lg">
-            </div>
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-3">
+                    <div>
+                        <label for="edit_lastname" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <input type="text" id="edit_lastname" name="lastname" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="edit_firstname" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" id="edit_firstname" name="firstname" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </div>
+                    <div>
+                        <label for="edit_middlename" class="block text-sm font-medium text-gray-700 mb-1">Middle Name</label>
+                        <input type="text" id="edit_middlename" name="middlename" 
+                               class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                    </div>
+                </div>
 
-            <div class="flex justify-end">
-                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-400 text-white rounded-lg mr-2">Cancel</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition">Update</button>
-            </div>
-        </form>
+                <div>
+                    <label for="edit_username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                    <input type="text" id="edit_username" name="username" 
+                           class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditModal()" 
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('searchInput');
+        let searchTimeout;
+
+        searchInput.addEventListener("input", function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchValue = searchInput.value;
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('search', searchValue);
+                currentUrl.searchParams.set('page', '1'); // Reset to first page when searching
+                window.location.href = currentUrl.toString();
+            }, 300);
+        });
+
+        // Handle delete link clicks with Notiflix Confirm
+        document.querySelectorAll('.delete-user').forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                let url = this.getAttribute('href');
+                Notiflix.Confirm.show(
+                    'Confirm Deletion',
+                    'Are you sure you want to delete this student?',
+                    'Yes',
+                    'No',
+                    function() {
+                        window.location.href = url;
+                    },
+                    function() {
+                        Notiflix.Notify.info('Deletion canceled.');
+                    }
+                );
+            });
+        });
+        
+        // Validate and trap errors on Edit modal form submission
+        const editForm = document.querySelector('form[action="update_student.php"]');
+        if(editForm) {
+            editForm.addEventListener('submit', function(e) {
+                let idno = document.getElementById('edit_idno').value.trim();
+                let lastname = document.getElementById('edit_lastname').value.trim();
+                let firstname = document.getElementById('edit_firstname').value.trim();
+                let middlename = document.getElementById('edit_middlename').value.trim();
+                let username = document.getElementById('edit_username').value.trim();
+                if(!idno || !lastname || !firstname || !middlename || !username) {
+                    e.preventDefault();
+                    Notiflix.Notify.warning('Please fill in all required fields.');
+                }
+            });
+        }
+    });
+
     function openRegisterModal() {
         document.getElementById("registerModal").classList.remove("hidden");
     }
@@ -129,6 +356,23 @@ $result = mysqli_query($conn, $query);
 
     function closeEditModal() {
         document.getElementById("editModal").classList.add("hidden");
+    }
+
+    function clearSearch() {
+        window.location.href = 'manage_users.php';
+    }
+
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    navy: "#24292e",
+                    darkblue: "#0366d6",
+                    steelblue: "#f6f8fa",
+                    bluegray: "#6a737d"
+                }
+            }
+        }
     }
 </script>
 

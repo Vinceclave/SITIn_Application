@@ -3,6 +3,15 @@ session_start();
 require_once '../config/config.php';
 require_once '../shared/header.php';
 
+if(isset($_SESSION['success'])): // Added success alert block
+?>
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+<script>
+    Notiflix.Notify.success("<?php echo addslashes($_SESSION['success']); ?>");
+</script>
+<?php unset($_SESSION['success']); endif; ?>
+
+<?php
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");
@@ -61,46 +70,114 @@ $rules = [
 ];
 
 ?>
-    <?php include '../shared/aside.php'; ?>
-    <main class="">
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 
-    
-        <section class="px-10 py-4">
-            <h1 class="text-4xl font-bold mb-4">Home</h1>
-            <p class="mb-8">Welcome to the Home page, <?php echo htmlspecialchars($user['username']); ?>!</p>
-            <!-- Home-specific content -->
-            <div class="flex space-x-8">
-                <div class="flex-1">
-                    <h2 class="text-2xl font-semibold mb-2">Announcements</h2>
-                    <div class="overflow-y-auto max-h-96 p-4 bg-gray-100 rounded-lg shadow-md">
+<div class="container max-w-[1400px] mx-auto mt-20 px-4 sm:px-6 md:px-8 lg:px-10">
+    <?php include '../shared/aside.php'; ?>
+    <main class="my-4">
+        <section class="px-4 sm:px-6 md:px-8 py-6">
+            <!-- Welcome Header -->
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 sm:p-8 md:p-10 text-white mb-8 shadow-lg">
+                <div class="flex items-center gap-4">
+                    <i class="fas fa-user-circle text-4xl sm:text-5xl opacity-90"></i>
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-bold">
+                            Welcome back, <span class="text-indigo-200"><?php echo htmlspecialchars($user['username']); ?></span>!
+                        </h1>
+                        <p class="text-indigo-100 mt-2">Manage your laboratory sessions and stay updated with announcements.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Announcements Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 backdrop-blur-sm overflow-hidden">
+                    <div class="border-b border-gray-200/50 px-6 py-4 flex items-center gap-3">
+                        <i class="fas fa-bullhorn text-indigo-600"></i>
+                        <h2 class="text-xl font-semibold">Announcements</h2>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-4">
                         <?php if (empty($announcements)): ?>
-                            <p class="text-gray-500 text-center py-4">No announcements available.</p>
+                            <div class="text-center py-8">
+                                <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500">No announcements available.</p>
+                            </div>
                         <?php else: ?>
                             <?php foreach ($announcements as $announcement): ?>
-                                <div class="mb-4 p-4 bg-white rounded-lg shadow">
-                                    <strong class="block text-lg"><?php echo htmlspecialchars($announcement['title']); ?></strong>
-                                    <span class="text-sm text-gray-600">
-                                        <?php echo htmlspecialchars($announcement['author']); ?> | 
-                                        <?php echo htmlspecialchars($announcement['date']); ?>
-                                    </span>
-                                    <p class="mt-2"><?php echo nl2br(htmlspecialchars($announcement['content'])); ?></p>
+                                <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-all duration-200">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <i class="fas fa-circle-info text-indigo-600"></i>
+                                        <strong class="text-gray-900"><?php echo htmlspecialchars($announcement['title']); ?></strong>
+                                    </div>
+                                    <div class="flex items-center text-sm text-gray-600 mb-2">
+                                        <i class="fas fa-user mr-2"></i>
+                                        <span><?php echo htmlspecialchars($announcement['author']); ?></span>
+                                        <i class="fas fa-calendar-alt mx-2"></i>
+                                        <span><?php echo htmlspecialchars($announcement['date']); ?></span>
+                                    </div>
+                                    <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['content'])); ?></p>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
-                </div>  
-                <div class="flex-1">
-                    <h2 class="text-2xl font-semibold mb-2">Rules and Regulations</h2>
-                    <div class="overflow-y-auto max-h-96 p-4 bg-gray-100 rounded-lg shadow-md">
-                        <?php foreach ($rules as $rule): ?>
-                            <p class="mb-2"><?php echo htmlspecialchars($rule); ?></p>
+                </div>
+
+                <!-- Rules and Regulations Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 backdrop-blur-sm overflow-hidden">
+                    <div class="border-b border-gray-200/50 px-6 py-4 flex items-center gap-3">
+                        <i class="fas fa-book text-indigo-600"></i>
+                        <h2 class="text-xl font-semibold">Rules and Regulations</h2>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-3">
+                        <?php foreach ($rules as $index => $rule): ?>
+                            <?php if ($index <= 2): ?>
+                                <h3 class="text-lg font-semibold text-indigo-600"><?php echo htmlspecialchars($rule); ?></h3>
+                            <?php else: ?>
+                                <div class="flex items-start gap-3 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                    <?php if (strpos($rule, '.') !== false): ?>
+                                        <i class="fas fa-check-circle text-indigo-600 mt-1"></i>
+                                    <?php else: ?>
+                                        <i class="fas fa-arrow-right text-gray-400 mt-1"></i>
+                                    <?php endif; ?>
+                                    <p class="text-gray-700"><?php echo htmlspecialchars($rule); ?></p>
+                                </div>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                     </div>
-                </div>  
+                </div>
             </div>
         </section>
     </main>
+</div>
 
-<?php
-require_once '../shared/footer.php';
-?>
+<style>
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Smooth transitions */
+.transition-all {
+    transition-property: all;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+}
+</style>
+
+<?php require_once '../shared/footer.php'; ?>
