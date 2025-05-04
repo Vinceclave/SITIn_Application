@@ -270,8 +270,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                     <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
                                     <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                                         <option value="">Select a Lab</option>
-                                        
-                                        <option value="">Select a Lab</option>
+
                                         <?php while ($lab = $labsResult->fetch_assoc()): ?>
                                             <option value="<?php echo $lab['lab_name']; ?>">
                                                 <?php echo $lab['lab_name'] . ' - ' . $lab['location']; ?>
@@ -516,7 +515,10 @@ $reservationsResult = $reservationsStmt->get_result();
         // Form validation
         document.getElementById('reservationForm').addEventListener('submit', function(e) {
             if (!labSelect.value || !reservationDateInput.value || !timeSlotInput.value || !pcNumberInput.value) {
-                e.preventDefault();
+               e.preventDefault();
+                 if (!timeSlotInput.value){
+                       alert("Please select a time slot");
+                   }
                 alert('Please fill all required fields and select a PC.');
             }
         });
