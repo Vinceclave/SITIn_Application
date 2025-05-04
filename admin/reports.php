@@ -27,6 +27,14 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
     $reasons[] = $row['reason'];
     $reasonCounts[] = $row['count'];
 }
+
+// Fetch all sit-in records for the table
+$sitInQuery = "SELECT sit_in_id, idno, full_name, reason, lab, in_time, out_time, sit_date FROM sit_in ORDER BY sit_in_id DESC";
+$sitInResult = mysqli_query($conn, $sitInQuery);
+$sitInRecords = [];
+while ($row = mysqli_fetch_assoc($sitInResult)) {
+    $sitInRecords[] = $row;
+}
 ?>
 
 <div class="flex min-h-screen bg-gray-50 text-gray-900 pb-14">
@@ -59,26 +67,33 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-search text-gray-400"></i>
+                            <i class="fas fa-search text-gray-400" id="searchIcon"></i>
                         </div>
                         <input type="text" 
                                id="searchInput" 
-                               onkeyup="if(event.key === 'Enter') filterTable()" 
                                placeholder="Search records..." 
                                class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer hidden" id="clearSearchButton">
+                            <i class="fas fa-times-circle text-gray-400 hover:text-gray-600"></i>
+                        </div>
                     </div>
                     <div class="flex space-x-3">
                         <button type="button" 
+                                id="searchButton"
                                 onclick="filterTable()" 
                                 class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                             <i class="fas fa-search mr-2"></i>Search
                         </button>
                         <button type="button" 
+                                id="clearButton" 
                                 onclick="clearSearch()" 
                                 class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                             <i class="fas fa-eraser mr-2"></i>Clear
                         </button>
                     </div>
+                </div>
+                <div id="searchStats" class="text-sm text-gray-500 mt-2 hidden">
+                    <span id="resultCount">0</span> results found
                 </div>
             </div>
 
@@ -115,7 +130,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
             <!-- Leaderboard Section -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800">Student Leaderboard</h3>
+                    <h3 class="text-lg font-semibold text-gray-800 leaderboard-header">Student Session Leaderboard</h3>
                     <div class="flex items-center space-x-2">
                         <button id="refreshLeaderboard" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                             <i class="fas fa-sync-alt"></i>
@@ -134,7 +149,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                             </div>
                         </div>
                         <div class="bg-gray-300 w-24 h-8 rounded-b-lg flex items-center justify-center">
-                            <span class="text-sm font-bold text-gray-600" id="secondPlacePoints">0 pts</span>
+                            <span class="text-sm font-bold text-gray-600" id="secondPlacePoints">0 sessions</span>
                         </div>
                     </div>
                     
@@ -147,7 +162,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                             </div>
                         </div>
                         <div class="bg-yellow-300 w-28 h-8 rounded-b-lg flex items-center justify-center">
-                            <span class="text-sm font-bold text-gray-700" id="firstPlacePoints">0 pts</span>
+                            <span class="text-sm font-bold text-gray-700" id="firstPlacePoints">0 sessions</span>
                         </div>
                     </div>
                     
@@ -160,7 +175,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                             </div>
                         </div>
                         <div class="bg-amber-300 w-24 h-8 rounded-b-lg flex items-center justify-center">
-                            <span class="text-sm font-bold text-gray-700" id="thirdPlacePoints">0 pts</span>
+                            <span class="text-sm font-bold text-gray-700" id="thirdPlacePoints">0 sessions</span>
                         </div>
                     </div>
                 </div>
@@ -173,13 +188,12 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">Rank</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">ID</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Points</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">Sessions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="leaderboardTableBody">
                             <tr>
-                                <td colspan="5" class="px-4 py-4 text-center text-gray-500">Loading leaderboard data...</td>
+                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">Loading leaderboard data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -202,7 +216,23 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="sitInTableBody">
-                            <?php include 'current_sit_in_fetch.php'; ?>
+                            <?php
+                            if (!empty($sitInRecords)) {
+                                foreach ($sitInRecords as $row) {
+                                    echo "<tr class='border-b hover:bg-gray-50'>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['idno']) . "</td>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['full_name']) . "</td>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['reason']) . "</td>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['lab']) . "</td>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['in_time']) . "</td>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . ($row['out_time'] ? htmlspecialchars($row['out_time']) : '---') . "</td>
+                                        <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['sit_date']) . "</td>
+                                    </tr>";
+                                }
+                            } else {
+                                echo "<tr><td colspan='7' class='text-center p-3 text-gray-500'>No sit-in records found</td></tr>";
+                            }
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -315,18 +345,119 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         let input = document.getElementById("searchInput").value.toLowerCase();
         let table = document.getElementById("sitInTable");
         let rows = table.getElementsByTagName("tr");
-
+        let noResultsRow = null;
+        let resultsFound = false;
+        let resultCount = 0;
+        
+        // Update UI to show search is active
+        document.getElementById("searchIcon").className = input ? "fas fa-search text-indigo-500" : "fas fa-search text-gray-400";
+        document.getElementById("clearSearchButton").classList.toggle("hidden", !input);
+        
         // Skip the header row
         for (let i = 1; i < rows.length; i++) {
+            // Skip any previously added "no results" rows
+            if (rows[i].classList.contains("no-results-row")) {
+                // Store it to possibly show later, but hide now
+                noResultsRow = rows[i];
+                rows[i].style.display = "none";
+                continue;
+            }
+            
             let rowText = rows[i].textContent.toLowerCase();
-            rows[i].style.display = rowText.includes(input) ? "" : "none";
+            if (rowText.includes(input)) {
+                rows[i].style.display = "";
+                resultsFound = true;
+                resultCount++;
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+
+        // If no results and no "no results" row exists, add one
+        if (!resultsFound && input) {
+            if (noResultsRow) {
+                noResultsRow.style.display = ""; // Show existing no results row
+            } else {
+                // Create a new no results row
+                let tbody = table.querySelector("tbody");
+                if (tbody) {
+                    noResultsRow = document.createElement("tr");
+                    noResultsRow.classList.add("no-results-row");
+                    noResultsRow.innerHTML = `<td colspan="7" class="text-center p-3 text-gray-500">No records found matching "${input}"</td>`;
+                    tbody.appendChild(noResultsRow);
+                }
+            }
+        }
+        
+        // Update search stats
+        const searchStats = document.getElementById("searchStats");
+        const resultCountElement = document.getElementById("resultCount");
+        
+        if (input) {
+            searchStats.classList.remove("hidden");
+            resultCountElement.textContent = resultCount;
+        } else {
+            searchStats.classList.add("hidden");
         }
     }
 
     function clearSearch() {
-        document.getElementById("searchInput").value = "";
+        const searchInput = document.getElementById("searchInput");
+        searchInput.value = "";
         filterTable();
+        searchInput.focus();
     }
+
+    // Add event listeners when the DOM is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize search-related elements
+        const searchInput = document.getElementById("searchInput");
+        const clearSearchButton = document.getElementById("clearSearchButton");
+        
+        // Add event listener for input changes and Enter key in the search box
+        searchInput.addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                filterTable();
+            } else {
+                // Debounce for live typing
+                debounceSearch(filterTable, 300);
+            }
+        });
+        
+        // Add event listener for the clear search icon
+        if (clearSearchButton) {
+            clearSearchButton.addEventListener("click", clearSearch);
+        }
+        
+        // Add focus/blur events to enhance UX
+        searchInput.addEventListener("focus", function() {
+            this.placeholder = "Type to search...";
+        });
+        
+        searchInput.addEventListener("blur", function() {
+            this.placeholder = "Search records...";
+        });
+        
+        // Initial load of charts and data
+        console.log('Initializing page components...');
+        
+        // Auto-focus search on page load for better UX
+        setTimeout(() => {
+            const searchInput = document.getElementById("searchInput");
+            if (searchInput) {
+                // Only focus if not on mobile (screen width > 768px)
+                if (window.innerWidth > 768) {
+                    searchInput.focus();
+                }
+            }
+        }, 500);
+        
+        // Initialize charts (already done via PHP, this is a reminder)
+        console.log('Charts initialized');
+        
+        // Update leaderboard
+        updateLeaderboard();
+    });
 
     // Print functionality
     document.getElementById("printTable").addEventListener("click", function() {
@@ -334,7 +465,34 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         const labChartImg = document.getElementById('labChart').toDataURL('image/png');
         const reasonChartImg = document.getElementById('reasonChart').toDataURL('image/png');
         
-        let printContents = document.getElementById("sitInTable").outerHTML;
+        // Get only visible rows from the filtered table
+        let table = document.getElementById("sitInTable");
+        let visibleRows = [];
+        let allRows = table.querySelectorAll("tbody tr");
+        
+        // Determine if we're filtering
+        let isFiltered = document.getElementById("searchInput").value.trim() !== "";
+        let filterText = document.getElementById("searchInput").value.trim();
+        
+        // Skip no-results-row and get only visible rows
+        allRows.forEach(row => {
+            if (!row.classList.contains("no-results-row") && row.style.display !== "none") {
+                visibleRows.push(row.outerHTML);
+            }
+        });
+        
+        // Create a new table with only visible rows
+        let tableHtml = `
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    ${table.querySelector("thead").innerHTML}
+                </thead>
+                <tbody>
+                    ${visibleRows.join("")}
+                </tbody>
+            </table>
+        `;
+        
         let originalContents = document.body.innerHTML;
 
         // Add print styles
@@ -400,11 +558,18 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
             </style>
         `;
 
+        // Add filter information if we're filtering
+        let filterInfo = isFiltered ? 
+            `<p style="text-align:center; margin-bottom: 10px; font-style: italic; color: #666;">
+                Filtered by: "${filterText}" (${visibleRows.length} records)
+            </p>` : '';
+
         // Add header to print content
         let header = `
             <div class="header">
                 <h1>Sit-in Records Report</h1>
                 <p>Generated on: ${new Date().toLocaleString()}</p>
+                ${filterInfo}
             </div>
         `;
         
@@ -423,7 +588,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
             <h3 style="font-size: 14px; margin-bottom: 10px;">Detailed Sit-in Records</h3>
         `;
 
-        document.body.innerHTML = printStyles + header + chartsContent + printContents;
+        document.body.innerHTML = printStyles + header + chartsContent + tableHtml;
         window.print();
         document.body.innerHTML = originalContents;
         
@@ -437,8 +602,23 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         const labChartImg = document.getElementById('labChart').toDataURL('image/png');
         const reasonChartImg = document.getElementById('reasonChart').toDataURL('image/png');
         
-        // Get the table element
-        const table = document.getElementById("sitInTable");
+        // Get only visible rows from the filtered table
+        let table = document.getElementById("sitInTable");
+        let visibleRows = [];
+        let allRows = table.querySelectorAll("tbody tr");
+        
+        // Determine if we're filtering
+        let isFiltered = document.getElementById("searchInput").value.trim() !== "";
+        let filterText = document.getElementById("searchInput").value.trim();
+        
+        // Get filter information
+        let filterInfo = '';
+        if (isFiltered) {
+            const resultCount = document.getElementById("resultCount").textContent;
+            filterInfo = `<p style="text-align:center; margin: 5px 0; font-style: italic; color: #666;">
+                Filtered by: "${filterText}" (${resultCount} records)
+            </p>`;
+        }
         
         // Create a container for the PDF content
         const container = document.createElement('div');
@@ -451,6 +631,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         header.innerHTML = `
             <h1 style="font-size: 18px; margin-bottom: 5px;">Sit-in Records Report</h1>
             <p style="font-size: 12px; color: #666;">Generated on: ${new Date().toLocaleString()}</p>
+            ${filterInfo}
         `;
         
         // Create a div for charts
@@ -479,13 +660,29 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         chartsDiv.appendChild(labChartDiv);
         chartsDiv.appendChild(reasonChartDiv);
         
-        // Style the table
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
-        table.style.marginBottom = '20px';
+        // Clone the table but only include visible rows
+        const clonedTable = document.createElement('table');
+        clonedTable.style.width = '100%';
+        clonedTable.style.borderCollapse = 'collapse';
+        clonedTable.style.marginBottom = '20px';
         
-        // Add styles to all cells
-        const cells = table.querySelectorAll('th, td');
+        // Add the header
+        const thead = document.createElement('thead');
+        thead.innerHTML = table.querySelector('thead').innerHTML;
+        clonedTable.appendChild(thead);
+        
+        // Add visible body rows
+        const tbody = document.createElement('tbody');
+        allRows.forEach(row => {
+            if (!row.classList.contains("no-results-row") && row.style.display !== "none") {
+                const newRow = row.cloneNode(true);
+                tbody.appendChild(newRow);
+            }
+        });
+        clonedTable.appendChild(tbody);
+        
+        // Style the table
+        const cells = clonedTable.querySelectorAll('th, td');
         cells.forEach(cell => {
             cell.style.border = '1px solid #ddd';
             cell.style.padding = '8px';
@@ -494,7 +691,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         });
         
         // Style header cells
-        const headerCells = table.querySelectorAll('th');
+        const headerCells = clonedTable.querySelectorAll('th');
         headerCells.forEach(cell => {
             cell.style.backgroundColor = '#f2f2f2';
             cell.style.fontWeight = 'bold';
@@ -502,7 +699,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         });
         
         // Style even rows
-        const rows = table.querySelectorAll('tr:nth-child(even)');
+        const rows = clonedTable.querySelectorAll('tr:nth-child(even)');
         rows.forEach(row => {
             row.style.backgroundColor = '#f9f9f9';
         });
@@ -519,7 +716,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         tableHeading.textContent = 'Detailed Sit-in Records';
         container.appendChild(tableHeading);
         
-        container.appendChild(table.cloneNode(true));
+        container.appendChild(clonedTable);
         
         // Configuration for PDF
         const opt = {
@@ -547,11 +744,23 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         let table = document.getElementById("sitInTable");
         let rows = table.querySelectorAll("tr");
         let excelData = [];
+        
+        // Determine if we're filtering
+        let isFiltered = document.getElementById("searchInput").value.trim() !== "";
+        let filterText = document.getElementById("searchInput").value.trim();
+        let visibleRowCount = 0;
 
         // Add header row with current date
         let headers = ['Generated on: ' + new Date().toLocaleString()];
         excelData.push(headers);
         excelData.push([]); // Empty row for spacing
+        
+        // Add filter information if filtering is active
+        if (isFiltered) {
+            const resultCount = document.getElementById("resultCount").textContent;
+            excelData.push([`Filtered by: "${filterText}" (${resultCount} records)`]);
+            excelData.push([]); // Empty row for spacing
+        }
         
         // Add lab chart data
         excelData.push(['Sit-ins per Lab']);
@@ -586,16 +795,27 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
         });
         excelData.push(headers);
 
-        // Extract rows
-        rows.forEach((row, index) => {
-            if (index > 0) {
+        // Extract only visible rows
+        let tableBody = table.querySelector("tbody");
+        let tableRows = tableBody.querySelectorAll("tr");
+        
+        tableRows.forEach(row => {
+            // Skip no-results rows and hidden rows
+            if (!row.classList.contains("no-results-row") && row.style.display !== "none") {
                 let rowData = [];
                 row.querySelectorAll("td").forEach(cell => {
                     rowData.push(cell.innerText);
                 });
                 excelData.push(rowData);
+                visibleRowCount++;
             }
         });
+        
+        // Add a summary row if filtered
+        if (isFiltered) {
+            excelData.push([]); // Empty row for spacing
+            excelData.push([`Total records displayed: ${visibleRowCount}`]);
+        }
 
         // Create an Excel file
         let wb = XLSX.utils.book_new();
@@ -622,8 +842,9 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
 
         XLSX.utils.book_append_sheet(wb, ws, "Sit-in Records");
 
-        // Download Excel
-        XLSX.writeFile(wb, "sit_in_records.xlsx");
+        // Download Excel with a timestamp in the filename for uniqueness
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+        XLSX.writeFile(wb, `sit_in_records_${timestamp}.xlsx`);
     });
 
     // Leaderboard functionality
@@ -671,26 +892,26 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                 // Update podium
                 if (data.length >= 1) {
                     firstPlaceName.textContent = data[0].full_name;
-                    firstPlacePoints.textContent = data[0].total_points + ' pts';
+                    firstPlacePoints.textContent = data[0].total_sessions + ' sessions';
                 } else {
                     firstPlaceName.textContent = 'No data';
-                    firstPlacePoints.textContent = '0 pts';
+                    firstPlacePoints.textContent = '0 sessions';
                 }
                 
                 if (data.length >= 2) {
                     secondPlaceName.textContent = data[1].full_name;
-                    secondPlacePoints.textContent = data[1].total_points + ' pts';
+                    secondPlacePoints.textContent = data[1].total_sessions + ' sessions';
                 } else {
                     secondPlaceName.textContent = 'No data';
-                    secondPlacePoints.textContent = '0 pts';
+                    secondPlacePoints.textContent = '0 sessions';
                 }
                 
                 if (data.length >= 3) {
                     thirdPlaceName.textContent = data[2].full_name;
-                    thirdPlacePoints.textContent = data[2].total_points + ' pts';
+                    thirdPlacePoints.textContent = data[2].total_sessions + ' sessions';
                 } else {
                     thirdPlaceName.textContent = 'No data';
-                    thirdPlacePoints.textContent = '0 pts';
+                    thirdPlacePoints.textContent = '0 sessions';
                 }
 
                 // Update table
@@ -705,7 +926,7 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                 
                 if (data.length === 0) {
                     const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="5" class="px-4 py-4 text-center text-gray-500">No leaderboard data available</td>`;
+                    row.innerHTML = `<td colspan="4" class="px-4 py-4 text-center text-gray-500">No leaderboard data available</td>`;
                     tableBody.appendChild(row);
                     return;
                 }
@@ -722,12 +943,23 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                         <td class="px-4 py-3 text-sm text-gray-900">${index + 1}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">${student.idno}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">${student.full_name}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${student.total_points}</td>
                         <td class="px-4 py-3 text-sm text-gray-900">${student.total_sessions}</td>
                     `;
                     
                     tableBody.appendChild(row);
                 });
+                
+                // Add a note about ranking based on sessions
+                const rankingNote = document.querySelector('.session-ranking-note');
+                if (!rankingNote) {
+                    const leaderboardHeader = document.querySelector('.leaderboard-header');
+                    if (leaderboardHeader) {
+                        const newNote = document.createElement('p');
+                        newNote.className = 'text-sm text-gray-500 mt-2 session-ranking-note';
+                        newNote.textContent = 'Students are ranked based on total number of completed sit-in sessions';
+                        leaderboardHeader.insertAdjacentElement('afterend', newNote);
+                    }
+                }
                 
                 console.log('Leaderboard update completed successfully'); // Debug log
             })
@@ -747,14 +979,14 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
                 };
                 
                 if (elements.firstPlaceName) elements.firstPlaceName.textContent = 'Error';
-                if (elements.firstPlacePoints) elements.firstPlacePoints.textContent = '0 pts';
+                if (elements.firstPlacePoints) elements.firstPlacePoints.textContent = '0 sessions';
                 if (elements.secondPlaceName) elements.secondPlaceName.textContent = 'Error';
-                if (elements.secondPlacePoints) elements.secondPlacePoints.textContent = '0 pts';
+                if (elements.secondPlacePoints) elements.secondPlacePoints.textContent = '0 sessions';
                 if (elements.thirdPlaceName) elements.thirdPlaceName.textContent = 'Error';
-                if (elements.thirdPlacePoints) elements.thirdPlacePoints.textContent = '0 pts';
+                if (elements.thirdPlacePoints) elements.thirdPlacePoints.textContent = '0 sessions';
                 
                 if (elements.tableBody) {
-                    elements.tableBody.innerHTML = '<tr><td colspan="5" class="px-4 py-4 text-center text-red-500">Error loading leaderboard data</td></tr>';
+                    elements.tableBody.innerHTML = '<tr><td colspan="4" class="px-4 py-4 text-center text-red-500">Error loading leaderboard data</td></tr>';
                 }
             })
             .finally(() => {

@@ -59,15 +59,6 @@ $sitInResult = $sitInStmt->get_result();
             </div>
         <?php endif; ?>
 
-        <!-- Report Button -->
-        <div class="mb-6">
-            <button onclick="openModal()" 
-                    class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 shadow-sm hover:shadow-md">
-                <i class="fas fa-flag mr-2"></i>
-                Report Issue
-            </button>
-        </div>
-
         <!-- History Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 backdrop-blur-sm overflow-hidden">
             <div class="border-b border-gray-200/50 px-6 py-4 flex items-center gap-3">
@@ -92,15 +83,30 @@ $sitInResult = $sitInStmt->get_result();
                                     <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
                                         <i class="fas fa-clock mr-2"></i>Out Time
                                     </th>
+                                    <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
+                                        <i class="fas fa-cogs mr-2"></i>Actions
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
-                                <?php while ($row = $sitInResult->fetch_assoc()): ?>
+                                <?php 
+                                $sitInStmt->execute();
+                                $sitInResult = $sitInStmt->get_result();
+                                while ($row = $sitInResult->fetch_assoc()): 
+                                ?>
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4"><?php echo htmlspecialchars($row['lab']); ?></td>
                                         <td class="px-6 py-4"><?php echo htmlspecialchars($row['reason']); ?></td>
                                         <td class="px-6 py-4"><?php echo htmlspecialchars($row['in_time']); ?></td>
                                         <td class="px-6 py-4"><?php echo htmlspecialchars($row['out_time']); ?></td>
+                                        <td class="px-6 py-4">
+                                            <button 
+                                                onclick="openModalWithLab('<?php echo htmlspecialchars($row['lab']); ?>')" 
+                                                class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                                                <i class="fas fa-flag mr-1"></i>
+                                                Report Issue
+                                            </button>
+                                        </td>
                                     </tr>
                                 <?php endwhile; ?>
                             </tbody>
@@ -262,6 +268,12 @@ document.getElementById('feedbackSubmitBtn').addEventListener('click', function(
         }
     );
 });
+
+function openModalWithLab(lab) {
+    document.querySelector('#feedbackForm input[name="lab"]').value = lab;
+    document.getElementById("feedbackModal").classList.remove("hidden");
+    document.body.style.overflow = 'hidden';
+}
 
 function openModal() {
     document.getElementById("feedbackModal").classList.remove("hidden");

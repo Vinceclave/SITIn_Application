@@ -13,38 +13,16 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     exit;
 }
 
-// First, update the leaderboard table to ensure it has the latest data
-$updateQuery = "INSERT INTO leaderboard (idno, full_name, total_sessions, total_points, last_updated)
-                SELECT 
-                    s.idno,
-                    s.full_name,
-                    COUNT(DISTINCT s.sit_in_id) as total_sessions,
-                    COALESCE(SUM(lp.points), 0) as total_points,
-                    NOW() as last_updated
-                FROM sit_in s
-                LEFT JOIN lab_points lp ON s.sit_in_id = lp.sit_in_id
-                GROUP BY s.idno, s.full_name
-                ON DUPLICATE KEY UPDATE
-                    full_name = VALUES(full_name),
-                    total_sessions = VALUES(total_sessions),
-                    total_points = VALUES(total_points),
-                    last_updated = VALUES(last_updated)";
-
-if (!$conn->query($updateQuery)) {
-    error_log('Error updating leaderboard: ' . $conn->error);
-    http_response_code(500);
-    echo json_encode(['error' => 'Error updating leaderboard: ' . $conn->error]);
-    exit;
-}
-
-// Now query the leaderboard table for the top students
+// Query the sit_in table directly for the leaderboard data
 $query = "SELECT 
             idno,
             full_name,
-            total_sessions,
-            total_points
-          FROM leaderboard
-          ORDER BY total_points DESC, total_sessions DESC
+            COUNT(DISTINCT sit_in_id) as total_sessions,
+            0 as total_points
+          FROM sit_in
+          WHERE status = 0 
+          GROUP BY idno, full_name
+          ORDER BY total_sessions DESC
           LIMIT 10";
 
 $result = $conn->query($query);

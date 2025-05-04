@@ -142,15 +142,36 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
-                        <input type="text" id="reason" name="reason" 
-                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
-                               placeholder="Enter Reason">
+                        <select id="reason" name="reason" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                            <option value="">Select Reason</option>
+                            <option value="C programming">C programming</option>
+                            <option value="C# programming">C# programming</option>
+                            <option value="Java programming">Java programming</option>
+                            <option value="PHP programming">PHP programming</option>
+                            <option value="Database">Database</option>
+                            <option value="Digital Logic & Design">Digital Logic & Design</option>
+                            <option value="Embedded Systems & IoT">Embedded Systems & IoT</option>
+                            <option value="Python Programming">Python Programming</option>
+                            <option value="Systems Integration & Architecture">Systems Integration & Architecture</option>
+                            <option value="Computer Application">Computer Application</option>
+                            <option value="Web Design & Development">Web Design & Development</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lab</label>
-                        <input type="text" id="lab" 
-                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
-                               placeholder="Enter Lab">
+                        <select id="lab" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                            <option value="">Select Lab</option>
+                            <option value="Lab 517">Lab 517</option>
+                            <option value="Lab 524">Lab 524</option>
+                            <option value="Lab 526">Lab 526</option>
+                            <option value="Lab 528">Lab 528</option>
+                            <option value="Lab 530">Lab 530</option>
+                            <option value="Lab 542">Lab 542</option>
+                            <option value="Lab 544">Lab 544</option>
+                        </select>
                     </div>
                 </div>
                 

@@ -6,19 +6,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // New branch to end an active session without updating sit_date
     if (isset($_POST['action']) && $_POST['action'] === 'end') {
         $idno = isset($_POST['idno']) ? $_POST['idno'] : '';
+        
+        // 1. Check if student has an active session
+        $checkQuery = "SELECT sit_in_id FROM sit_in WHERE idno = ? AND out_time IS NULL AND status = 1";
+        $stmt = $conn->prepare($checkQuery);
+        $stmt->bind_param("s", $idno);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 0) {
+            echo json_encode([
+                'status' => 'error',
+                'message' => 'There is no active session to end.'
+            ]);
+            exit;
+        }
+        
+        // 2. Update the sit_in record to end the session
         $updateQuery = "UPDATE sit_in SET out_time = NOW(), status = 0 WHERE idno = ? AND out_time IS NULL";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("s", $idno);
         $stmt->execute();
+        
         if ($stmt->affected_rows > 0) {
+            // 3. Deduct one session from student_session table
+            $deductQuery = "UPDATE student_session SET session = session - 1 WHERE idno = ? AND session > 0";
+            $stmt = $conn->prepare($deductQuery);
+            $stmt->bind_param("s", $idno);
+            $stmt->execute();
+            
+            // 4. Get the updated remaining sessions count
+            $sessionQuery = "SELECT session FROM student_session WHERE idno = ?";
+            $stmt = $conn->prepare($sessionQuery);
+            $stmt->bind_param("s", $idno);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $remainingSessions = $result->num_rows > 0 ? $result->fetch_assoc()['session'] : 0;
+            
             echo json_encode([
                 'status' => 'success',
-                'message' => 'Session ended successfully.'
+                'message' => 'Session ended successfully.',
+                'remaining_sessions' => $remainingSessions
             ]);
         } else {
             echo json_encode([
                 'status' => 'error',
-                'message' => 'There is no active session to end.'
+                'message' => 'Failed to end the session. Please try again.'
             ]);
         }
         exit;

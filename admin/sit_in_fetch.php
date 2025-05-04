@@ -114,6 +114,9 @@ if ($result->num_rows > 0) {
                     <span class='font-medium'>" . htmlspecialchars($row['session'] ?? 'N/A') . "</span>
                     <span class='text-xs text-gray-500'>" . $inTime . " - " . $outTime . "</span>
                     <span class='text-xs text-gray-500'>Duration: " . $duration . "</span>
+                    <button class='reset-session-btn mt-1 text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition-colors' data-id='{$row['idno']}' data-name='" . htmlspecialchars($row['full_name']) . "'>
+                        <i class='fas fa-sync-alt mr-1'></i>Reset Sessions
+                    </button>
                 </div>
             </td>
             <td class='p-3 text-center'>" . 

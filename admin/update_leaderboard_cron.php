@@ -26,10 +26,9 @@ try {
                         s.idno,
                         s.full_name,
                         COUNT(DISTINCT s.sit_in_id) as total_sessions,
-                        COALESCE(SUM(lp.points), 0) as total_points,
+                        0 as total_points,
                         NOW() as last_updated
                     FROM sit_in s
-                    LEFT JOIN lab_points lp ON s.sit_in_id = lp.sit_in_id
                     GROUP BY s.idno, s.full_name
                     ON DUPLICATE KEY UPDATE
                         full_name = VALUES(full_name),

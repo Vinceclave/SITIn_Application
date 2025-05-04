@@ -233,133 +233,180 @@ require_once '../shared/header.php';
             return button;
         }
 
-        // Handle the "End" button click event with validation and error trapping
+        // Handle the table button click events with improved error handling
         document.getElementById("sitInTable").addEventListener("click", function (event) {
-            if (event.target && event.target.classList.contains("end-btn")) {
-                let idno = event.target.getAttribute("data-id");
+            // For end button
+            if (event.target && (event.target.classList.contains("end-btn") || 
+                                (event.target.parentElement && event.target.parentElement.classList.contains("end-btn")))) {
+                // Make sure we have the button element (could be the icon inside the button)
+                const button = event.target.classList.contains("end-btn") 
+                    ? event.target 
+                    : event.target.parentElement;
+                    
+                let idno = button.getAttribute("data-id");
+                
                 if (!idno) {
                     Notiflix.Notify.failure("Invalid Student ID.");
                     return;
                 }
-                // Send a POST request to end the sit-in
-                fetch("sit_in_end.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: `idno=${idno}`
-                })
-                .then(response => response.text())
-                .then(text => {
-                    if (!text) {
-                        throw new Error("Empty response received from server.");
-                    }
-                    try {
-                        const jsonResponse = JSON.parse(text);
-                        if (jsonResponse.success) {
-                            Notiflix.Notify.success(jsonResponse.message);
-                            fetchData(); // Refresh table after update
-                        } else {
-                            Notiflix.Notify.failure("Error: " + jsonResponse.message);
-                        }
-                    } catch (e) {
-                        console.error("Error parsing JSON:", text);
-                        throw e;
-                    }
-                })
-                .catch(error => {
-                    console.error("Fetch error:", error);
-                    Notiflix.Notify.failure("There was an error processing the request.");
-                });
-            } else if (event.target && event.target.classList.contains("points-btn")) {
-                let idno = event.target.getAttribute("data-id");
-                let sitInId = event.target.getAttribute("data-sit-in-id");
-                let pointsSelect = event.target.previousElementSibling;
-                let points = pointsSelect ? pointsSelect.value : 1;
                 
-                if (!idno || !sitInId) {
-                    Notiflix.Notify.failure("Invalid Student ID or Sit-in ID.");
-                    return;
-                }
-                
-                // Confirm before giving points
+                // Confirm before ending the session
                 Notiflix.Confirm.show(
-                    'Give Points',
-                    `Are you sure you want to award ${points} point(s) to this student?<br><br>Note: This will increment their session count by 1, regardless of how many points are given. Points cannot be given if the student has already reached 30 sessions.`,
+                    'End Session',
+                    `Are you sure you want to end the active session for student ID: ${idno}?`,
                     'Yes',
                     'No',
                     function() {
-                        // Send POST request to give points
-                        fetch("give_points.php", {
+                        // Store the original button content
+                        const originalContent = button.innerHTML;
+                        
+                        // Disable button and show loading state
+                        button.disabled = true;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Ending...';
+                        
+                        // Send AJAX request to sitting_process.php with action=end
+                        fetch("sitting_process.php", {
                             method: "POST",
                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                            body: `idno=${idno}&sit_in_id=${sitInId}&points=${points}`
+                            body: `idno=${idno}&action=end`
                         })
-                        .then(response => response.text())
-                        .then(text => {
-                            if (!text) {
-                                throw new Error("Empty response received from server.");
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
                             }
-                            try {
-                                const jsonResponse = JSON.parse(text);
-                                if (jsonResponse.success) {
-                                    Notiflix.Notify.success(jsonResponse.message);
-                                    fetchData(); // Refresh table after update
-                                } else {
-                                    Notiflix.Notify.failure("Error: " + jsonResponse.message);
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.status === 'success') {
+                                // Success notification
+                                Notiflix.Notify.success(data.message);
+                                
+                                // Show detailed report with remaining sessions
+                                if (data.remaining_sessions !== undefined) {
+                                    Notiflix.Report.success(
+                                        'Session Ended Successfully',
+                                        `The session has been ended. The student now has ${data.remaining_sessions} remaining sessions.`,
+                                        'OK'
+                                    );
                                 }
-                            } catch (e) {
-                                console.error("Error parsing JSON:", text);
-                                throw e;
+                                
+                                // Refresh the table data to show updated status
+                                fetchData();
+                            } else {
+                                console.error("Error:", data.message);
+                                Notiflix.Notify.failure(data.message);
+                                
+                                // Reset button state
+                                button.disabled = false;
+                                button.innerHTML = originalContent;
                             }
                         })
                         .catch(error => {
                             console.error("Fetch error:", error);
-                            Notiflix.Notify.failure("There was an error processing the request.");
+                            Notiflix.Notify.failure("Failed to connect to server: " + error.message);
+                            
+                            // Reset button state
+                            button.disabled = false;
+                            button.innerHTML = originalContent;
                         });
                     }
                 );
-            } else if (event.target && event.target.classList.contains("view-btn")) {
-                let idno = event.target.getAttribute("data-id");
+            }
+            
+            // For reset session button
+            if (event.target && (event.target.classList.contains("reset-session-btn") || 
+                                 (event.target.parentElement && event.target.parentElement.classList.contains("reset-session-btn")))) {
+                // Make sure we have the button element (could be the icon inside the button)
+                const button = event.target.classList.contains("reset-session-btn") 
+                    ? event.target 
+                    : event.target.parentElement;
+                    
+                let idno = button.getAttribute("data-id");
+                let studentName = button.getAttribute("data-name");
+                
                 if (!idno) {
                     Notiflix.Notify.failure("Invalid Student ID.");
                     return;
                 }
-                // Show session details in a modal
-                Notiflix.Report.show(
-                    'Session Details',
-                    'Loading session details...',
-                    'Close',
+                
+                // Confirm before resetting sessions for individual student
+                Notiflix.Confirm.show(
+                    'Reset Sessions',
+                    `Are you sure you want to reset sessions for ${studentName} (ID: ${idno})?`,
+                    'Yes',
+                    'No',
                     function() {
-                        // Close callback
+                        // Store the original button content
+                        const originalContent = button.innerHTML;
+                        
+                        // Disable button and show loading state
+                        button.disabled = true;
+                        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
+                        
+                        fetch("reset_student_session.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: `idno=${idno}`
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.text();
+                        })
+                        .then(text => {
+                            if (!text) {
+                                throw new Error("Empty response received from server.");
+                            }
+                            
+                            try {
+                                let jsonResponse = JSON.parse(text);
+                                
+                                if (jsonResponse.success) {
+                                    // If we have old and new values, show a more detailed success message
+                                    if (jsonResponse.old_value !== undefined && jsonResponse.new_value !== undefined) {
+                                        Notiflix.Report.success(
+                                            'Session Reset Successful',
+                                            `Sessions for ${studentName} have been reset from ${jsonResponse.old_value} to ${jsonResponse.new_value}.`,
+                                            'OK'
+                                        );
+                                    } else {
+                                        Notiflix.Notify.success(jsonResponse.message);
+                                    }
+                                    
+                                    // Refresh table data to show updated sessions
+                                    fetchData();
+                                } else {
+                                    console.error("Server error:", jsonResponse.message);
+                                    Notiflix.Notify.failure("Error: " + jsonResponse.message);
+                                    
+                                    // Reset button state
+                                    button.disabled = false;
+                                    button.innerHTML = originalContent;
+                                }
+                            } catch (e) {
+                                console.error("Error parsing JSON:", e, "Raw response:", text);
+                                Notiflix.Notify.failure("Error processing server response. See console for details.");
+                                
+                                // Reset button state
+                                button.disabled = false;
+                                button.innerHTML = originalContent;
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Fetch error:", error);
+                            Notiflix.Notify.failure("Failed to connect to server: " + error.message);
+                            
+                            // Reset button state
+                            button.disabled = false;
+                            button.innerHTML = originalContent;
+                        });
                     }
                 );
-                
-                // Fetch session details
-                fetch(`get_session_details.php?idno=${idno}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Notiflix.Report.show(
-                                'Session Details',
-                                `<div class="text-left">
-                                    <p class="mb-2"><strong>Student ID:</strong> ${data.details.idno}</p>
-                                    <p class="mb-2"><strong>Name:</strong> ${data.details.full_name}</p>
-                                    <p class="mb-2"><strong>Lab:</strong> ${data.details.lab}</p>
-                                    <p class="mb-2"><strong>Reason:</strong> ${data.details.reason}</p>
-                                    <p class="mb-2"><strong>In Time:</strong> ${data.details.in_time}</p>
-                                    <p class="mb-2"><strong>Out Time:</strong> ${data.details.out_time}</p>
-                                    <p class="mb-2"><strong>Duration:</strong> ${data.details.duration}</p>
-                                </div>`,
-                                'Close'
-                            );
-                        } else {
-                            Notiflix.Notify.failure("Error fetching session details.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error fetching session details:", error);
-                        Notiflix.Notify.failure("Error fetching session details.");
-                    });
             }
+            
+            // Handle other buttons (end-btn, points-btn, etc.)
+            // Make sure this is integrated with your existing event handlers
         });
 
         // Search and filter functionality with debounce
@@ -426,6 +473,149 @@ require_once '../shared/header.php';
                     });
                 }
             );
+        });
+
+        // Add event listener for reset student buttons
+        document.addEventListener('click', function(event) {
+            // Check if the clicked element or its parent has the class 'reset-student-btn' or 'reset-session-btn'
+            const resetButton = event.target.closest('.reset-student-btn, .reset-session-btn');
+            
+            if (resetButton) {
+                const idno = resetButton.getAttribute('data-id');
+                const studentName = resetButton.getAttribute('data-name') || 'this student';
+                
+                if (!idno) {
+                    Notiflix.Notify.failure('Invalid Student ID');
+                    return;
+                }
+                
+                // Show confirmation dialog
+                Notiflix.Confirm.show(
+                    'Reset Student Sessions',
+                    `Are you sure you want to reset sessions to 30 for ${studentName} (ID: ${idno})?`,
+                    'Yes',
+                    'No',
+                    function() {
+                        // Show loading state
+                        const originalContent = resetButton.innerHTML;
+                        resetButton.disabled = true;
+                        resetButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Resetting...';
+                        
+                        // Send AJAX request
+                        fetch('reset_student_session.php', {
+                            method: 'POST',
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: `idno=${idno}`
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Notiflix.Notify.success(data.message);
+                                fetchData(); // Refresh the table
+                            } else {
+                                Notiflix.Notify.failure(data.message);
+                                resetButton.disabled = false;
+                                resetButton.innerHTML = originalContent;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Notiflix.Notify.failure('An error occurred while processing your request');
+                            resetButton.disabled = false;
+                            resetButton.innerHTML = originalContent;
+                        });
+                    }
+                );
+            }
+        });
+        
+        // Add event listener for awarding points
+        document.addEventListener('click', function(event) {
+            // Check if the clicked element or its parent has the class 'points-btn'
+            const pointsButton = event.target.closest('.points-btn');
+            
+            if (pointsButton) {
+                const idno = pointsButton.getAttribute('data-id');
+                const sitInId = pointsButton.getAttribute('data-sit-in-id');
+                
+                if (!idno || !sitInId) {
+                    Notiflix.Notify.failure('Invalid parameters for awarding points');
+                    return;
+                }
+                
+                // Get selected points from dropdown
+                const pointsSelect = pointsButton.parentElement.querySelector('.points-select');
+                if (!pointsSelect) {
+                    Notiflix.Notify.failure('Points selection not found');
+                    return;
+                }
+                
+                const points = pointsSelect.value;
+                
+                // Show confirmation dialog
+                Notiflix.Confirm.show(
+                    'Award Points',
+                    `Are you sure you want to award ${points} point(s) to student ID: ${idno}?`,
+                    'Yes',
+                    'No',
+                    function() {
+                        // Show loading state
+                        const originalContent = pointsButton.innerHTML;
+                        pointsButton.disabled = true;
+                        pointsButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Processing...';
+                        
+                        // Prepare form data
+                        const formData = new FormData();
+                        formData.append('sit_in_id', sitInId);
+                        formData.append('idno', idno);
+                        formData.append('points', points);
+                        
+                        // Send AJAX request
+                        fetch('save_lab_points.php', {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Success notification
+                                Notiflix.Notify.success(data.message);
+                                
+                                // Show detailed report
+                                let reportMessage = `${points} point(s) awarded to student. Total points: ${data.total_points}`;
+                                
+                                // Add session information if applicable
+                                if (data.sessions_added) {
+                                    reportMessage += `<br><br><strong>${data.sessions_added} session(s) added</strong> because student accumulated ${data.sessions_added * 3} points.`;
+                                    reportMessage += `<br>Points reset to ${data.total_points}. Current sessions: ${data.current_sessions}`;
+                                }
+                                
+                                Notiflix.Report.success(
+                                    'Points Awarded Successfully',
+                                    reportMessage,
+                                    'OK'
+                                );
+                                
+                                // Refresh the table data
+                                fetchData();
+                            } else {
+                                console.error('Error:', data.message);
+                                Notiflix.Notify.failure(data.message);
+                                
+                                // Reset button state
+                                pointsButton.disabled = false;
+                                pointsButton.innerHTML = originalContent;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Notiflix.Notify.failure('An error occurred while processing your request');
+                            pointsButton.disabled = false;
+                            pointsButton.innerHTML = originalContent;
+                        });
+                    }
+                );
+            }
         });
 
         // Initial fetch when the page loads
