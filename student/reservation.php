@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     $pc_number = $_POST['pc_number'];
     $reservation_date = $_POST['reservation_date'];
     $time_slot = $_POST['time_slot'];
-    $purpose= $_POST['lab_name'];
+    $purpose= $_POST['purpose'];
     $full_name = $user['firstname'] . ' ' . $user['lastname'];
 
     // Check if the student already has a pending reservation for the same date and time slot
@@ -249,9 +249,9 @@ $reservationsResult = $reservationsStmt->get_result();
                     <div class="p-6">
                         <form method="POST" id="reservationForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div>
-                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
-                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                <div >
+                                    <label for="purpose" class="block text-sm font-medium text-gray-700 mb-2">Select Reason</label>
+                                    <select name="purpose" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                                         <option value="" disabled selected>Select Reason</option>
                                         <option value="C programming">C programming</option>  
                                         <option value="C# programming">C# programming</option>
@@ -269,10 +269,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                 </div>
 
 
-                                <div>
-                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
-                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                                        <option value="">Select a Lab</option>
+                                <div >
 
 
 
@@ -285,6 +282,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                     </select>
                                 </div>
                                 
+
                                 <div>
                                     <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-2">Reservation Date</label>
                                     <input type="date" id="reservation_date" name="reservation_date" 
