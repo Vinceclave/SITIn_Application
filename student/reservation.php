@@ -192,6 +192,18 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
         <?php endif; ?>
 
+          <!-- Create Reservation Button -->
+          <div class="mb-8 flex justify-start ">
+              <button id="openModal" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out">
+                  <i class="fas fa-plus mr-2"></i> Create Reservation
+              </button>
+          </div>
+
+      
+        
+       
+
+        
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
              <!-- Reservation Form -->
              <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden ">
@@ -204,133 +216,58 @@ $reservationsResult = $reservationsStmt->get_result();
                            
                         </div>
                     </div>
-                 <form method="POST" id="reservationForm" class="p-6">
-
-                    <div class="space-y-6">
-                        <!-- Select Reason -->
-                        <div class="mb-2 ">
-                            <label for="purpose" class="block text-sm font-medium text-gray-700 mb-1">Select Reason</label>
-                            <select name="purpose" id="purpose" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                                <option value="" disabled selected>Select Reason</option>
-                                <option value="C programming">C programming</option>
-                                <option value="C# programming">C# programming</option>
-                                <option value="Java programming">Java programming</option>
-                                <option value="PHP programming">PHP programming</option>
-                                <option value="Database">Database</option>
-                                <option value="Digital Logic & Design">Digital Logic & Design</option>
-                                <option value="Embedded Systems & IoT">Embedded Systems & IoT</option>
-                                <option value="Python Programming">Python Programming</option>
-                                <option value="Systems Integration & Architecture">Systems Integration & Architecture</option>
-                                <option value="Computer Application">Computer Application</option>
-                                <option value="Web Design & Development">Web Design & Development</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-
-                        <!-- Select Lab -->
-                        <div class="mb-2">
-                            <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-1">Select Lab</label>
-                            <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                                <option value="" disabled selected>Select a Lab</option>
-                                <?php while ($lab = $labsResult->fetch_assoc()): ?>
-                                <option value="<?php echo $lab['lab_name']; ?>"><?php echo $lab['lab_name'] . ' - ' . $lab['location']; ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-
-                        <!-- Reservation Date -->
-                        <div class="mb-2">
-                            <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-1">Reservation Date</label>
-                            <input type="date" id="reservation_date" name="reservation_date" min="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d', strtotime('+7 days')); ?>" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                        </div>
-                        <!-- select time -->
-                         <div class="mb-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Select Time Slot</label>
-                            <div class="flex flex-wrap gap-2">
-                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="8:00 AM - 10:00 AM" title="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</div>
-                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="10:00 AM - 12:00 PM" title="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</div>
-                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="1:00 PM - 3:00 PM" title="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</div>
-                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="3:00 PM - 5:00 PM" title="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</div>
-                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="5:00 PM - 7:00 PM" title="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</div>
-                                </div>
-                                <input type="hidden" id="time_slot" name="time_slot" required>
-                        </div>
-                        
-                         <!-- Select PC -->
-                        <div class="mb-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Select PC</label>
-                            <div class="overflow-x-auto pb-4">
-                                <div class="lab-grid" id="pcGrid"></div>
-                            </div>
-                            <input type="hidden" id="pc_number" name="pc_number" required>
-                        
-
-                         </div>
-                        <!-- Submit Button -->
-                        <div class="flex justify-end">
-                                <button type="submit" name="submit_reservation" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out">
-                                    <i class="fas fa-save mr-2"></i>Submit Reservation
-                                </button>
-                            </div> 
-                        </form>
-                    </div>
-                </div>
-                </div>
+               
+            </div>
         
             <!-- Reservations List -->
             <div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden ">
                     <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-between ">
                      <div class="flex items-center gap-3 w-full ">
-
                           <i class="fas fa-list text-indigo-600"></i>
                           <h2 class="text-xl font-semibold">My Reservations</h2>
-                         
                      </div>
-
                     </div>
-                    
                     <div class="p-6">
                         <?php if ($reservationsResult->num_rows > 0): ?>
                             <div class="space-y-4 h-full ">
-                                <?php while ($reservation = $reservationsResult->fetch_assoc()): ?>                           
+                                <?php while ($reservation = $reservationsResult->fetch_assoc()): ?>
                                     <div class="group border border-gray-200 rounded-lg p-4 hover:shadow-xl transition-all duration-300 ease-in-out">
                                         <div class="flex justify-between items-start">
                                             <div class="flex-grow">
                                                 <p class="font-medium text-gray-800"><?php echo $reservation['lab_name']; ?> - PC #<?php echo $reservation['pc_number']; ?></p>
                                                 <p class="text-gray-600">
-                                                    <i class="fas fa-calendar-day mr-1"></i> 
+                                                    <i class="fas fa-calendar-day mr-1"></i>
                                                     <?php echo date('F j, Y', strtotime($reservation['reservation_date'])); ?>
                                                 </p>
                                                 <p class="text-gray-600">
-                                                    <i class="fas fa-clock mr-1"></i> 
+                                                    <i class="fas fa-clock mr-1"></i>
                                                     <?php echo $reservation['time_slot']; ?>
                                                 </p>
                                             </div>
                                             <div>
                                                 <?php if ($reservation['status'] === 'pending'): ?>
                                                     <span class="animate-pulse inline-block px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
-                                                        Pending
-                                                    </span>
+                                                         Pending
+                                                      </span>
                                                 <?php elseif ($reservation['status'] === 'approved'): ?>
                                                     <span class="animate-pulse inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
-                                                        Approved
+                                                         Approved
                                                     </span>
                                                 <?php elseif ($reservation['status'] === 'rejected'): ?>
                                                     <span class="animate-pulse inline-block px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">
-                                                        Rejected
+                                                         Rejected
                                                     </span>
                                                 <?php elseif ($reservation['status'] === 'completed'): ?>
                                                     <span class="animate-pulse inline-block px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-semibold">
-                                                        Completed
+                                                         Completed
                                                     </span>
                                                 <?php endif; ?>
                                             </div>
                                         </div>
-                                        
                                         <div class="flex justify-end mt-3">
                                             <?php if ($reservation['status'] === 'pending'): ?>
-                                                <button class="group text-red-500 hover:text-red-700 text-sm" 
+                                                <button class="group text-red-500 hover:text-red-700 text-sm"
                                                        onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)">
                                                     <i class="fas fa-times-circle mr-1"></i> Cancel
                                                 </button>
@@ -340,26 +277,129 @@ $reservationsResult = $reservationsStmt->get_result();
                                             </span>
                                         </div>
                                     </div>
-                                <?php endwhile; ?>
+                                <?php endwhile; ?>  
                             </div>
                         <?php else: ?>
                             <div class="text-center py-8 ">
                                 <i class="fas fa-calendar-xmark text-5xl text-gray-400 mb-3"></i>
                                 <p class="text-gray-500">You don't have any reservations yet.</p>
                             </div>
-                        <?php endif; ?>
+                        <?php endif; ?> 
                     </div>
                 </div>
             </div>
         </div>
        </div>
     </main>
+    <!-- Modal -->
+        <div id="reservationModal" class="fixed z-50 inset-0 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-center justify-center min-h-screen px-4 text-center md:px-0">
+                <!-- Modal Backdrop -->
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+                <!-- Modal Panel -->
+                <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full sm:p-6 my-8 align-middle">
+                    <!-- Modal Header -->
+                    <div class="border-b border-gray-200 pb-4 flex justify-between items-center">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                            Create Reservation
+                        </h3>
+                        <button type="button" id="closeModal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-full">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <!-- Modal Body -->
+                    <div class="mt-4">
+                        <!-- Reservation Form -->
+                        <form method="POST" id="reservationForm" class="p-6">
+                            <div class="space-y-6">
+                                <!-- Select Reason -->
+                                <div class="mb-2 ">
+                                    <label for="purpose" class="block text-sm font-medium text-gray-700 mb-1">Select Reason</label>
+                                    <select name="purpose" id="purpose" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                        <option value="" disabled selected>Select Reason</option>
+                                        <option value="C programming">C programming</option>
+                                        <option value="C# programming">C# programming</option>
+                                        <option value="Java programming">Java programming</option>
+                                        <option value="PHP programming">PHP programming</option>
+                                        <option value="Database">Database</option>
+                                        <option value="Digital Logic & Design">Digital Logic & Design</option>
+                                        <option value="Embedded Systems & IoT">Embedded Systems & IoT</option>
+                                        <option value="Python Programming">Python Programming</option>
+                                        <option value="Systems Integration & Architecture">Systems Integration & Architecture</option>
+                                        <option value="Computer Application">Computer Application</option>
+                                        <option value="Web Design & Development">Web Design & Development</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <!-- Select Lab -->
+                                <div class="mb-2">
+                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-1">Select Lab</label>
+                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                        <option value="" disabled selected>Select a Lab</option>
+                                        <?php while ($lab = $labsResult->fetch_assoc()): ?>
+                                        <option value="<?php echo $lab['lab_name']; ?>"><?php echo $lab['lab_name'] . ' - ' . $lab['location']; ?></option>
+                                        <?php endwhile; ?>
+                                    </select>
+                                </div>
+                                <!-- Reservation Date -->
+                                <div class="mb-2">
+                                    <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-1">Reservation Date</label>
+                                    <input type="date" id="reservation_date" name="reservation_date" min="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d', strtotime('+7 days')); ?>" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                </div>
+                                <!-- select time -->
+                                <div class="mb-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Time Slot</label>
+                                    <div class="flex flex-wrap gap-2">
+                                        <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="8:00 AM - 10:00 AM" title="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</div>
+                                        <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="10:00 AM - 12:00 PM" title="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</div>
+                                        <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="1:00 PM - 3:00 PM" title="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</div>
+                                        <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="3:00 PM - 5:00 PM" title="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</div>
+                                        <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105" data-value="5:00 PM - 7:00 PM" title="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</div>
+                                    </div>
+                                    <input type="hidden" id="time_slot" name="time_slot" required>
+                                </div>
+                                <!-- Select PC -->
+                                <div class="mb-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Select PC</label>
+                                    <div class="overflow-x-auto pb-4">
+                                        <div class="lab-grid" id="pcGrid"></div>
+                                    </div>
+                                    <input type="hidden" id="pc_number" name="pc_number" required>
+                                </div>
+                                <!-- Submit Button -->
+                                <div class="flex justify-end">
+                                    <button type="submit" name="submit_reservation" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 ease-in-out">
+                                        <i class="fas fa-save mr-2"></i>Submit Reservation
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Include Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <script>
+    // modal
+    const modal = document.getElementById('reservationModal');
+    const openModalButton = document.getElementById('openModal');
+    const closeModalButton = document.getElementById('closeModal');
+
+    // open modal
+    openModalButton.addEventListener('click', () => {
+        modal.classList.remove('hidden');
+    });
+
+    // close modal
+    closeModalButton.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
     document.addEventListener('DOMContentLoaded', function() {
         // Generate PC Grid
         const pcGrid = document.getElementById('pcGrid');
@@ -375,7 +415,7 @@ $reservationsResult = $reservationsStmt->get_result();
              const selectedDate = reservationDateInput.value;
             const selectedTimeSlot = timeSlotInput.value;
             
-            if (!selectedLab || !selectedDate || !selectedTimeSlot) return;
+           if (!selectedLab || !selectedDate || !selectedTimeSlot) return;
             
             // Clear existing grid
             pcGrid.innerHTML = '';
@@ -398,7 +438,7 @@ $reservationsResult = $reservationsStmt->get_result();
                     try {
                         const reservedPCs = JSON.parse(xhr.responseText);
                         
-                        // Generate 50 PC items
+                       // Generate 50 PC items
                         for (let i = 1; i <= 50; i++) {
                             const pcItem = document.createElement('div');
                             pcItem.className = 'pc-item pc-item px-3 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105';
@@ -463,14 +503,13 @@ $reservationsResult = $reservationsStmt->get_result();
               // Update hidden input value
               timeSlotInput.value = this.dataset.value;
 
-              // Update hidden input value
-              timeSlotInput.value = this.dataset.value;
                 // Update hidden input value
                 timeSlotInput.value = this.dataset.value;
                 
                 // Regenerate PC grid if all required fields are filled
                 if (labSelect.value && reservationDateInput.value) {
-                    generatePcGrid();
+                   generatePcGrid();
+
                 }
             });
         });
@@ -510,5 +549,6 @@ $reservationsResult = $reservationsStmt->get_result();
         };
     });
 </script>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <?php require_once '../shared/footer.php'; ?>
