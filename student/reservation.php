@@ -121,11 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
             $errorMessage = "This PC is already reserved for the selected date and time slot.";
         } else {
             // Insert reservation
-            $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, reason) 
+            $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, purpose) 
                             VALUES (?, ?, ?, ?, ?, ?, ?)";
             $insertStmt = $conn->prepare($insertQuery);
             $insertStmt->bind_param("ississs", $idno, $full_name, $lab_name, $pc_number, $reservation_date, $time_slot, $purpose);
-            
+
             if ($insertStmt->execute()) {
                 $successMessage = "Reservation submitted successfully!";
             } else {
