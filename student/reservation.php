@@ -206,17 +206,7 @@ $reservationsResult = $reservationsStmt->get_result();
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
              <!-- Reservation Form -->
-             <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden ">
-                 <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-start ">
-                 
-                        <div class="group flex items-center gap-3 w-full">
-                            <i class="fas fa-calendar-alt text-indigo-600 group-hover:text-indigo-800 transition-all duration-300 ease-in-out "></i>
-
-                            <h2 class="text-xl font-semibold ">Create Reservation</h2>
-                           
-                        </div>
-                    </div>
-               
+             <div>
             </div>
         
             <!-- Reservations List -->
