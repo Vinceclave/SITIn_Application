@@ -97,14 +97,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     $pc_number = $_POST['pc_number'];
     $reservation_date = $_POST['reservation_date'];
     $time_slot = $_POST['time_slot'];
+    $purpose= $_POST['lab_name'];
     $full_name = $user['firstname'] . ' ' . $user['lastname'];
-    
+
     // Check if the student already has a pending reservation for the same date and time slot
     $checkExistingQuery = "SELECT * FROM reservations WHERE idno = ? AND reservation_date = ? AND time_slot = ? AND status = 'pending'";
     $checkStmt = $conn->prepare($checkExistingQuery);
     $checkStmt->bind_param("iss", $idno, $reservation_date, $time_slot);
     $checkStmt->execute();
-    $existingResult = $checkStmt->get_result();
+    $existingResult = $checkStmt->get_result();    
     
     if ($existingResult->num_rows > 0) {
         $errorMessage = "You already have a pending reservation for this date and time slot.";
@@ -120,10 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
             $errorMessage = "This PC is already reserved for the selected date and time slot.";
         } else {
             // Insert reservation
-            $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
+            $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, reason) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?)";
             $insertStmt = $conn->prepare($insertQuery);
-            $insertStmt->bind_param("ississ", $idno, $full_name, $lab_name, $pc_number, $reservation_date, $time_slot);
+            $insertStmt->bind_param("ississs", $idno, $full_name, $lab_name, $pc_number, $reservation_date, $time_slot, $purpose);
             
             if ($insertStmt->execute()) {
                 $successMessage = "Reservation submitted successfully!";
@@ -252,7 +253,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                     <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
                                     <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                                         <option value="" disabled selected>Select Reason</option>
-                                        <option value="C programming">C programming</option>
+                                        <option value="C programming">C programming</option>  
                                         <option value="C# programming">C# programming</option>
                                         <option value="Java programming">Java programming</option>
                                         <option value="PHP programming">PHP programming</option>
