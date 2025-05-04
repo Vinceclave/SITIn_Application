@@ -112,14 +112,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     } else {
         // Check if the PC is already reserved for the selected date and time slot
         $checkPcQuery = "SELECT * FROM reservations WHERE lab_name = ? AND pc_number = ? AND reservation_date = ? AND time_slot = ? AND status IN ('pending', 'approved')";
-        $checkPcStmt = $conn->prepare($checkPcQuery);
-        $checkPcStmt->bind_param("siss", $lab_name, $pc_number, $reservation_date, $time_slot);
-        $checkPcStmt->execute();
-        $pcResult = $checkPcStmt->get_result();
+         $checkPcStmt = $conn->prepare($checkPcQuery);
+         $checkPcStmt->bind_param("siss", $lab_name, $pc_number, $reservation_date, $time_slot);
+         $checkPcStmt->execute();
+         $pcResult = $checkPcStmt->get_result();
         
         if ($pcResult->num_rows > 0) {
-            $errorMessage = "This PC is already reserved for the selected date and time slot.";
-        } else {
+            $errorMessage = "This PC is already reserved for the selected date and time slot.";        } else {
             // Insert reservation
             $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, purpose) 
                             VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -249,14 +248,14 @@ $reservationsResult = $reservationsStmt->get_result();
                     <div class="p-6">
                         <form method="POST" id="reservationForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div >
-                                    <label for="purpose" class="block text-sm font-medium text-gray-700 mb-2">Select Reason</label>
-                                    <select name="purpose" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                <div>
+                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Reason</label>
+                                    <select name="purpose"  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                                         <option value="" disabled selected>Select Reason</option>
-                                        <option value="C programming">C programming</option>  
+                                        <option value="C programming">C programming</option>
                                         <option value="C# programming">C# programming</option>
                                         <option value="Java programming">Java programming</option>
-                                        <option value="PHP programming">PHP programming</option>
+                                       <option value="PHP programming">PHP programming</option>
                                         <option value="Database">Database</option>
                                         <option value="Digital Logic & Design">Digital Logic & Design</option>
                                         <option value="Embedded Systems & IoT">Embedded Systems & IoT</option>
@@ -267,12 +266,11 @@ $reservationsResult = $reservationsStmt->get_result();
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
-
-
-                                <div >
-
-
-
+                                <div>
+                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
+                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                        <option value="">Select a Lab</option>
+                                        
                                         <option value="">Select a Lab</option>
                                         <?php while ($lab = $labsResult->fetch_assoc()): ?>
                                             <option value="<?php echo $lab['lab_name']; ?>">
@@ -280,8 +278,6 @@ $reservationsResult = $reservationsStmt->get_result();
                                             </option>
                                         <?php endwhile; ?>
                                     </select>
-                                </div>
-                                
 
                                 <div>
                                     <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-2">Reservation Date</label>
@@ -373,7 +369,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                         <div class="flex justify-end mt-3">
                                             <?php if ($reservation['status'] === 'pending'): ?>
                                                 <button class="text-red-500 hover:text-red-700 text-sm mr-4" 
-                                                        onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)">
+                                                       onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)">
                                                     <i class="fas fa-times-circle mr-1"></i> Cancel
                                                 </button>
                                             <?php endif; ?>
