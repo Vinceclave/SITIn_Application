@@ -251,6 +251,30 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <div>
                                     <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
                                     <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                        <option value="" disabled selected>Select Reason</option>
+                                        <option value="C programming">C programming</option>
+                                        <option value="C# programming">C# programming</option>
+                                        <option value="Java programming">Java programming</option>
+                                        <option value="PHP programming">PHP programming</option>
+                                        <option value="Database">Database</option>
+                                        <option value="Digital Logic & Design">Digital Logic & Design</option>
+                                        <option value="Embedded Systems & IoT">Embedded Systems & IoT</option>
+                                        <option value="Python Programming">Python Programming</option>
+                                        <option value="Systems Integration & Architecture">Systems Integration & Architecture</option>
+                                        <option value="Computer Application">Computer Application</option>
+                                        <option value="Web Design & Development">Web Design & Development</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+
+                                <div>
+                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
+                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                        <option value="">Select a Lab</option>
+
+
+
                                         <option value="">Select a Lab</option>
                                         <?php while ($lab = $labsResult->fetch_assoc()): ?>
                                             <option value="<?php echo $lab['lab_name']; ?>">
