@@ -192,10 +192,10 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
              <!-- Reservation Form -->
-             <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden">
-                 <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-start">
+             <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden ">
+                 <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-start ">
                  
                         <div class="group flex items-center gap-3 w-full">
                             <i class="fas fa-calendar-alt text-indigo-600 group-hover:text-indigo-800 transition-all duration-300 ease-in-out "></i>
@@ -255,14 +255,16 @@ $reservationsResult = $reservationsStmt->get_result();
                                 </div>
                                 <input type="hidden" id="time_slot" name="time_slot" required>
                         </div>
+                        
+                         <!-- Select PC -->
+                        <div class="mb-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Select PC</label>
+                            <div class="overflow-x-auto pb-4">
+                                <div class="lab-grid" id="pcGrid"></div>
+                            </div>
+                            <input type="hidden" id="pc_number" name="pc_number" required>
+                        
 
-                        <!-- Select PC -->
-                        <div class="mb-2 ">
-                             <label class="block text-sm font-medium text-gray-700 mb-1">Select PC</label>
-                                <div class="overflow-x-auto pb-4">
-                                    <div class="lab-grid" id="pcGrid"></div>
-                                </div>
-                             <input type="hidden" id="pc_number" name="pc_number" required>
                          </div>
                         <!-- Submit Button -->
                         <div class="flex justify-end">
@@ -274,17 +276,13 @@ $reservationsResult = $reservationsStmt->get_result();
                     </div>
                 </div>
                 </div>
-             
-
-
-           
-           
-            
+        
             <!-- Reservations List -->
             <div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden ">
                     <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-between ">
                      <div class="flex items-center gap-3 w-full ">
+
                           <i class="fas fa-list text-indigo-600"></i>
                           <h2 class="text-xl font-semibold">My Reservations</h2>
                          
@@ -345,7 +343,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <?php endwhile; ?>
                             </div>
                         <?php else: ?>
-                            <div class="text-center py-8">
+                            <div class="text-center py-8 ">
                                 <i class="fas fa-calendar-xmark text-5xl text-gray-400 mb-3"></i>
                                 <p class="text-gray-500">You don't have any reservations yet.</p>
                             </div>
