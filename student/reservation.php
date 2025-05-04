@@ -200,14 +200,11 @@ $reservationsResult = $reservationsStmt->get_result();
           </div>
 
       
-        
-       
-
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Remove grid class-->
+        <div class="gap-8">
              <!-- Reservation Form -->
-             <div>
-            </div>
+            
+             
         
             <!-- Reservations List -->
             <div>
@@ -287,7 +284,7 @@ $reservationsResult = $reservationsStmt->get_result();
                 <!-- Modal Backdrop -->
                 <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
                 <!-- Modal Panel -->
-                <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full sm:p-6 my-8 align-middle">
+                <div class="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all lg:max-w-4xl sm:w-full sm:p-6 my-8 align-middle">
                     <!-- Modal Header -->
                     <div class="border-b border-gray-200 pb-4 flex justify-between items-center">
                         <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
