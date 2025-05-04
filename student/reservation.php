@@ -146,63 +146,21 @@ $reservationsStmt->execute();
 $reservationsResult = $reservationsStmt->get_result();
 ?>
 
-<!-- Include CSS for PC Grid -->
-<style>
-    .lab-grid {
-        display: grid;
-        grid-template-columns: repeat(10, 1fr);
-        gap: 10px;
-        margin-top: 20px;
-    }
+<style> 
+ .lab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); 
+  gap: 1rem;
+}
 
-    .pc-item {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+.pc-item {
+  @apply flex flex-col items-center justify-center p-2 border border-gray-300 rounded-lg cursor-pointer transition-all;
+}
 
-    .pc-item:hover:not(.reserved) {
-        border-color: #4F46E5;
-        background-color: #EEF2FF;
-    }
+.pc-item.reserved {
+  @apply bg-red-500 text-white opacity-60 cursor-not-allowed;
+}
 
-    .pc-item.selected {
-        border-color: #4F46E5;
-        background-color: #4F46E5;
-        color: white;
-    }
-
-    .pc-item.reserved {
-        background-color: #EF4444;
-        color: white;
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-    
-    .time-slot {
-        display: inline-block;
-        padding: 8px 16px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        margin-right: 10px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .time-slot:hover {
-        border-color: #4F46E5;
-        background-color: #EEF2FF;
-    }
-
-    .time-slot.selected {
-        border-color: #4F46E5;
-        background-color: #4F46E5;
-        color: white;
-    }
 </style>
 
 <div class="container max-w-[1400px] mx-auto mt-20 px-4 sm:px-6 md:px-8 lg:px-10">
@@ -234,7 +192,7 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Reservation Form -->
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden">
@@ -247,10 +205,10 @@ $reservationsResult = $reservationsStmt->get_result();
                     
                     <div class="p-6">
                         <form method="POST" id="reservationForm">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                                <div>
-                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Reason</label>
-                                    <select name="purpose"  class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="mb-4">
+                                    <label for="purpose" class="block text-sm font-medium text-gray-700 mb-1">Select Reason</label>
+                                    <select name="purpose" id="purpose" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                                         <option value="" disabled selected>Select Reason</option>
                                         <option value="C programming">C programming</option>
                                         <option value="C# programming">C# programming</option>
@@ -266,10 +224,10 @@ $reservationsResult = $reservationsStmt->get_result();
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
-                                <div>
-                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-2">Select Lab</label>
-                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                                        <option value="">Select a Lab</option>
+                                <div class="mb-4">
+                                    <label for="lab_name" class="block text-sm font-medium text-gray-700 mb-1">Select Lab</label>
+                                    <select id="lab_name" name="lab_name" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                                        <option value="" disabled selected>Select a Lab</option>
 
                                         <?php while ($lab = $labsResult->fetch_assoc()): ?>
                                             <option value="<?php echo $lab['lab_name']; ?>">
@@ -277,30 +235,30 @@ $reservationsResult = $reservationsStmt->get_result();
                                             </option>
                                         <?php endwhile; ?>
                                     </select>
-
-                                <div>
-                                    <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-2">Reservation Date</label>
-                                    <input type="date" id="reservation_date" name="reservation_date" 
-                                           min="<?php echo date('Y-m-d'); ?>" 
-                                           max="<?php echo date('Y-m-d', strtotime('+7 days')); ?>" 
-                                           class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
-                                </div>
+                                </div>   
+                            
+                            <div class="mb-4 md:col-span-2">
+                                <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-1">Reservation Date</label>
+                                <input type="date" id="reservation_date" name="reservation_date" 
+                                       min="<?php echo date('Y-m-d'); ?>" 
+                                       max="<?php echo date('Y-m-d', strtotime('+7 days')); ?>" 
+                                       class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                             </div>
                             
                             <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Time Slot</label>
-                                <div class="flex flex-wrap">
-                                    <div class="time-slot" data-value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</div>
-                                    <div class="time-slot" data-value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</div>
-                                    <div class="time-slot" data-value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</div>
-                                    <div class="time-slot" data-value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</div>
-                                    <div class="time-slot" data-value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Select Time Slot</label>
+                                <div class="flex flex-wrap gap-2">
+                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-100" data-value="8:00 AM - 10:00 AM">8:00 AM - 10:00 AM</div>
+                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-100" data-value="10:00 AM - 12:00 PM">10:00 AM - 12:00 PM</div>
+                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-100" data-value="1:00 PM - 3:00 PM">1:00 PM - 3:00 PM</div>
+                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-100" data-value="3:00 PM - 5:00 PM">3:00 PM - 5:00 PM</div>
+                                    <div class="time-slot px-4 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-100" data-value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</div>
                                 </div>
                                 <input type="hidden" id="time_slot" name="time_slot" required>
                             </div>
                             
                             <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Select PC</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Select PC</label>
                                 <div class="overflow-x-auto pb-4">
                                     <div class="lab-grid" id="pcGrid"></div>
                                 </div>
@@ -308,7 +266,7 @@ $reservationsResult = $reservationsStmt->get_result();
                             </div>
                             
                             <div class="flex justify-end">
-                                <button type="submit" name="submit_reservation" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                <button type="submit" name="submit_reservation" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                                     <i class="fas fa-save mr-2"></i>Submit Reservation
                                 </button>
                             </div>
@@ -319,7 +277,7 @@ $reservationsResult = $reservationsStmt->get_result();
             
             <!-- Reservations List -->
             <div>
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden h-full">
                     <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <i class="fas fa-list text-indigo-600"></i>
@@ -329,11 +287,11 @@ $reservationsResult = $reservationsStmt->get_result();
                     
                     <div class="p-6">
                         <?php if ($reservationsResult->num_rows > 0): ?>
-                            <div class="space-y-4">
+                            <div class="space-y-4 h-full ">
                                 <?php while ($reservation = $reservationsResult->fetch_assoc()): ?>
                                     <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-all">
                                         <div class="flex justify-between items-start">
-                                            <div>
+                                            <div class="flex-grow">
                                                 <p class="font-medium text-gray-800"><?php echo $reservation['lab_name']; ?> - PC #<?php echo $reservation['pc_number']; ?></p>
                                                 <p class="text-gray-600">
                                                     <i class="fas fa-calendar-day mr-1"></i> 
@@ -367,7 +325,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                         
                                         <div class="flex justify-end mt-3">
                                             <?php if ($reservation['status'] === 'pending'): ?>
-                                                <button class="text-red-500 hover:text-red-700 text-sm mr-4" 
+                                                <button class="text-red-500 hover:text-red-700 text-sm" 
                                                        onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)">
                                                     <i class="fas fa-times-circle mr-1"></i> Cancel
                                                 </button>
@@ -381,7 +339,7 @@ $reservationsResult = $reservationsStmt->get_result();
                             </div>
                         <?php else: ?>
                             <div class="text-center py-8">
-                                <i class="fas fa-calendar-xmark text-4xl text-gray-400 mb-3"></i>
+                                <i class="fas fa-calendar-xmark text-5xl text-gray-400 mb-3"></i>
                                 <p class="text-gray-500">You don't have any reservations yet.</p>
                             </div>
                         <?php endif; ?>
@@ -404,6 +362,7 @@ $reservationsResult = $reservationsStmt->get_result();
         const timeSlots = document.querySelectorAll('.time-slot');
         const pcNumberInput = document.getElementById('pc_number');
         const timeSlotInput = document.getElementById('time_slot');
+        
         
         // Function to generate the PC grid based on the selected lab
         function generatePcGrid() {
@@ -437,12 +396,12 @@ $reservationsResult = $reservationsStmt->get_result();
                         // Generate 50 PC items
                         for (let i = 1; i <= 50; i++) {
                             const pcItem = document.createElement('div');
-                            pcItem.className = 'pc-item';
+                            pcItem.className = 'pc-item pc-item px-3 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-gray-100';
                             pcItem.dataset.pcNumber = i;
                             pcItem.innerHTML = `<i class="fas fa-desktop mb-1"></i><br>PC ${i}`;
                             
                             // Check if this PC is reserved
-                            if (reservedPCs.includes(i)) {
+                             if (reservedPCs.includes(i)) {
                                 pcItem.classList.add('reserved');
                                 pcItem.title = 'This PC is already reserved';
                             } else {
@@ -488,7 +447,7 @@ $reservationsResult = $reservationsStmt->get_result();
                 
                 // Add selected class to this time slot
                 this.classList.add('selected');
-                
+                this.classList.add('bg-indigo-600','text-white')
                 // Update hidden input value
                 timeSlotInput.value = this.dataset.value;
                 
@@ -515,8 +474,11 @@ $reservationsResult = $reservationsStmt->get_result();
         // Form validation
         document.getElementById('reservationForm').addEventListener('submit', function(e) {
             if (!labSelect.value || !reservationDateInput.value || !timeSlotInput.value || !pcNumberInput.value) {
-               e.preventDefault();
-                 if (!timeSlotInput.value){
+                e.preventDefault();
+                
+                 if (!labSelect.value || !reservationDateInput.value || !pcNumberInput.value){
+                       alert('Please fill all required fields and select a PC.');
+                   }else if (!timeSlotInput.value){
                        alert("Please select a time slot");
                    }
                 alert('Please fill all required fields and select a PC.');
