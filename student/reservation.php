@@ -197,13 +197,15 @@ $reservationsResult = $reservationsStmt->get_result();
             <div class="lg:col-span-2">
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden">
                     <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
+                        
+                        <div class="flex items-center gap-3 w-full ">
                             <i class="fas fa-calendar-alt text-indigo-600"></i>
                             <h2 class="text-xl font-semibold">Create Reservation</h2>
+                           
                         </div>
                     </div>
                     
-                    <div class="p-6">
+                    <div class="p-6 ">
                         <form method="POST" id="reservationForm">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div class="mb-4">
@@ -279,10 +281,12 @@ $reservationsResult = $reservationsStmt->get_result();
             <div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden h-full">
                     <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-list text-indigo-600"></i>
-                            <h2 class="text-xl font-semibold">My Reservations</h2>
-                        </div>
+                     <div class="flex items-center gap-3 w-full ">
+                          <i class="fas fa-list text-indigo-600"></i>
+                          <h2 class="text-xl font-semibold">My Reservations</h2>
+                         
+                     </div>
+
                     </div>
                     
                     <div class="p-6">
