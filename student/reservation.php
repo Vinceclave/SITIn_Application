@@ -370,7 +370,6 @@ $reservationsResult = $reservationsStmt->get_result();
         const pcNumberInput = document.getElementById('pc_number');
         const timeSlotInput = document.getElementById('time_slot');
         
-        
         // Function to generate the PC grid based on the selected lab
         function generatePcGrid() {
             const selectedLab = labSelect.value;
@@ -413,17 +412,19 @@ $reservationsResult = $reservationsStmt->get_result();
                                 pcItem.title = 'This PC is already reserved';
                             } else {
                                 pcItem.addEventListener('click', function() {
-                                    // Remove selected class from all PC items
-                                    document.querySelectorAll('.pc-item.selected').forEach(function(item) {
-                                        item.classList.remove('selected');
-                                    });
-                                    
-                                    // Add selected class to this PC item
-                                    this.classList.add('selected');
-                                    this.classList.add('bg-indigo-200','ring-2','ring-indigo-400')
-                                    
-                                    // Update hidden input value
-                                    pcNumberInput.value = this.dataset.pcNumber;
+                                 // Remove selected class from all PC items
+                                  document.querySelectorAll('.pc-item.selected').forEach(function(item) {
+                                      item.classList.remove('selected', 'bg-indigo-200', 'ring-2', 'ring-indigo-400');
+                                  });
+
+                                  // Add selected class to this PC item
+                                  this.classList.add('selected', 'bg-indigo-200', 'ring-2', 'ring-indigo-400');
+
+                                  // Update hidden input value
+                                  pcNumberInput.value = this.dataset.pcNumber;
+
+                                  // Update hidden input value
+                                  pcNumberInput.value = this.dataset.pcNumber;
                                 });
                             }
                             
@@ -448,14 +449,23 @@ $reservationsResult = $reservationsStmt->get_result();
         // Time slot selection
         timeSlots.forEach(function(slot) {
             slot.addEventListener('click', function() {
-                // Remove selected class from all time slots
-                timeSlots.forEach(function(s) {
-                    s.classList.remove('selected');
-                });
-                
-                // Add selected class to this time slot
-                this.classList.add('selected');
-                this.classList.add('bg-indigo-600','text-white','ring-2','ring-indigo-300')
+              // Remove selected class from all time slots
+              timeSlots.forEach(function(s) {
+                s.classList.remove('selected', 'bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-300');
+              });
+
+              // Add selected class to this time slot
+              this.classList.add('selected', 'bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-300');
+
+             // Add selected class to this time slot
+               this.classList.add('selected');
+               this.classList.add('bg-indigo-600','text-white','ring-2','ring-indigo-300')
+               
+              // Update hidden input value
+              timeSlotInput.value = this.dataset.value;
+
+              // Update hidden input value
+              timeSlotInput.value = this.dataset.value;
                 // Update hidden input value
                 timeSlotInput.value = this.dataset.value;
                 
@@ -481,15 +491,15 @@ $reservationsResult = $reservationsStmt->get_result();
         
         // Form validation
         document.getElementById('reservationForm').addEventListener('submit', function(e) {
-            if (!labSelect.value || !reservationDateInput.value || !timeSlotInput.value || !pcNumberInput.value) {
-                e.preventDefault();
-                
-                 if (!labSelect.value || !reservationDateInput.value || !pcNumberInput.value){
-                       alert('Please fill all required fields and select a PC.');
-                   }else if (!timeSlotInput.value){
-                       alert("Please select a time slot");
-                   }
-                alert('Please fill all required fields and select a PC.');
+             if (!labSelect.value || !reservationDateInput.value || !timeSlotInput.value || !pcNumberInput.value) {
+                 e.preventDefault();
+
+                 if (!labSelect.value) alert('Please select a lab.');
+                 else if (!reservationDateInput.value) alert('Please select a reservation date.');
+                 else if (!timeSlotInput.value) alert("Please select a time slot.");
+                 else if (!pcNumberInput.value) alert("Please select a PC.");
+
+                 
             }
         });
         
