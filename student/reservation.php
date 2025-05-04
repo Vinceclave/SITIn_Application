@@ -162,10 +162,10 @@ $reservationsResult = $reservationsStmt->get_result();
 }
 
 </style>
-
-<div class="container max-w-[1400px] mx-auto mt-20 px-4 sm:px-6 md:px-8 lg:px-10">
+<div class="container mx-auto mt-10 px-4 sm:px-6 md:px-8 lg:px-10">
     <?php include '../shared/aside.php'; ?>
-    <main class="my-4">
+    <main class="my-4 ">
+      <div class="max-w-[1200px] mx-auto">
         <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 sm:p-8 md:p-10 text-white mb-8 shadow-lg">
             <div class="flex items-center gap-4">
                 <i class="fas fa-desktop text-4xl sm:text-5xl opacity-90"></i>
@@ -192,21 +192,21 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
         <?php endif; ?>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Reservation Form -->
-            <div class="lg:col-span-2">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden">
-                    <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-between">
+            <div class="  ">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 overflow-hidden ">
+                    <div class="border-b border-gray-200/50 px-6 py-4 flex items-center justify-start">
                         
-                        <div class="flex items-center gap-3 w-full ">
+                        <div class="flex items-center gap-3 w-full">
                             <i class="fas fa-calendar-alt text-indigo-600"></i>
-                            <h2 class="text-xl font-semibold">Create Reservation</h2>
+                            <h2 class="text-xl font-semibold ">Create Reservation</h2>
                            
                         </div>
                     </div>
                     
-                    <div class="p-6 ">
-                        <form method="POST" id="reservationForm">
+                    <div class="p-6 "> 
+                        <form method="POST" id="reservationForm" class=" ">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                                 <div class="mb-4">
                                     <label for="purpose" class="block text-sm font-medium text-gray-700 mb-1">Select Reason</label>
@@ -240,7 +240,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                 </div>   
                             
                             <div class="mb-4 md:col-span-2">
-                                <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-1">Reservation Date</label>
+                                <label for="reservation_date" class="block text-sm font-medium text-gray-700 mb-1">Reservation Date </label>
                                 <input type="date" id="reservation_date" name="reservation_date" 
                                        min="<?php echo date('Y-m-d'); ?>" 
                                        max="<?php echo date('Y-m-d', strtotime('+7 days')); ?>" 
@@ -271,11 +271,13 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <button type="submit" name="submit_reservation" class="px-5 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                                     <i class="fas fa-save mr-2"></i>Submit Reservation
                                 </button>
-                            </div>
+                            </div> 
                         </form>
                     </div>
                 </div>
             </div>
+           
+           
             
             <!-- Reservations List -->
             <div>
@@ -351,6 +353,7 @@ $reservationsResult = $reservationsStmt->get_result();
                 </div>
             </div>
         </div>
+       </div>
     </main>
 </div>
 
