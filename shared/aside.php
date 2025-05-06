@@ -67,44 +67,56 @@
 <?php endif; ?>
 
 <?php if ($_SESSION['role'] == 'Admin'): ?>
-<aside class="fixed h-screen top-0 left-0 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
-    <!-- Logo Section -->
-    <div class="p-6 border-b border-gray-200/50">
-        <div class="flex items-center space-x-3">
-            <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg">
-            <h2 class="text-xl font-semibold text-gray-800">Admin Panel</h2>
+    <aside class="fixed h-screen top-0 left-0 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
+        <!-- Logo Section -->
+        <div class="p-6 border-b border-gray-200/50">
+            <div class="flex items-center space-x-3">
+                <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg">
+                <h2 class="text-xl font-semibold text-gray-800">Admin Panel</h2>
+            </div>
         </div>
-    </div>
-    
-    <!-- Navigation -->
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-        <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
-        </a>
-        <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-users mr-3 w-6"></i>Manage Users
-        </a>
-        <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-file-alt mr-3 w-6"></i>Reports
-        </a>
-        <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
-        </a>
-        <button id="openSearchModal" class="w-full flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-search mr-3 w-6"></i>Search Student
-        </button>
-        <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-comments mr-3 w-6"></i>View Feedback
-        </a>
-    </nav>
-    
-    <!-- Logout Button -->
-    <div class="p-4 border-t border-gray-200/50">
-        <a href="../logout.php" class="flex items-center justify-center px-4 py-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-            <i class="fas fa-sign-out-alt mr-2"></i>Log Out
-        </a>
-    </div>
-</aside>
+
+        <!-- Navigation -->
+        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <ul class="space-y-1">
+                <li>
+                    <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <i class="fas fa-users mr-3 w-6"></i>Manage Users
+                    </a>
+                </li>
+                <li>
+                    <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <i class="fas fa-file-alt mr-3 w-6"></i>Reports
+                    </a>
+                </li>
+                <li>
+                    <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
+                    </a>
+                </li>
+                <li>
+                    <button id="openSearchModal" class="w-full flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <i class="fas fa-search mr-3 w-6"></i>Search Student
+                    </button>
+                    <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                        <i class="fas fa-comments mr-3 w-6"></i>View Feedback
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Logout Button -->
+        <div class="p-4 border-t border-gray-200/50">
+            <a href="../logout.php" class="flex items-center justify-center px-4 py-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+            </a>
+        </div>
+    </aside>
 <?php endif; ?>
 
 <!-- Search Modal -->
