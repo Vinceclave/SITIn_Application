@@ -67,9 +67,9 @@ if(isset($_SESSION['success'])):
 </script>
 <?php unset($_SESSION['success']); endif; ?>
 
-<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
+<div class="mt-10 flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="flex-1 p-6 ml-64">
+    <main class="flex-1 pt-10 p-6 ">
         <div class="max-w-[1400px] mx-auto">
             <div class="flex items-center justify-between mb-8">
                 <div>

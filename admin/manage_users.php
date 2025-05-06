@@ -37,9 +37,9 @@ $query .= " ORDER BY id DESC LIMIT $offset, $perPage";
 $result = mysqli_query($conn, $query);
 ?>
 
-<div class="flex min-h-screen bg-gray-50 text-gray-900 pb-14">
+<div class="mt-10 flex min-h-screen bg-gray-50 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="flex-1 p-4 ml-64">
+    <main class="flex-1 pt-10 p-6">
         <div class="max-w-[1400px] mx-auto">
             <div class="flex items-center justify-between mb-8">
                 <div>
