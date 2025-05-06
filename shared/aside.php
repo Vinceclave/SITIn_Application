@@ -2,14 +2,14 @@
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
-            <!-- Mobile Menu Button -->
+            <!-- Mobile Menu Button for student -->
             <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
             
             <!-- Desktop Navigation -->
-            <nav class="hidden md:flex items-center space-x-6">
-                <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+            <nav id="studentNav" class="hidden md:flex items-center space-x-6">
+               <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
                     <i class="fas fa-home mr-2"></i>Home
                 </a>
                 <a href="profile.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
@@ -24,13 +24,13 @@
             </nav>
             
             <!-- Logout Button -->
-            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors md:flex">
                 <i class="fas fa-sign-out-alt mr-2"></i>Log Out
             </a>
         </div>
     </div>
-    
     <!-- Mobile Navigation -->
+    
     <nav id="studentNav" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
             <a href="home.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
@@ -50,6 +50,7 @@
 </header>
 
 <script>
+    // script for the student header
     window.addEventListener('scroll', function () {
         const header = document.getElementById('studentHeader');
         if (window.scrollY > 50) {
@@ -58,54 +59,101 @@
             header.classList.remove('bg-white/80');
         }
     });
-    
     document.getElementById('menuToggle').addEventListener('click', function () {
         let menu = document.getElementById('studentNav');
         menu.classList.toggle('hidden');
+        }
+    });
+</script>
+<?php endif; ?>
+<!-- Admin -->
+<?php if ($_SESSION['role'] == 'Admin'): ?>
+<header id="adminHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
+    <div class="container max-w-[1400px] mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <!-- Mobile Menu Button for admin -->
+            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors ">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+             <!-- Desktop Navigation -->
+                <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
+            <nav id="adminNav" class="hidden md:flex items-center space-x-6">
+            <h2 class="text-xl font-bold text-gray-800 md:hidden">Admin Panel</h2>
+                <a href="dashboard.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-chart-bar mr-2"></i>Dashboard
+                </a>
+                <a href="manage_users.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-users mr-2"></i>Manage Users
+                </a>
+                <!-- Dropdown -->
+                <div class="relative group">
+                    <button class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                        <i class="fas fa-database mr-2"></i>Records <i class="fas fa-caret-down ml-1"></i>
+                    </button>
+                    <div class="absolute hidden group-hover:block mt-1 bg-white border border-gray-200/50 rounded-md shadow-md z-10">
+                        <a href="reports.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                            <i class="fas fa-file-alt mr-2 w-4"></i>Reports
+                        </a>
+                        <a href="sitting_records.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                            <i class="fas fa-chair mr-2 w-4"></i>Sitting Records
+                        </a>
+                    </div>
+                </div>
+                <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-comments mr-2"></i>View Feedback
+                </a>
+                 <button id="openSearchModal" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                        <i class="fas fa-search mr-2"></i>Search Student
+                    </button>
+                <!-- Logout Button -->
+                <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+                </a>
+            </nav>
+        </div>
+    </div>
+      <!-- Mobile Navigation -->
+     <nav id="adminMenu" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="container max-w-[1400px] mx-auto px-4 py-2">
+            <a href="dashboard.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
+                            </a>
+            <a href="manage_users.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-users mr-3 w-6"></i>Manage Users
+                            </a>
+            <div class="relative group">
+                    <button class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors"><i class="fas fa-database mr-3 w-6"></i>Records</button>
+                    <div class="absolute hidden group-hover:block left-0 mt-1 w-full bg-white border border-gray-200/50 rounded-md shadow-md z-10">
+                        <a href="reports.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-file-alt mr-3 w-6"></i>Reports</a>
+                        <a href="sitting_records.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-chair mr-3 w-6"></i>Sitting Records</a>
+                    </div>
+                </div>
+               <a href="admin_feedback.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                   <i class="fas fa-comments mr-3 w-6"></i>View Feedback
+                            </a>
+             <button id="openSearchModal" class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                  <i class="fas fa-search mr-3 w-6"></i>Search Student
+             </button>
+        </div>
+    </nav>
+</header>
+<script>
+        // script for the admin header
+    document.getElementById('adminMenuToggle').addEventListener('click', function() {
+                let menu = document.getElementById('adminMenu');
+                menu.classList.toggle('hidden');
+            });
+    window.addEventListener('scroll', function () {
+        const header = document.getElementById('adminHeader');
+        if (window.scrollY > 50) {
+            header.classList.add('bg-white/80');
+        } else {
+            header.classList.remove('bg-white/80');
+        }
     });
 </script>
 <?php endif; ?>
 
-<?php if ($_SESSION['role'] == 'Admin'): ?>
-<aside class="fixed h-screen top-0 left-0 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
-    <!-- Logo Section -->
-    <div class="p-6 border-b border-gray-200/50">
-        <div class="flex items-center space-x-3">
-            <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg">
-            <h2 class="text-xl font-semibold text-gray-800">Admin Panel</h2>
-        </div>
-    </div>
-    
-    <!-- Navigation -->
-    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-        <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
-        </a>
-        <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-users mr-3 w-6"></i>Manage Users
-        </a>
-        <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-file-alt mr-3 w-6"></i>Reports
-        </a>
-        <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
-        </a>
-        <button id="openSearchModal" class="w-full flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-search mr-3 w-6"></i>Search Student
-        </button>
-        <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-            <i class="fas fa-comments mr-3 w-6"></i>View Feedback
-        </a>
-    </nav>
-    
-    <!-- Logout Button -->
-    <div class="p-4 border-t border-gray-200/50">
-        <a href="../logout.php" class="flex items-center justify-center px-4 py-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-            <i class="fas fa-sign-out-alt mr-2"></i>Log Out
-        </a>
-    </div>
-</aside>
-<?php endif; ?>
 
 <!-- Search Modal -->
 <div id="searchModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden transition-all duration-300">
@@ -304,4 +352,3 @@
         }
     });
 </script>
-

@@ -35,6 +35,6 @@ CREATE TABLE IF NOT EXISTS `reservations` (
 CREATE INDEX IF NOT EXISTS `idx_reservations_lab_date_slot` 
 ON `reservations` (`lab_name`, `reservation_date`, `time_slot`, `status`);
 
--- Create index for user's reservations
+-- Create index for user's reservatigons
 CREATE INDEX IF NOT EXISTS `idx_reservations_user` 
 ON `reservations` (`idno`, `reservation_date`, `status`); 
