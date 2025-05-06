@@ -30,7 +30,7 @@
         </div>
     </div>
         <!-- Mobile Navigation -->
-
+    
     <nav id="studentNav" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
             <a href="home.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
@@ -68,30 +68,33 @@
 <?php endif; ?>
 <!-- Admin -->
 <?php if ($_SESSION['role'] == 'Admin'): ?>
-<header id="adminHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
+<header id="adminHeader" class="fixed top-0 left-0 z-30 w-full bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
-        <div class="flex justify-between items-center">
-            <!-- Mobile Menu Button -->
-            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
-            <div class="flex items-center space-x-3 ">
+        <div class="flex justify-between items-center gap-4">
+            <!-- Logo and Name -->
+            <div class="flex items-center space-x-3">
                 <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg md:hidden">
                 <h2 class="text-xl font-semibold text-gray-800 md:hidden">Admin Panel</h2>
             </div>
+            <!-- Mobile Menu Button -->
+            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors ml-auto">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
 
             <!-- Desktop Navigation -->
-            <nav id="adminNav" class="hidden md:flex items-center space-x-6">
-               <div class="flex items-center space-x-3 ">
-               <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg hidden md:block ">
-               <h2 class="text-xl font-semibold text-gray-800 hidden md:block ">Admin Panel</h2>
+            <nav id="adminNav" class="hidden md:flex items-center justify-center space-x-6 w-full ">
+            <div class="flex items-center space-x-3 w-full">
+                <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg hidden md:block ">
+                <h2 class="text-xl font-semibold text-gray-800 hidden md:block ">Admin Panel</h2>
             </div>
-               
+            <div class="flex items-center justify-end w-full ">
+               <!-- Logout Button -->
+                <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors ">
+                    <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+                </a>
+            </div>
             </nav>
-            <!-- Logout Button -->
-            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
-                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
-            </a>
+          
         </div>
     </div>
 
@@ -99,39 +102,37 @@
     <nav id="adminMenu" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
        
-        <!-- Navigation -->
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-            <ul class="space-y-1">
-                <li>
-                    <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+           <ul class=" space-y-1">
+                <li class="py-1">
+                    <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
                         <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
                     </a>
                 </li>
-                <li>
-                    <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                <li class="py-1">
+                    <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
                         <i class="fas fa-users mr-3 w-6"></i>Manage Users
                     </a>
                 </li>
-                <li>
-                    <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                <li class="py-1">
+                    <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
                         <i class="fas fa-file-alt mr-3 w-6"></i>Reports
                     </a>
                 </li>
-                <li>
-                    <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                <li class="py-1">
+                    <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
                         <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
                     </a>
                 </li>
-                <li>
-                    <button id="openSearchModal" class="w-full flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
-                        <i class="fas fa-search mr-3 w-6"></i>Search Student
-                    </button>
-                    <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                 <li class="py-1">
+                    <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
                         <i class="fas fa-comments mr-3 w-6"></i>View Feedback
                     </a>
+                </li> <li class="py-1">
+                    <button id="openSearchModal" class="w-full flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
+                        <i class="fas fa-search mr-3 w-6"></i>Search Student
+                    </button>
                 </li>
             </ul>
-        </nav>\
 
         </div>
 </nav>
