@@ -2,7 +2,7 @@
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
-            <!-- Mobile Menu Button -->
+            <!-- Mobile Menu Button for Student -->
             <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
@@ -50,6 +50,10 @@
 </header>
 
 <script>
+        function toggleMobileMenu(menuId, toggleButtonId) {
+        document.getElementById(toggleButtonId).addEventListener('click', function () {
+            document.getElementById(menuId).classList.toggle('hidden');
+        });
     window.addEventListener('scroll', function () {
         const header = document.getElementById('studentHeader');
         if (window.scrollY > 50) {
@@ -58,19 +62,25 @@
             header.classList.remove('bg-white/80');
         }
     });
-    
-    document.getElementById('menuToggle').addEventListener('click', function () {
-        let menu = document.getElementById('studentNav');
-        menu.classList.toggle('hidden');
-    });
+    toggleMobileMenu('studentNav', 'menuToggle');
+
 </script>
 <?php endif; ?>
 
 <?php if ($_SESSION['role'] == 'Admin'): ?>
-    <aside class="fixed h-screen top-0 left-0 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
+<aside id="adminAside" class="fixed h-screen top-0 left-0 z-30 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
+        <!-- Mobile Menu Button for Admin -->
+        <div class="md:hidden p-4">
+            <button id="adminMenuToggle" class="text-gray-600 hover:text-indigo-600 transition-colors">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+
+        <div id="adminMenu" class="flex flex-col h-full md:block">
+
         <!-- Logo Section -->
-        <div class="p-6 border-b border-gray-200/50">
-            <div class="flex items-center space-x-3">
+        <div class="p-6 border-b border-gray-200/50 hidden md:block">
+            <div class="flex items-center space-x-3 ">
                 <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg">
                 <h2 class="text-xl font-semibold text-gray-800">Admin Panel</h2>
             </div>
@@ -116,7 +126,13 @@
                 <i class="fas fa-sign-out-alt mr-2"></i>Log Out
             </a>
         </div>
-    </aside>
+        </div>
+</aside>
+<script>
+
+        toggleMobileMenu('adminMenu', 'adminMenuToggle');
+
+</script>
 <?php endif; ?>
 
 <!-- Search Modal -->
