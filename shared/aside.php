@@ -24,7 +24,7 @@
             </nav>
             
             <!-- Logout Button -->
-            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors hidden md:flex">
                 <i class="fas fa-sign-out-alt mr-2"></i>Log Out
             </a>
         </div>
@@ -67,48 +67,51 @@
 </script>
 <?php endif; ?>
 <!-- Admin -->
-<?php if ($_SESSION['role'] == 'Admin'): ?>\
-<header id="adminHeader" class="fixed top-0 left-0 z-30 w-full bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm transition-all duration-300">\
+<?php if ($_SESSION['role'] == 'Admin'): ?>
+<header id="adminHeader" class="fixed top-0 left-0 z-30 w-full bg-white/80 backdrop-blur-sm border-b border-gray-200/50 shadow-sm transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
-        <div class="flex justify-between items-center">\
-            <!-- Mobile Menu Button for admin -->\
-            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">\
+        <div class="flex justify-between items-center">
+             <!-- Mobile Menu Button for admin -->
+            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-            <h2 class="text-xl font-bold text-gray-800">Admin Panel</h2>\
-        <!-- Desktop Navigation -->\
-        <nav id="adminNav" class="hidden md:flex items-center space-x-6 w-full ">
-            <ul class=\"flex items-center justify-center space-x-6 w-full\">\
-                <li>\
-                    <a href="dashboard.php" class="flex items-center  text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">\
-                        <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard\
-                    </a>\
-                </li>\
-                <li>\
-                    <a href="manage_users.php" class="flex items-center  text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">\
-                        <i class="fas fa-users mr-3 w-6"></i>Manage Users\
-                    </a>\
-                </li>\
-                <li>\
-                    <a href="reports.php" class="flex items-center  text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">\
-                        <i class="fas fa-file-alt mr-3 w-6"></i>Reports\
-                    </a>\
-                </li>\
-                <li>\
-                    <a href="sitting_records.php" class="flex items-center  text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">\
-                        <i class="fas fa-chair mr-3 w-6"></i>Sitting Records\
-                    </a>\
-                </li>\
-                  <li>\
-                    <a href="admin_feedback.php" class="flex items-center  text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">\
-                        <i class="fas fa-comments mr-3 w-6"></i>View Feedback\
-                    </a>\
-                </li>\
-            </ul>
-            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">\
-                <i class="fas fa-sign-out-alt mr-2"></i>Log Out\
-            </a>\
-        </nav>\
+            <!-- header nav -->
+            <div class="flex items-center w-full">
+                <h2 class="text-xl font-bold text-gray-800 w-full md:w-auto">Admin Panel</h2>
+                 <!-- Desktop Navigation -->
+                <nav id="adminNav" class="hidden md:flex items-center justify-center space-x-6 w-full">
+                    <ul class="flex items-center justify-center space-x-6 w-full">
+                        <li>
+                            <a href="dashboard.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">
+                                <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
+                            </a>
+                        </li>
+                        <li>
+                            <a href="manage_users.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">
+                                <i class="fas fa-users mr-3 w-6"></i>Manage Users
+                            </a>
+                        </li>
+                        <li>
+                            <a href="reports.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">
+                                <i class="fas fa-file-alt mr-3 w-6"></i>Reports
+                            </a>
+                        </li>
+                        <li>
+                            <a href="sitting_records.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">
+                                <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
+                            </a>
+                        </li>
+                          <li>
+                            <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors px-4 py-2">
+                                <i class="fas fa-comments mr-3 w-6"></i>View Feedback
+                            </a>
+                        </li>
+                    </ul>
+                    <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+                    </a>
+                </nav>
+            </div>
         </div>
     </div>
     <!-- Mobile Navigation -->\
@@ -116,27 +119,27 @@
         <div class="container max-w-[1400px] mx-auto px-4 py-2">\
             <ul class=" space-y-1">\
                 <li class="py-1">
-                    <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
+                    <a href="dashboard.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors w-full">
                         <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
                     </a>
                 </li>
                 <li class="py-1">
-                    <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
+                    <a href="manage_users.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors w-full">
                         <i class="fas fa-users mr-3 w-6"></i>Manage Users
                     </a>
                 </li>
                 <li class="py-1">
-                    <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
+                    <a href="reports.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors w-full">
                         <i class="fas fa-file-alt mr-3 w-6"></i>Reports
                     </a>
                 </li>
                 <li class="py-1">
-                    <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
+                    <a href="sitting_records.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors w-full">
                         <i class="fas fa-chair mr-3 w-6"></i>Sitting Records
                     </a>
                 </li>
                 <li class="py-1">\
-                    <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors">
+                    <a href="admin_feedback.php" class="flex items-center px-4 py-3 text-gray-600 hover:text-white hover:bg-indigo-500 rounded-lg transition-colors w-full">
                         <i class="fas fa-comments mr-3 w-6"></i>View Feedback
                     </a>
                 </li>\
@@ -151,13 +154,13 @@
 </header>
 <script>
         // script for the admin header
-    document.getElementById('adminMenuToggle').addEventListener('click', function () {
+    document.getElementById('adminMenuToggle').addEventListener('click', function() {
                 let menu = document.getElementById('adminMenu');
                 menu.classList.toggle('hidden');
             });
-       
-</script>\
+</script>
 <?php endif; ?>
+
 
 <!-- Search Modal -->
 <div id="searchModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden transition-all duration-300">
@@ -356,4 +359,3 @@
         }
     });
 </script>
-
