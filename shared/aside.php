@@ -2,7 +2,7 @@
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
-            <!-- Mobile Menu Button -->
+            <!-- Mobile Menu Button for student -->
             <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
@@ -50,6 +50,7 @@
 </header>
 
 <script>
+    // script for the student header
     window.addEventListener('scroll', function () {
         const header = document.getElementById('studentHeader');
         if (window.scrollY > 50) {
@@ -65,33 +66,39 @@
     });
 </script>
 <?php endif; ?>
-
+<!-- Admin -->
 <?php if ($_SESSION['role'] == 'Admin'): ?>
-<aside id="adminAside" class="fixed h-screen top-0 left-0 z-30 w-64 bg-white/80 backdrop-blur-sm border-r border-gray-200/50 shadow-sm flex flex-col transition-all duration-300">
-        <!-- Mobile Menu Button for Admin -->
-        <div class="md:hidden p-4">
-            <button id="adminMenuToggle" class=" p-2 text-gray-600 hover:text-indigo-600 transition-colors">
+<header id="adminHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
+    <div class="container max-w-[1400px] mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <!-- Mobile Menu Button -->
+            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-        </div>
-
-        <div id="adminMenu" class=" flex flex-col h-full md:block">
-
-        <!-- Logo Section -->
-        <div class="p-6 border-b border-gray-200/50 ">
             <div class="flex items-center space-x-3 ">
-               <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg  md:hidden">
-               <h2 class="text-xl font-semibold text-gray-800 md:hidden ">Admin Panel</h2>
+                <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg md:hidden">
+                <h2 class="text-xl font-semibold text-gray-800 md:hidden">Admin Panel</h2>
             </div>
-        </div>
-        <!-- Desktop Navigation -->
-       <nav id="adminNav" class="hidden md:flex items-center space-x-6">
-            <div class="flex items-center space-x-3 ">
+
+            <!-- Desktop Navigation -->
+            <nav id="adminNav" class="hidden md:flex items-center space-x-6">
+               <div class="flex items-center space-x-3 ">
                <img src="logo.png" alt="Logo" class="h-10 w-10 rounded-lg hidden md:block ">
                <h2 class="text-xl font-semibold text-gray-800 hidden md:block ">Admin Panel</h2>
             </div>
-       </nav>
+               
+            </nav>
+            <!-- Logout Button -->
+            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
+            </a>
+        </div>
+    </div>
 
+   <!-- Mobile Navigation -->
+    <nav id="adminMenu" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
+        <div class="container max-w-[1400px] mx-auto px-4 py-2">
+       
         <!-- Navigation -->
         <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
             <ul class="space-y-1">
@@ -124,22 +131,18 @@
                     </a>
                 </li>
             </ul>
-        </nav>
+        </nav>\
 
-        <!-- Logout Button -->
-        <div class="p-4 border-t border-gray-200/50">
-            <a href="../logout.php" class="flex items-center justify-center px-4 py-3 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                <i class="fas fa-sign-out-alt mr-2"></i>Log Out
-            </a>
         </div>
-        </div>
-</aside>
+</nav>
+</header>
 <script>
-
+        // script for the admin header
     document.getElementById('adminMenuToggle').addEventListener('click', function () {
-        let menu = document.getElementById('adminMenu');
-        menu.classList.toggle('hidden');
-     });
+                let menu = document.getElementById('adminMenu');
+                menu.classList.toggle('hidden');
+            });
+       
 </script>
 
 
