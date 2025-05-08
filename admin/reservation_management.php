@@ -23,13 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     if ($updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
-            $selectReservation = "SELECT idno, CONCAT(firstname, ' ', lastname) as full_name, lab_name, purpose, time_slot, reservation_date FROM reservations r JOIN users u ON r.idno = u.idno WHERE reservation_id = ?";
+            $selectReservation = "SELECT idno, CONCAT(firstname, ' ', lastname) as full_name, lab_name, COALESCE(purpose, 'Default Reason') AS purpose, time_slot, reservation_date FROM reservations r JOIN users u ON r.idno = u.idno WHERE reservation_id = ?";
             $selectStmt = $conn->prepare($selectReservation);
             $selectStmt->bind_param("i", $reservation_id);
             $selectStmt->execute();
             $reservationResult = $selectStmt->get_result()->fetch_assoc();
 
-            $insertSitIn = "INSERT INTO sit_in (idno, full_name, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?, 1)";
+             // Adjust the values to match the sit_in table structure
+            $insertSitIn = "INSERT INTO sit_in (idno, full_name, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?, 1)";            
             $insertStmt = $conn->prepare($insertSitIn);
             $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['full_name'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
 
