@@ -1,3 +1,24 @@
+<?php
+    // Database connection details (replace with your actual credentials)
+    include '../config/config.php';
+
+    // Fetching the latest 5 pending reservations
+    $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
+    $result = $conn->query($sql);
+
+    // Array to hold the fetched notifications
+    $notifications = [];
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $notifications[] = [
+                'full_name' => $row['full_name'],
+                'lab_name' => $row['lab_name'],
+                'time_slot' => $row['time_slot']
+            ];
+        }
+    }
+    $conn->close();
+?>
 <?php if ($_SESSION['role'] == 'Student'): ?>
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
@@ -108,11 +129,25 @@
                         <span id="notificationBadge" class="badge hidden">0</span>
                     </button>
                     <!-- Notification Dropdown -->
-                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
-                        <p class="p-3 text-gray-600">No new notifications</p>
+                     <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
+                        <?php if (!empty($notifications)): ?>
+                            <?php foreach ($notifications as $notification): ?>
+                                <div class="px-4 py-2 border-b border-gray-100">
+                                    <p class="text-sm text-gray-700">
+                                        <?= htmlspecialchars($notification['full_name']) ?> reserved <?= htmlspecialchars($notification['lab_name']) ?> at <?= htmlspecialchars($notification['time_slot']) ?>
+                                    </p>
+                                </div>
+                            <?php endforeach; ?>
+                            <?php else: ?>
+                            <p class="p-3 text-gray-600">No new notifications</p>
+                        <?php endif; ?>
+                       <?php
+                            $notificationCount = count($notifications);
+                            $displayMessage = ($notificationCount > 0) ? $notificationCount. " Pending reservation" : "No new notifications";
+                        ?>
                     </div>
                 </div>
-             <!-- Desktop Navigation -->
+                <!-- Desktop Navigation -->
                 <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
             <nav id="adminNav" class="hidden md:flex items-center space-x-6">
             <h2 class="text-xl font-bold text-gray-800 md:hidden">Admin Panel</h2>
@@ -176,7 +211,7 @@
 </header>
 <script>
         // script for the admin header
-    document.getElementById('adminMenuToggle').addEventListener('click', function() {
+    document.getElementById('adminMenuToggle').addEventListener('click', function () {
                 let menu = document.getElementById('adminMenu');
                 menu.classList.toggle('hidden');
             });
