@@ -52,15 +52,14 @@
                 <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">
                     <?php if (!empty($announcements)): ?>
                         <?php foreach ($announcements as $announcement): ?>
-                            <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
-                                <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
-                            </div>
+                        <div class="px-4 py-2 border-b border-gray-100">
+                            <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
+                            <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
+                        </div>
                         <?php endforeach; ?>
-                     <?php else: ?>
-                          <p class="p-3 text-gray-600">No new notifications</p>
-                     </div>
-                     <?php endforeach; ?>
+                        <?php else: ?>
+                        <p class="p-3 text-gray-600">No new notifications</p>
+                        <?php endif; ?>
                         <?php else: ?>
                          <p class="p-3 text-gray-600">No new notifications</p>
                     <?php endif; ?>
