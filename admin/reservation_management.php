@@ -1,14 +1,17 @@
 <?php
+// Start session to manage user data
 session_start();
+// Check if the user is logged in and has the 'Admin' role
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     header("Location: ../login.php");
     exit();
 }
 
+// Include necessary files for database configuration and header
 require_once '../config/config.php';
 require_once '../shared/header.php';
 
-// Process reservation status updates
+// Process reservation status updates if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $reservation_id = $_POST['reservation_id'];
     $new_status = $_POST['new_status'];
@@ -22,17 +25,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 
     if ($updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
-        if ($new_status == 'approved') {
-            $selectReservation = "SELECT r.idno, r.lab_name, COALESCE(r.purpose, 'Default Reason') AS purpose, r.time_slot, r.reservation_date FROM reservations r WHERE r.reservation_id = ?";
-            $selectStmt = $conn->prepare($selectReservation);
-            $selectStmt->bind_param("i", $reservation_id);
-            $selectStmt->execute();
-            $reservationResult = $selectStmt->get_result()->fetch_assoc();
-
-             // Adjust the values to match the sit_in table structure
-            $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?)";
-            $insertStmt = $conn->prepare($insertSitIn);
-            $insertStmt->bind_param("sssssi", $reservationResult['idno'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date'], $status = 1);
+         if ($new_status == 'approved') {
+                // Prepare and execute query to fetch reservation details
+                $selectReservation = "SELECT idno, lab_name, COALESCE(purpose, 'Default Reason') AS purpose, time_slot, reservation_date FROM reservations WHERE reservation_id = ?";
+                $selectStmt = $conn->prepare($selectReservation);
+                $selectStmt->bind_param("i", $reservation_id);
+                $selectStmt->execute();
+                $reservationResult = $selectStmt->get_result()->fetch_assoc();
+                
+                // Prepare and execute query to insert data into sit_in table
+                $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, 1)";
+                $insertStmt = $conn->prepare($insertSitIn);
+                $insertStmt->bind_param("sssss", $reservationResult['idno'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
 
             if (!$insertStmt->execute()) {
                  $conn->rollback();
@@ -46,51 +50,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     }
 }
 
-// Get filter values from GET parameters
+// Get filter values from GET parameters, default to empty string if not set
 $lab_filter = isset($_GET['lab']) ? $_GET['lab'] : '';
 $date_filter = isset($_GET['date']) ? $_GET['date'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 
-// Prepare query with possible filters
-$query = "SELECT r.* FROM reservations r WHERE 1=1";
-
+// Prepare base query for selecting all data from the reservations table
+$query = "SELECT r.* FROM reservations r WHERE 1=1"; 
 $params = [];
 $types = "";
 
+// Add lab filter to the query if it is set
 if (!empty($lab_filter)) {
     $query .= " AND r.lab_name = ?";
     $params[] = $lab_filter;
     $types .= "s";
 }
 
+// Add date filter to the query if it is set
 if (!empty($date_filter)) {
     $query .= " AND r.reservation_date = ?";
     $params[] = $date_filter;
     $types .= "s";
 }
 
+// Add status filter to the query if it is set
 if (!empty($status_filter)) {
-
     $query .= " AND r.status = ?";
     $params[] = $status_filter;
     $types .= "s";
 }
 
+// Add order by to the query
 $query .= " ORDER BY r.reservation_date DESC, r.created_at DESC";
 
-// Prepare and execute the query
+// Prepare the SQL statement
 $stmt = $conn->prepare($query);
+// Bind parameters to the statement if there are any
 if (!empty($types)) {
     $stmt->bind_param($types, ...$params);
 }
+// Execute the statement
 $stmt->execute();
+// Get the result set
 $result = $stmt->get_result();
 
-// Fetch all labs for dropdown filter
+// Fetch all unique lab names for the lab filter dropdown
 $labsQuery = "SELECT DISTINCT lab_name FROM reservations ORDER BY lab_name";
 $labsResult = $conn->query($labsQuery);
 ?>
-
+<!-- Main container for the admin page -->
 <div class="flex min-h-screen bg-gray-50 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
     <main class="flex-1 pt-10 p-6"">
@@ -101,7 +110,7 @@ $labsResult = $conn->query($labsQuery);
                     <p class="text-lg text-gray-600">Approve, reject, or mark reservations as completed</p>
                </div>
             </div>
-            
+            <!-- Display success message if set -->
             <?php if (isset($successMessage)): ?>
                 <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
                     <p class="font-medium">Success!</p>
@@ -109,7 +118,7 @@ $labsResult = $conn->query($labsQuery);
                 </div>
             <?php endif; ?>
             
-            <?php if (isset($errorMessage)): ?>
+              <?php if (isset($errorMessage)): ?>
                 <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
                     <p class="font-medium">Error!</p>
                     <p><?php echo $errorMessage; ?></p>
@@ -146,18 +155,20 @@ $labsResult = $conn->query($labsQuery);
                         </select>
                     </div>
                     <div class="flex items-end">
+                           <!-- Filter button -->
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors mr-2">
                             <i class="fas fa-filter mr-2"></i>Filter
                         </button>
+                          <!-- Clear button -->
                         <a href="reservation_management.php" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                             <i class="fas fa-eraser mr-2"></i>Clear
                         </a>
                     </div>
                 </form>
             </div>
-
             <!-- Reservations Table -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+               <!-- Table container that allows horizontal scrolling -->
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
@@ -165,6 +176,7 @@ $labsResult = $conn->query($labsQuery);
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab & PC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -178,13 +190,14 @@ $labsResult = $conn->query($labsQuery);
                                             <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['idno']); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['lab_name']); ?></div>
-                                            <div class="text-sm text-gray-500">PC #<?php echo htmlspecialchars($reservation['pc_number']); ?></div>
+                                             <div class="font-medium text-gray-900"><?php echo htmlspecialchars("Lab {$reservation['lab_name']}, PC {$reservation['pc_number']}"); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="font-medium text-gray-900"><?php echo date('F j, Y', strtotime($reservation['reservation_date'])); ?></div>
-                                            <div class="text-sm text-gray-500"><?php echo htmlspecialchars($reservation['time_slot']); ?></div>
+                                            <div class="font-medium text-gray-900"><?php echo date('M j, Y', strtotime($reservation['reservation_date'])); ?></div>
+                                             <div class="text-sm text-gray-500"><?php echo htmlspecialchars($reservation['time_slot']); ?></div>
                                         </td>
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo htmlspecialchars($reservation['purpose']); ?></td>
+                                       
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <?php if ($reservation['status'] === 'pending'): ?>
                                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
@@ -204,10 +217,12 @@ $labsResult = $conn->query($labsQuery);
                                                 </span>
                                             <?php endif; ?>
                                         </td>
+                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <?php echo date('M j, Y g:i A', strtotime($reservation['created_at'])); ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                          <!-- Container for action buttons -->
                                             <div class="flex space-x-2">
                                                 <?php if ($reservation['status'] === 'pending'): ?>
                                                     <form method="POST" class="inline">
@@ -233,6 +248,7 @@ $labsResult = $conn->query($labsQuery);
                                                         </button>
                                                     </form>
                                                 <?php else: ?>
+                                                 <!-- Dash if no actions available -->
                                                     -
                                                 <?php endif; ?>
                                             </div>
@@ -255,6 +271,7 @@ $labsResult = $conn->query($labsQuery);
 </div>
 
 <script>
+     // Confirm before changing the status of a reservation
     // Confirm before changing status
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', function(e) {
@@ -268,4 +285,5 @@ $labsResult = $conn->query($labsQuery);
     });
 </script>
 
+<!-- Include the footer -->
 <?php require_once '../shared/footer.php'; ?>
