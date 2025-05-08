@@ -3,7 +3,7 @@
     include '../config/config.php';
 
     // Fetching the latest 5 pending reservations for admin
-    $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
+    $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5"; //for admin
     $result = $conn->query($sql);
 
     // Fetching the latest 5 announcements for student
@@ -22,7 +22,7 @@
     }
     // Array to hold the fetched notifications
     $notifications = [];
-    if ($result->num_rows > 0) {
+     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
             $notifications[] = [
                 'full_name' => $row['full_name'],
@@ -54,7 +54,7 @@
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
                                 <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
-                            </div>
+                        </div>
                             <?php endforeach; ?>
                     <?php else: ?>
                     <p class="p-3 text-gray-600">No new announcements</p>
@@ -117,7 +117,6 @@
         let menu = document.getElementById('studentNav');
         menu.classList.toggle('hidden');
         }
-    });
         document.getElementById('notificationBtn').addEventListener('click', function () {
         let dropdown = document.getElementById('notificationDropdown');
         dropdown.classList.toggle('hidden');
@@ -130,11 +129,11 @@
         if (!button.contains(event.target) && !dropdown.contains(event.target)) {
             dropdown.classList.add('hidden');
         }
-
     });
   </script>
 <?php endif; ?>
 <!-- Admin -->
+<?php if ($_SESSION['role'] == 'Admin'): ?>
 <header id="adminHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
@@ -152,18 +151,17 @@
                      <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
                      <?php if (!empty($notifications)): ?>
                             <?php foreach ($notifications as $notification): ?>
-                                <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-sm text-gray-700">
-                                    <?= htmlspecialchars($notification['full_name']) ?> reserved <?= htmlspecialchars($notification['lab_name']) ?> at <?= htmlspecialchars($notification['time_slot']) ?>
-                                </p>
-                                </div>
-                            <?php endforeach; ?>
-                            <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                                View All
-                            </a>
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm text-gray-700"><?= htmlspecialchars($notification['full_name']) ?> reserved <?= htmlspecialchars($notification['lab_name']) ?> at <?= htmlspecialchars($notification['time_slot']) ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                        <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                            View All
+                        </a>
                         <?php else: ?>
                         <p class="p-3 text-gray-600">No new notifications</p>
-                        <?php endif; ?>
+                    <?php endif; ?>
+                    
                         <?php
                                 $notificationCount = count($notifications);
                         ?>
@@ -219,12 +217,12 @@
                     <button class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors"><i class="fas fa-database mr-3 w-6"></i>Records</button>
                     <div class="absolute hidden group-hover:block left-0 mt-1 w-full bg-white border border-gray-200/50 rounded-md shadow-md z-10">
                         <a href="reports.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-file-alt mr-3 w-6"></i>Reports</a>
-                        <a href="sitting_records.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-chair mr-3 w-6"></i>Sitting Records</a>
-                    </div>
+                            <a href="sitting_records.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-chair mr-3 w-6"></i>Sitting Records</a>
+                        </div>
                 </div>
                <a href="admin_feedback.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
                    <i class="fas fa-comments mr-3 w-6"></i>View Feedback
-                </a>
+               </a>
              <button id="openSearchModal" class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors">
                     <i class="fas fa-search mr-3 w-6"></i>Search Student
              </button>
@@ -259,8 +257,8 @@
         }
     });
 </script>
-<?php endif ?>
-
+<?php endif; ?>
+    
 
 <!-- Search Modal -->
 <div id="searchModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden transition-all duration-300">

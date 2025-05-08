@@ -108,7 +108,7 @@ $rules = [
                             <?php foreach ($announcements as $announcement): ?>
                                 <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-center gap-2 mb-2">
-                                        <i class="fas fa-circle-info text-indigo-600"></i></div>
+                                        <i class="fas fa-circle-info text-indigo-600"></i>
                                     <div class="flex items-center text-sm text-gray-600 mb-2">
                                         <i class="fas fa-user mr-2"></i>
                                         <span><?php echo htmlspecialchars($announcement['admin_name']); ?></span>
@@ -116,8 +116,6 @@ $rules = [
                                         <span><?php echo htmlspecialchars($announcement['date']); ?></span>
                                     </div>
                                      <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
-
-                                    
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
