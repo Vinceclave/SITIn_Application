@@ -18,23 +18,23 @@ $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $perPage;
 
 // Count total students with filtering
-$countQuery = "SELECT COUNT(*) as total FROM users WHERE role = 'Student'";
+$countQuery = "SELECT COUNT(*) as total FROM users WHERE role = 'Student' ";
 if ($search) {
     $countQuery .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
 }
 $countResult = mysqli_query($conn, $countQuery);
 $totalRows = mysqli_fetch_assoc($countResult)['total'];
 $totalPages = ceil($totalRows / $perPage);
-
+    
 // Fetch students with search filtering and pagination
-$query = "SELECT id, idno, lastname, firstname, middlename, course, year_level, username 
-          FROM users 
-          WHERE role = 'Student'";
+$query = "SELECT * FROM users WHERE role = 'Student'";
 if ($search) {
     $query .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
 }
 $query .= " ORDER BY id DESC LIMIT $offset, $perPage";
 $result = mysqli_query($conn, $query);
+
+$students = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 
 <div class="mt-10 flex min-h-screen bg-gray-50 text-gray-900 pb-14">
@@ -115,8 +115,8 @@ $result = mysqli_query($conn, $query);
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <?php if (mysqli_num_rows($result) > 0): ?>
-                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                            <?php if (!empty($students)): ?>
+                                <?php foreach ($students as $row): ?>
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['id']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['idno']) ?></td>
@@ -139,7 +139,7 @@ $result = mysqli_query($conn, $query);
                                             </div>
                                         </td>
                                     </tr>
-                                <?php endwhile; ?>
+                                <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
                                     <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
