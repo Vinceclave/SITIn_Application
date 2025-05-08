@@ -7,8 +7,8 @@
     $result = $conn->query($sql);
 
     // Fetching the latest 5 announcements
-        $sql_announcements = "SELECT message, created_at FROM announcements ORDER BY created_at DESC LIMIT 5";
-        $result_announcements = $conn->query($sql_announcements);
+    $sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
+    $result_announcements = $conn->query($sql_announcements);
     
         // Array to hold the fetched announcements
         $announcements = [];
@@ -16,7 +16,7 @@
             while ($row = $result_announcements->fetch_assoc()) {
                 $announcements[] = [
                     'message' => $row['message'],
-                    'created_at' => $row['created_at']
+                    'date' => $row['date']
                 ];
             }
         }
@@ -49,12 +49,16 @@
                     <span id="notificationBadge" class="badge hidden">0</span>
                 </button>
                 <!-- Notification Dropdown -->
-             <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">
-                <?php if (!empty($announcements)): ?>
-                   <?php foreach ($announcements as $announcement): ?>
-                     <div class="px-4 py-2 border-b border-gray-100">
-                         <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
-                         <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['created_at'])) ?></p>
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">
+                    <?php if (!empty($announcements)): ?>
+                        <?php foreach ($announcements as $announcement): ?>
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
+                                <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                     <?php else: ?>
+                          <p class="p-3 text-gray-600">No new notifications</p>
                      </div>
                      <?php endforeach; ?>
                         <?php else: ?>
