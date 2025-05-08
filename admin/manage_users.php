@@ -18,26 +18,21 @@ $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 $offset = ($page - 1) * $perPage;
 
 // Count total students with filtering
-$countQuery = "SELECT COUNT(*) as total FROM users";
+$countQuery = "SELECT COUNT(*) as total FROM users WHERE role = 'Student'";
 if ($search) {
     $countQuery .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
 }
 $countResult = mysqli_query($conn, $countQuery);
 $totalRows = mysqli_fetch_assoc($countResult)['total'];
 $totalPages = ceil($totalRows / $perPage);
-
-$countQueryAll = "SELECT * from users";
-$countResultAll = mysqli_query($conn, $countQueryAll);
-
 // Fetch students with search filtering and pagination
 $query = "SELECT *,id as id FROM users WHERE role = 'Student'";
+
 if ($search) {
     $query .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
 }
-$query .= " ORDER BY id DESC LIMIT $offset, $perPage";
+$query .= " ORDER BY id DESC";
 $result = mysqli_query($conn, $query);
-$number_of_rows = mysqli_num_rows($result);
-echo $number_of_rows;
 
 ?>
 
