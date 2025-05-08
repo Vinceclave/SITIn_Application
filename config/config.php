@@ -1,22 +1,22 @@
 <?php
 // Database configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'sitin_application');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+if (!defined('DB_HOST')) define('DB_HOST', 'localhost');
+if (!defined('DB_NAME')) define('DB_NAME', 'sitin_application');
+if (!defined('DB_USER')) define('DB_USER', 'root');
+if (!defined('DB_PASS')) define('DB_PASS', '');
 
 // Application settings
-define('APP_DEBUG', true);
-define('APP_URL', 'http://localhost/SITIn_Application');
+if (!defined('APP_DEBUG')) define('APP_DEBUG', true);
+if (!defined('APP_URL')) define('APP_URL', 'http://localhost/SITIn_Application');
 
 // Timezone setting
 date_default_timezone_set('America/New_York');
 
 // Database connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "sitin_application";
+if (!isset($servername)) $servername = "localhost";
+if (!isset($username)) $username = "root";
+if (!isset($password)) $password = "";
+if (!isset($dbname)) $dbname = "sitin_application";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);

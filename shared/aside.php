@@ -1,6 +1,7 @@
 <?php
     // Database connection details (replace with your actual credentials)
     include '../config/config.php';
+    
 
     // Fetching the latest 5 pending reservations
     $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
@@ -10,7 +11,7 @@
     $notifications = [];
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            $notifications[] = [
+             $notifications[] = [
                 'full_name' => $row['full_name'],
                 'lab_name' => $row['lab_name'],
                 'time_slot' => $row['time_slot']
@@ -130,7 +131,7 @@
                     </button>
                     <!-- Notification Dropdown -->
                      <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
-                        <?php if (!empty($notifications)): ?>
+                     <?php if (!empty($notifications)): ?>
                             <?php foreach ($notifications as $notification): ?>
                                 <div class="px-4 py-2 border-b border-gray-100">
                                     <p class="text-sm text-gray-700">
@@ -138,12 +139,16 @@
                                     </p>
                                 </div>
                             <?php endforeach; ?>
-                            <?php else: ?>
-                            <p class="p-3 text-gray-600">No new notifications</p>
-                        <?php endif; ?>
-                       <?php
+                                <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                                    View All
+                                </a>
+                        <?php
                             $notificationCount = count($notifications);
-                            $displayMessage = ($notificationCount > 0) ? $notificationCount. " Pending reservation" : "No new notifications";
+                             else: ?>
+                           <p class="p-3 text-gray-600">No new notifications</p>
+                             <?php
+                                $notificationCount = count($notifications);
+                                $displayMessage = ($notificationCount > 0) ? $notificationCount. " Pending reservation" : "No new notifications";
                         ?>
                     </div>
                 </div>
