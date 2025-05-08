@@ -23,14 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     if ($new_status !== 'completed' && $updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
-            $selectReservation = "SELECT r.idno, COALESCE(r.full_name, CONCAT(u.firstname, ' ', u.lastname)) AS full_name, r.lab_name, COALESCE(r.purpose, 'Default Reason') AS purpose, r.time_slot, r.reservation_date FROM reservations r JOIN users u ON r.idno = u.idno WHERE r.reservation_id = ?";
+            $selectReservation = "SELECT r.idno, r.lab_name, COALESCE(r.purpose, 'Default Reason') AS purpose, r.time_slot, r.reservation_date FROM reservations r WHERE r.reservation_id = ?";
             $selectStmt = $conn->prepare($selectReservation);
             $selectStmt->bind_param("i", $reservation_id);
             $selectStmt->execute();
             $reservationResult = $selectStmt->get_result()->fetch_assoc();
 
              // Adjust the values to match the sit_in table structure
-            $insertSitIn = "INSERT INTO sit_in (idno, full_name, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?, 1)";            
+            $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, 1)";            
             $insertStmt = $conn->prepare($insertSitIn);
             $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['full_name'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
 
@@ -54,7 +54,7 @@ $date_filter = isset($_GET['date']) ? $_GET['date'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 
 // Prepare query with possible filters
-$query = "SELECT r.*, COALESCE(r.full_name, CONCAT(u.firstname, ' ', u.lastname)) AS full_name
+$query = "SELECT r.*
           FROM reservations r
           JOIN users u ON r.idno = u.idno
           WHERE 1=1";
@@ -103,7 +103,7 @@ $labsResult = $conn->query($labsQuery);
                 <div>
                     <h1 class="text-3xl font-semibold text-gray-800">Reservation Management</h1>
                     <p class="text-lg text-gray-600">Approve, reject, or mark reservations as completed</p>
-                </div>
+               </div>
             </div>
             
             <?php if (isset($successMessage)): ?>
@@ -166,7 +166,7 @@ $labsResult = $conn->query($labsQuery);
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab & PC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -179,8 +179,7 @@ $labsResult = $conn->query($labsQuery);
                                 <?php while ($reservation = $result->fetch_assoc()): ?>
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['full_name']); ?></div>
-                                            <div class="text-sm text-gray-500">ID: <?php echo htmlspecialchars($reservation['idno']); ?></div>
+                                            <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['idno']); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['lab_name']); ?></div>
@@ -229,7 +228,6 @@ $labsResult = $conn->query($labsQuery);
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form>
-
                                                 <?php else: ?>
                                                     -
                                                 <?php endif; ?>
