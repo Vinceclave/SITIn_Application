@@ -7,6 +7,18 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
             
+                 <!-- Notification Bell -->
+            <div class="relative">
+                <button id="notificationBtn" class="text-gray-600 hover:text-indigo-600 focus:outline-none transition-colors">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span id="notificationBadge" class="badge hidden">0</span>
+                </button>
+                <!-- Notification Dropdown -->
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
+                    <p class="p-3 text-gray-600">No new notifications</p>
+                </div>
+            </div>
+            
             <!-- Desktop Navigation -->
             <nav id="studentNav" class="hidden md:flex items-center space-x-6">
                <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
@@ -64,6 +76,20 @@
         menu.classList.toggle('hidden');
         }
     });
+        document.getElementById('notificationBtn').addEventListener('click', function () {
+        let dropdown = document.getElementById('notificationDropdown');
+        dropdown.classList.toggle('hidden');
+    });
+
+    // Close the dropdown if the user clicks outside of it
+    window.addEventListener('click', function (event) {
+        let dropdown = document.getElementById('notificationDropdown');
+        let button = document.getElementById('notificationBtn');
+        if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+
+    });
 </script>
 <?php endif; ?>
 <!-- Admin -->
@@ -75,6 +101,17 @@
             <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors ">
                 <i class="fas fa-bars text-xl"></i>
             </button>
+              <!-- Notification Bell -->
+                <div class="relative">
+                    <button id="notificationBtn" class="text-gray-600 hover:text-indigo-600 focus:outline-none transition-colors">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="notificationBadge" class="badge hidden">0</span>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
+                        <p class="p-3 text-gray-600">No new notifications</p>
+                    </div>
+                </div>
              <!-- Desktop Navigation -->
                 <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
             <nav id="adminNav" class="hidden md:flex items-center space-x-6">
@@ -149,6 +186,19 @@
             header.classList.add('bg-white/80');
         } else {
             header.classList.remove('bg-white/80');
+        }
+    });
+    document.getElementById('notificationBtn').addEventListener('click', function () {
+        let dropdown = document.getElementById('notificationDropdown');
+        dropdown.classList.toggle('hidden');
+    });
+
+    // Close the dropdown if the user clicks outside of it
+    window.addEventListener('click', function (event) {
+        let dropdown = document.getElementById('notificationDropdown');
+        let button = document.getElementById('notificationBtn');
+        if (!button.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
         }
     });
 </script>
