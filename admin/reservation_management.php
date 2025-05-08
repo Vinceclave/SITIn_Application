@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $new_status = $_POST['new_status'];
     
     // Begin transaction
-     $conn->begin_transaction();
+    $conn->begin_transaction();
 
     $updateQuery = "UPDATE reservations SET status = ? WHERE reservation_id = ?";
     $updateStmt = $conn->prepare($updateQuery);
@@ -30,9 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             $reservationResult = $selectStmt->get_result()->fetch_assoc();
 
              // Adjust the values to match the sit_in table structure
-            $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, 1)";
+            $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?)";
             $insertStmt = $conn->prepare($insertSitIn);
-            $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['lab_name'],$reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
+            $insertStmt->bind_param("sssssi", $reservationResult['idno'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date'], $status = 1);
 
             if (!$insertStmt->execute()) {
                  $conn->rollback();
@@ -52,25 +52,26 @@ $date_filter = isset($_GET['date']) ? $_GET['date'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 
 // Prepare query with possible filters
-$query = "SELECT r.* FROM reservations r";
+$query = "SELECT r.* FROM reservations r WHERE 1=1";
 
 $params = [];
 $types = "";
 
 if (!empty($lab_filter)) {
-    $query .= " WHERE r.lab_name = ?";
+    $query .= " AND r.lab_name = ?";
     $params[] = $lab_filter;
     $types .= "s";
 }
 
 if (!empty($date_filter)) {
-    $query .= (empty($types) ? " WHERE" : " AND")." r.reservation_date = ?";
+    $query .= " AND r.reservation_date = ?";
     $params[] = $date_filter;
     $types .= "s";
 }
 
 if (!empty($status_filter)) {
-    $query .= (empty($types) ? " WHERE" : " AND")." r.status = ?";
+
+    $query .= " AND r.status = ?";
     $params[] = $status_filter;
     $types .= "s";
 }
@@ -112,7 +113,7 @@ $labsResult = $conn->query($labsQuery);
                 <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
                     <p class="font-medium">Error!</p>
                     <p><?php echo $errorMessage; ?></p>
-                </div>
+                </div> 
             <?php endif; ?>
 
             <!-- Filters -->
@@ -227,7 +228,7 @@ $labsResult = $conn->query($labsQuery);
                                                       <form method="POST" class="inline">
                                                         <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
                                                         <input type="hidden" name="new_status" value="completed" >
-                                                        <button type="submit" name="update_status" class="text-blue-600 hover:text-blue-900" title="Mark as Completed">
+                                                        <button type="submit" name="update_status" class="text-blue-600 hover:text-blue-900" title="Mark as Completed"> 
                                                             <i class="fas fa-check-double"></i>
                                                         </button>
                                                     </form>
