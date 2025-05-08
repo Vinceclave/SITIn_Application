@@ -140,19 +140,19 @@
                                 </div>
                             <?php endforeach; ?>
                                 <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                                    View All
-                                </a>
-                        <?php
-                            $notificationCount = count($notifications);
-                             else: ?>
-                           <p class="p-3 text-gray-600">No new notifications</p>
-                             <?php
+                                        View All
+                                    </a>
+                            <?php else: ?>
+                                <p class="p-3 text-gray-600">No new notifications</p>
+                            <?php endif; ?>
+                            <?php
                                 $notificationCount = count($notifications);
-                                $displayMessage = ($notificationCount > 0) ? $notificationCount. " Pending reservation" : "No new notifications";
+                                // $displayMessage = ($notificationCount > 0) ? $notificationCount. " Pending reservation" : "No new notifications";
                         ?>
-                    </div>
-                </div>
+                     </div>
+                 </div>
                 <!-- Desktop Navigation -->
+
                 <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
             <nav id="adminNav" class="hidden md:flex items-center space-x-6">
             <h2 class="text-xl font-bold text-gray-800 md:hidden">Admin Panel</h2>
