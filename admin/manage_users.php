@@ -27,14 +27,14 @@ $totalRows = mysqli_fetch_assoc($countResult)['total'];
 $totalPages = ceil($totalRows / $perPage);
 
 // Fetch students with search filtering and pagination
-$query = "SELECT id, idno, lastname, firstname, middlename, course, year_level, username 
-          FROM users 
-          WHERE role = 'Student'";
+$query = "SELECT *,id as id FROM users WHERE role = 'Student'";
 if ($search) {
     $query .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
 }
 $query .= " ORDER BY id DESC LIMIT $offset, $perPage";
 $result = mysqli_query($conn, $query);
+
+
 ?>
 
 <div class="mt-10 flex min-h-screen bg-gray-50 text-gray-900 pb-14">
@@ -103,7 +103,7 @@ $result = mysqli_query($conn, $query);
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">id</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
@@ -117,7 +117,7 @@ $result = mysqli_query($conn, $query);
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if (mysqli_num_rows($result) > 0): ?>
                                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                    <tr class="hover:bg-gray-50 transition-colors">
+                                    <tr class="hover:bg-gray-50 transition-colors" >
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['id']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['idno']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['lastname']) ?></td>
