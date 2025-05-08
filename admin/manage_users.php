@@ -31,7 +31,7 @@ $query = "SELECT *,id as id FROM users WHERE role = 'Student'";
 if ($search) {
     $query .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
 }
-$query .= " ORDER BY id DESC";
+$query .= " ORDER BY id DESC LIMIT $offset, $perPage";
 $result = mysqli_query($conn, $query);
 
 ?>
