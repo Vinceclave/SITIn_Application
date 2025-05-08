@@ -14,12 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $new_status = $_POST['new_status'];
     
     // Begin transaction
-    $conn->begin_transaction();
+     $conn->begin_transaction();
 
     $updateQuery = "UPDATE reservations SET status = ? WHERE reservation_id = ?";
     $updateStmt = $conn->prepare($updateQuery);
     $updateStmt->bind_param("si", $new_status, $reservation_id);
-    
+
     if ($new_status !== 'completed' && $updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
@@ -30,13 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             $reservationResult = $selectStmt->get_result()->fetch_assoc();
 
              // Adjust the values to match the sit_in table structure
-            $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, 1)";            
+            $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, 1)";
             $insertStmt = $conn->prepare($insertSitIn);
-            $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['full_name'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
+            $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
 
             if (!$insertStmt->execute()) {
                 $conn->rollback();
-                $errorMessage = "Error inserting into sit_in: " . $insertStmt->error;
             }
         }
             $updateStmt->execute();
@@ -54,10 +53,9 @@ $date_filter = isset($_GET['date']) ? $_GET['date'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 
 // Prepare query with possible filters
-$query = "SELECT r.*
-          FROM reservations r
-          JOIN users u ON r.idno = u.idno
-          WHERE 1=1";
+$query = "SELECT r.* FROM reservations r WHERE 1=1";
+
+
 
 $params = [];
 $types = "";
@@ -177,7 +175,7 @@ $labsResult = $conn->query($labsQuery);
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if ($result->num_rows > 0): ?>
                                 <?php while ($reservation = $result->fetch_assoc()): ?>
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class=\"hover:bg-gray-50\">
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['idno']); ?></div>
                                         </td>
@@ -226,6 +224,14 @@ $labsResult = $conn->query($labsQuery);
                                                         <input type="hidden" name="new_status" value="rejected">
                                                         <button type="submit" name="update_status" class="text-red-600 hover:text-red-900" title="Reject">
                                                             <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                 <?php elseif ($reservation['status'] === 'approved'): ?>
+                                                      <form method="POST" class="inline">
+                                                        <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
+                                                        <input type="hidden" name="new_status" value="completed">
+                                                        <button type="submit" name="update_status" class="text-blue-600 hover:text-blue-900" title="Mark as Completed">
+                                                            <i class="fas fa-check-double"></i>
                                                         </button>
                                                     </form>
                                                 <?php else: ?>
