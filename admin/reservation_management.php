@@ -172,7 +172,7 @@ $labsResult = $conn->query($labsQuery);
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
-                            <tr>
+                            <tr class="text-center">
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab & PC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
@@ -185,20 +185,20 @@ $labsResult = $conn->query($labsQuery);
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if ($result->num_rows > 0): ?>
                                 <?php while ($reservation = $result->fetch_assoc()): ?>
-                                    <tr class=\"hover:bg-gray-50\">
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                    <tr class="hover:bg-gray-50 text-center">
+                                        <td class="px-6 py-4 whitespace-nowrap ">
                                             <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['idno']); ?></div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4 whitespace-normal">
                                              <div class="font-medium text-gray-900"><?php echo htmlspecialchars("Lab {$reservation['lab_name']}, PC {$reservation['pc_number']}"); ?></div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4 whitespace-normal">
                                             <div class="font-medium text-gray-900"><?php echo date('M j, Y', strtotime($reservation['reservation_date'])); ?></div>
                                              <div class="text-sm text-gray-500"><?php echo htmlspecialchars($reservation['time_slot']); ?></div>
                                         </td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?php echo htmlspecialchars($reservation['purpose']); ?></td>
+                                         <td class="px-6 py-4 whitespace-normal text-sm text-gray-500"><?php echo htmlspecialchars($reservation['purpose']); ?></td>
                                        
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-6 py-4 whitespace-normal">
                                             <?php if ($reservation['status'] === 'pending'): ?>
                                                 <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
                                                     Pending
@@ -218,29 +218,29 @@ $labsResult = $conn->query($labsQuery);
                                             <?php endif; ?>
                                         </td>
                                          
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <td class="px-6 py-4 whitespace-normal text-sm text-gray-500">
                                             <?php echo date('M j, Y g:i A', strtotime($reservation['created_at'])); ?>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-6 py-4 whitespace-normal text-sm">
                                           <!-- Container for action buttons -->
-                                            <div class="flex space-x-2">
+                                            <div class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 justify-center">
                                                 <?php if ($reservation['status'] === 'pending'): ?>
-                                                    <form method="POST" class="inline">
+                                                    <form method="POST" class="inline-flex">
                                                         <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
                                                         <input type="hidden" name="new_status" value="approved">
-                                                        <button type="submit" name="update_status" class="text-green-600 hover:text-green-900" title="Approve">
+                                                        <button type="submit" name="update_status" class="text-green-600 hover:text-green-900 w-full" title="Approve">
                                                             <i class="fas fa-check"></i>
                                                         </button>
                                                     </form>
-                                                    <form method="POST" class="inline">
+                                                    <form method="POST" class="inline-flex">
                                                         <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
                                                         <input type="hidden" name="new_status" value="rejected">
-                                                        <button type="submit" name="update_status" class="text-red-600 hover:text-red-900" title="Reject">
+                                                        <button type="submit" name="update_status" class="text-red-600 hover:text-red-900 w-full" title="Reject">
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form >
                                                  <?php elseif ($reservation['status'] === 'approved'): ?>
-                                                      <form method="POST" class="inline">
+                                                      <form method="POST" class="inline-flex">
                                                         <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
                                                         <input type="hidden" name="new_status" value="completed" >
                                                         <button type="submit" name="update_status" class="text-blue-600 hover:text-blue-900" title="Mark as Completed"> 
@@ -257,7 +257,7 @@ $labsResult = $conn->query($labsQuery);
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">
                                         No reservations found matching your criteria.
                                     </td>
                                 </tr>
