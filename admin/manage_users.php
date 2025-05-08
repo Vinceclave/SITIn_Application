@@ -8,32 +8,14 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
 require_once '../config/config.php';
 require_once '../shared/header.php';
 
-// Add search & pagination variables
-$search = "";
-if(isset($_GET['search'])) {
-    $search = mysqli_real_escape_string($conn, $_GET['search']);
-}
-$perPage = 10;
-$page = isset($_GET['page']) ? intval($_GET['page']) : 1;
-$offset = ($page - 1) * $perPage;
-
-// Count total students with filtering
-$countQuery = "SELECT COUNT(*) as total FROM users WHERE role = 'Student'";
-if ($search) {
-    $countQuery .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
-}
-$countResult = mysqli_query($conn, $countQuery);
-$totalRows = mysqli_fetch_assoc($countResult)['total'];
-$totalPages = ceil($totalRows / $perPage);
-// Fetch students with search filtering and pagination
-$query = "SELECT *,id as id FROM users WHERE role = 'Student'";
-
-if ($search) {
-    $query .= " AND (idno LIKE '%$search%' OR lastname LIKE '%$search%' OR firstname LIKE '%$search%')";
-}
-$query .= " ORDER BY id DESC LIMIT $offset, $perPage";
+// Fetch all users
+$query = "SELECT *, id as id FROM users ORDER BY id DESC";
 $result = mysqli_query($conn, $query);
 
+//Check if there are error in the query
+if (!$result) {
+    die("Error in query: " . mysqli_error($conn));
+}
 ?>
 
 <div class="mt-10 flex min-h-screen bg-gray-50 text-gray-900 pb-14">
@@ -41,12 +23,12 @@ $result = mysqli_query($conn, $query);
     <main class="flex-1 pt-10 p-6">
         <div class="max-w-[1400px] mx-auto">
             <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h1 class="text-3xl font-semibold text-gray-800">Manage Students</h1>
-                    <p class="text-lg text-gray-600">View and manage registered students</p>
-                </div>
+            <div>
+                <h1 class="text-3xl font-semibold text-gray-800">Manage Users</h1>
+                <p class="text-lg text-gray-600">View and manage all users</p>
+            </div>
                 <button onclick="openRegisterModal()" 
-                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                     <i class="fas fa-user-plus mr-2"></i>Add Student
                 </button>
             </div>
@@ -69,32 +51,9 @@ $result = mysqli_query($conn, $query);
                 </div>
             <?php endif; ?>
 
-            <!-- Search Bar -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-                <form action="manage_users.php" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fas fa-id-card text-gray-400"></i>
-                        </div>
-                        <input type="text" 
-                               name="search" 
-                               value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
-                               placeholder="Search by ID, Last Name, or First Name" 
-                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
-                    </div>
-                    <div class="flex space-x-3">
-                        <button type="submit" 
-                                class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                            <i class="fas fa-search mr-2"></i>Search
-                        </button>
-                        <button type="button" 
-                                onclick="clearSearch()" 
-                                class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
-                            <i class="fas fa-eraser mr-2"></i>Clear
-                        </button>
-                    </div>
-                </form>
-            </div>
+        
+
+
             
             <!-- Student Management Table -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -109,6 +68,7 @@ $result = mysqli_query($conn, $query);
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Middle Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
@@ -124,6 +84,7 @@ $result = mysqli_query($conn, $query);
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['middlename']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['course']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['year_level']) ?></td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['role']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><?= htmlspecialchars($row['username']) ?></td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             <div class="flex items-center space-x-3">
@@ -141,7 +102,7 @@ $result = mysqli_query($conn, $query);
                                 <?php endwhile; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">
+                                    <td colspan="10" class="px-6 py-4 text-center text-sm text-gray-500">
                                         <div class="flex flex-col items-center justify-center py-8">
                                             <i class="fas fa-users-slash text-4xl text-gray-400 mb-2"></i>
                                             <p>No students found.</p>
@@ -154,70 +115,6 @@ $result = mysqli_query($conn, $query);
                 </div>
             </div>
             
-            <!-- Pagination -->
-            <?php if ($totalPages > 1): ?>
-                <div id="pagination" class="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                    <div class="text-sm text-gray-500 mr-4 flex items-center">
-                        Page <?= $page ?> of <?= $totalPages ?> (<?= $totalRows ?> records)
-                    </div>
-                    <div class="flex space-x-2">
-                        <?php if ($page > 1): ?>
-                            <a href="manage_users.php?page=<?= $page - 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
-                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
-                                <i class="fas fa-chevron-left mr-1"></i> Prev
-                            </a>
-                        <?php endif; ?>
-                        
-                        <?php
-                        $maxVisiblePages = 5;
-                        $startPage = max(1, $page - floor($maxVisiblePages / 2));
-                        $endPage = min($totalPages, $startPage + $maxVisiblePages - 1);
-                        
-                        // Adjust startPage if we are showing fewer than maxVisiblePages
-                        if ($endPage - $startPage + 1 < $maxVisiblePages && $startPage > 1) {
-                            $startPage = max(1, $endPage - $maxVisiblePages + 1);
-                        }
-                        
-                        // First page and ellipsis if needed
-                        if ($startPage > 1): ?>
-                            <a href="manage_users.php?page=1<?= $search ? '&search=' . urlencode($search) : '' ?>" 
-                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
-                                1
-                            </a>
-                            <?php if ($startPage > 2): ?>
-                                <span class="px-3 py-2 text-gray-500">...</span>
-                            <?php endif;
-                        endif;
-                        
-                        // Page numbers
-                        for ($i = $startPage; $i <= $endPage; $i++): ?>
-                            <a href="manage_users.php?page=<?= $i ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
-                               class="px-3 py-2 <?= ($i == $page ? 'bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300') ?> rounded-md transition-colors">
-                                <?= $i ?>
-                            </a>
-                        <?php endfor;
-                        
-                        // Last page and ellipsis if needed
-                        if ($endPage < $totalPages): 
-                            if ($endPage < $totalPages - 1): ?>
-                                <span class="px-3 py-2 text-gray-500">...</span>
-                            <?php endif; ?>
-                            <a href="manage_users.php?page=<?= $totalPages ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
-                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
-                                <?= $totalPages ?>
-                            </a>
-                        <?php endif;
-                        
-                        // Next button
-                        if ($page < $totalPages): ?>
-                            <a href="manage_users.php?page=<?= $page + 1 ?><?= $search ? '&search=' . urlencode($search) : '' ?>" 
-                               class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
-                                Next <i class="fas fa-chevron-right ml-1"></i>
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
         </div>
     </main>
 </div>
@@ -288,19 +185,6 @@ $result = mysqli_query($conn, $query);
 <script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const searchInput = document.getElementById('searchInput');
-        let searchTimeout;
-
-        searchInput.addEventListener("input", function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                const searchValue = searchInput.value;
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('search', searchValue);
-                currentUrl.searchParams.set('page', '1'); // Reset to first page when searching
-                window.location.href = currentUrl.toString();
-            }, 300);
-        });
 
         // Handle delete link clicks with Notiflix Confirm
         document.querySelectorAll('.delete-user').forEach(function(link) {
@@ -355,10 +239,6 @@ $result = mysqli_query($conn, $query);
 
     function closeEditModal() {
         document.getElementById("editModal").classList.add("hidden");
-    }
-
-    function clearSearch() {
-        window.location.href = 'manage_users.php';
     }
 
     tailwind.config = {
