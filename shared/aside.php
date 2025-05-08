@@ -1,43 +1,42 @@
 <?php
-// Database connection details (replace with your actual credentials)
-include '../config/config.php';
+    // Database connection details (replace with your actual credentials)
+    include '../config/config.php';
 
-// Fetching the latest 5 pending reservations for admin
-$sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
-$result = $conn->query($sql);
+    // Fetching the latest 5 pending reservations for admin
+    $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
+    $result = $conn->query($sql);
 
-// Fetching the latest 5 announcements for student
-$sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
-$result_announcements = $conn->query($sql_announcements);
-    
-        // Array to hold the fetched announcements
-        $announcements = [];
-        if ($result_announcements->num_rows > 0) {
-            while ($row = $result_announcements->fetch_assoc()) {
-                $announcements[] = [
-                    'message' => $row['message'],
-                    'date' => $row['date']
-                ];
-            }
+    // Fetching the latest 5 announcements for student
+    $sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
+    $result_announcements = $conn->query($sql_announcements);
+        
+    // Array to hold the fetched announcements
+    $announcements = [];
+    if ($result_announcements->num_rows > 0) {
+        while ($row = $result_announcements->fetch_assoc()) {
+            $announcements[] = [
+                'message' => $row['message'],
+                'date' => $row['date']
+            ];
         }
-// Array to hold the fetched notifications
-$notifications = [];
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-         $notifications[] = [
-            'full_name' => $row['full_name'],
-            'lab_name' => $row['lab_name'],
-            'time_slot' => $row['time_slot']
-        ];
     }
-}
-$conn->close();
+    // Array to hold the fetched notifications
+    $notifications = [];
+    if ($result->num_rows > 0) {
+        while($row = $result->fetch_assoc()) {
+            $notifications[] = [
+                'full_name' => $row['full_name'],
+                'lab_name' => $row['lab_name'],
+                'time_slot' => $row['time_slot']
+            ];
+        }
+    }
+    $conn->close();
 ?>
 <?php if ($_SESSION['role'] == 'Student'): ?>
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
-            <!-- Mobile Menu Button for student -->
             <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
@@ -51,14 +50,15 @@ $conn->close();
                 <!-- Notification Dropdown -->
                 <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">
                     <?php if (!empty($announcements)): ?>
-                        <?php foreach ($announcements as $announcement): ?>
-                        <div class="px-4 py-2 border-b border-gray-100">
-                            <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
-                            <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
-                        </div>
-                        <?php endforeach; ?>
+                        <?php foreach ($announcements as $announcement): ?>                
+                            <div class="px-4 py-2 border-b border-gray-100">
+                                <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
+                                <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
+                            </div>
+                            <?php endforeach; ?>
                     <?php else: ?>
-                        <p class="p-3 text-gray-600">No new announcements</p>
+                    <p class="p-3 text-gray-600">No new announcements</p>
+                   
                     <?php endif; ?>
                </div>
             </div>
@@ -103,7 +103,6 @@ $conn->close();
         </div>
     </nav>
 </header>
-
 <script>
     // script for the student header
     window.addEventListener('scroll', function () {
@@ -136,7 +135,6 @@ $conn->close();
   </script>
 <?php endif; ?>
 <!-- Admin -->
-<?php if ($_SESSION['role'] == 'Admin'): ?>
 <header id="adminHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
@@ -155,18 +153,18 @@ $conn->close();
                      <?php if (!empty($notifications)): ?>
                             <?php foreach ($notifications as $notification): ?>
                                 <div class="px-4 py-2 border-b border-gray-100">
-                                    <p class="text-sm text-gray-700">
-                                        <?= htmlspecialchars($notification['full_name']) ?> reserved <?= htmlspecialchars($notification['lab_name']) ?> at <?= htmlspecialchars($notification['time_slot']) ?>
-                                    </p>
+                                <p class="text-sm text-gray-700">
+                                    <?= htmlspecialchars($notification['full_name']) ?> reserved <?= htmlspecialchars($notification['lab_name']) ?> at <?= htmlspecialchars($notification['time_slot']) ?>
+                                </p>
                                 </div>
                             <?php endforeach; ?>
-                                <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                                    View All
-                                </a>
-                            <?php else: ?>
-                            <p class="p-3 text-gray-600">No new notifications</p>
-                            <?php endif; ?>
-                            <?php
+                            <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                                View All
+                            </a>
+                        <?php else: ?>
+                        <p class="p-3 text-gray-600">No new notifications</p>
+                        <?php endif; ?>
+                        <?php
                                 $notificationCount = count($notifications);
                         ?>
                      </div>
@@ -261,7 +259,7 @@ $conn->close();
         }
     });
 </script>
-<?php endif; ?>
+<?php endif ?>
 
 
 <!-- Search Modal -->

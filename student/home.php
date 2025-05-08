@@ -36,10 +36,10 @@ $result = mysqli_query($conn, $query);
 $announcements = [];
 while ($row = mysqli_fetch_assoc($result)) {
     $announcements[] = [
-        'title' => 'Announcement',
+        'message' => $row['message'],
         'date' => date('Y-M-d', strtotime($row['date'])),
-        'content' => $row['message'],
-        'author' => $row['admin_name']
+        'admin_name' => $row['admin_name']
+
     ];
 }
 
@@ -108,16 +108,16 @@ $rules = [
                             <?php foreach ($announcements as $announcement): ?>
                                 <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-all duration-200">
                                     <div class="flex items-center gap-2 mb-2">
-                                        <i class="fas fa-circle-info text-indigo-600"></i>
-                                        <strong class="text-gray-900"><?php echo htmlspecialchars($announcement['title']); ?></strong>
-                                    </div>
+                                        <i class="fas fa-circle-info text-indigo-600"></i></div>
                                     <div class="flex items-center text-sm text-gray-600 mb-2">
                                         <i class="fas fa-user mr-2"></i>
-                                        <span><?php echo htmlspecialchars($announcement['author']); ?></span>
+                                        <span><?php echo htmlspecialchars($announcement['admin_name']); ?></span>
                                         <i class="fas fa-calendar-alt mx-2"></i>
                                         <span><?php echo htmlspecialchars($announcement['date']); ?></span>
                                     </div>
-                                    <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['content'])); ?></p>
+                                     <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
+
+                                    
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
