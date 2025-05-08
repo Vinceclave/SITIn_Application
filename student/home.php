@@ -74,13 +74,13 @@ $rules = [
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 
-<div class="container max-w-[1400px] mx-auto mt-20 px-4 sm:px-6 md:px-8 lg:px-10">
+<div class="container max-w-[1400px] mx-auto mt-20 px-6 py-8 md:px-8 lg:px-10">
     <?php include '../shared/aside.php'; ?>
     <main class="my-4">
-        <section class="px-4 sm:px-6 md:px-8 py-6">
+        <section class="py-6">
             <!-- Welcome Header -->
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 sm:p-8 md:p-10 text-white mb-8 shadow-lg">
-                <div class="flex items-center gap-4">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-8 text-white mb-10 shadow-lg">
+                <div class="flex items-center gap-6">
                     <i class="fas fa-user-circle text-4xl sm:text-5xl opacity-90"></i>
                     <div>
                         <h1 class="text-3xl sm:text-4xl font-bold">
@@ -91,49 +91,50 @@ $rules = [
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Announcements Card -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 backdrop-blur-sm overflow-hidden">
-                    <div class="border-b border-gray-200/50 px-6 py-4 flex items-center gap-3">
+                <div class="bg-white rounded-xl shadow-md border border-gray-200/50 backdrop-blur-sm overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                    <div class="border-b border-gray-200/50 px-6 py-5 flex items-center gap-3">
                         <i class="fas fa-bullhorn text-indigo-600"></i>
                         <h2 class="text-xl font-semibold">Announcements</h2>
                     </div>
-                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-4">
+                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-5">
                         <?php if (empty($announcements)): ?>
                             <div class="text-center py-8">
                                 <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
                                 <p class="text-gray-500">No announcements available.</p>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($announcements as $announcement): ?>
-                                <div class="bg-gray-50 rounded-lg p-4 hover:shadow-md transition-all duration-200">
-                                    <div class="flex items-center gap-2 mb-2">
-                                        <i class="fas fa-circle-info text-indigo-600"></i>
+                        <?php foreach ($announcements as $announcement): ?>
+                            <div class="bg-gray-50 rounded-lg p-5 hover:shadow-md transition-shadow duration-200">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <i class="fas fa-circle-info text-indigo-600"></i>
                                     <div class="flex items-center text-sm text-gray-600 mb-2">
-                                    <i class="fas fa-user mr-2"></i>
-                                    <span><?php echo htmlspecialchars(isset($announcement['admin_name']) ? $announcement['admin_name'] : 'Unknown'); ?></span>
-                                    <i class="fas fa-calendar-alt mx-2"></i>
-                                    <span><?php echo htmlspecialchars($announcement['date']); ?></span>
+                                        <i class="fas fa-user mr-2"></i>
+                                        <span><?php echo htmlspecialchars(isset($announcement['admin_name']) ? $announcement['admin_name'] : 'Unknown'); ?></span>
+                                        <i class="fas fa-calendar-alt mx-2"></i>
+                                        <span><?php echo htmlspecialchars($announcement['date']); ?></span>
                                     </div>
-                                     <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
-                                    </div>
-                            <?php endforeach; ?>
+                                </div>
+                                <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
+                            </div>
+                        <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Rules and Regulations Card -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 backdrop-blur-sm overflow-hidden">
-                    <div class="border-b border-gray-200/50 px-6 py-4 flex items-center gap-3">
+                <div class="bg-white rounded-xl shadow-md border border-gray-200/50 backdrop-blur-sm overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                    <div class="border-b border-gray-200/50 px-6 py-5 flex items-center gap-3">
                         <i class="fas fa-book text-indigo-600"></i>
                         <h2 class="text-xl font-semibold">Rules and Regulations</h2>
                     </div>
-                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-3">
+                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-4">
                         <?php foreach ($rules as $index => $rule): ?>
                             <?php if ($index <= 2): ?>
-                                <h3 class="text-lg font-semibold text-indigo-600"><?php echo htmlspecialchars($rule); ?></h3>
+                                <h3 class="text-lg font-semibold text-indigo-600 mb-3"><?php echo htmlspecialchars($rule); ?></h3>
                             <?php else: ?>
-                                <div class="flex items-start gap-3 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                                <div class="flex items-start gap-4 hover:bg-gray-50 p-3 rounded-lg transition-colors">
                                     <?php if (strpos($rule, '.') !== false): ?>
                                         <i class="fas fa-check-circle text-indigo-600 mt-1"></i>
                                     <?php else: ?>
@@ -176,6 +177,11 @@ $rules = [
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 150ms;
 }
+
+.hover\:shadow-lg:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+}
+
 </style>
 
 <?php require_once '../shared/footer.php'; ?>
