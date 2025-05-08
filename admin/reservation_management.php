@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $updateStmt = $conn->prepare($updateQuery);
     $updateStmt->bind_param("si", $new_status, $reservation_id);
 
-    if ($new_status !== 'completed' && $updateStmt->execute()) {
+     if ($updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
             $selectReservation = "SELECT r.idno, r.lab_name, COALESCE(r.purpose, 'Default Reason') AS purpose, r.time_slot, r.reservation_date FROM reservations r WHERE r.reservation_id = ?";
@@ -38,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                 $conn->rollback();
             }
         }
-            $updateStmt->execute();
 
         $conn->commit();
          $successMessage = "Reservation status updated successfully!";
@@ -53,8 +52,7 @@ $date_filter = isset($_GET['date']) ? $_GET['date'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 
 // Prepare query with possible filters
-$query = "SELECT r.* FROM reservations r WHERE 1=1";
-
+$query = "SELECT r.* FROM reservations r";
 
 
 $params = [];
