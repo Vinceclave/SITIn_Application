@@ -59,9 +59,7 @@
                         <?php endforeach; ?>
                         <?php else: ?>
                         <p class="p-3 text-gray-600">No new notifications</p>
-                        <?php endif; ?>
-                        <?php else: ?>
-                         <p class="p-3 text-gray-600">No new notifications</p>
+                    <?php endif; ?>
                     <?php endif; ?>
                </div>
             </div>
@@ -173,7 +171,7 @@
                                 $notificationCount = count($notifications);
                         ?>
                      </div>
-                 </div>
+                </div>
                 <!-- Desktop Navigation -->
 
                 <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
