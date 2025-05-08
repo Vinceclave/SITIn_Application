@@ -15,7 +15,7 @@
     if ($result_announcements->num_rows > 0) {
         while ($row = $result_announcements->fetch_assoc()) {
             $announcements[] = [
-                'message' => $row['message'],
+                'message' => $row['message'], 
                 'date' => $row['date']
             ];
         }
@@ -48,18 +48,18 @@
                     <span id="notificationBadge" class="badge hidden">0</span>
                 </button>
                 <!-- Notification Dropdown -->
-                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">
-                    <?php if (!empty($announcements)): ?>
-                        <?php foreach ($announcements as $announcement): ?>                
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">   
+                    <?php if (!empty($announcements)): ?>           
+                        <?php foreach ($announcements as $announcement): ?>                     
                             <div class="px-4 py-2 border-b border-gray-100">
                                 <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
-                                <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
-                        </div>
+                                <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>       
+                            </div>
                             <?php endforeach; ?>
-                    <?php else: ?>
-                    <p class="p-3 text-gray-600">No new announcements</p>
-                   
-                    <?php endif; ?>
+                        <?php else: ?>
+                            <p class="p-3 text-gray-600">No new announcements</p>
+                        <?php endif; ?>
+                    
                </div>
             </div>
                  <!-- Desktop Navigation -->
@@ -117,13 +117,15 @@
         let menu = document.getElementById('studentNav');
         menu.classList.toggle('hidden');
         }
-        document.getElementById('notificationBtn').addEventListener('click', function () {
+    );
+    document.getElementById('notificationBtn').addEventListener('click', function () {
         let dropdown = document.getElementById('notificationDropdown');
         dropdown.classList.toggle('hidden');
     });
-
+    
     // Close the dropdown if the user clicks outside of it
     window.addEventListener('click', function (event) {
+
         let dropdown = document.getElementById('notificationDropdown');
         let button = document.getElementById('notificationBtn');
         if (!button.contains(event.target) && !dropdown.contains(event.target)) {
@@ -161,9 +163,7 @@
                         <?php else: ?>
                         <p class="p-3 text-gray-600">No new notifications</p>
                     <?php endif; ?>
-                    
-                        <?php
-                                $notificationCount = count($notifications);
+                    <?php $notificationCount = count($notifications);
                         ?>
                      </div>
                 </div>
@@ -224,7 +224,7 @@
                    <i class="fas fa-comments mr-3 w-6"></i>View Feedback
                </a>
              <button id="openSearchModal" class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-search mr-3 w-6"></i>Search Student
+               <i class="fas fa-search mr-3 w-6"></i>Search Student
              </button>
         </div>
     </nav>
@@ -253,7 +253,7 @@
         let dropdown = document.getElementById('notificationDropdown');
         let button = document.getElementById('notificationBtn');
         if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-            dropdown.classList.add('hidden');
+           dropdown.classList.add('hidden');
         }
     });
 </script>

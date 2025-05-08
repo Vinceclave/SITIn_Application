@@ -38,7 +38,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $announcements[] = [
         'message' => $row['message'],
         'date' => date('Y-M-d', strtotime($row['date'])),
-        'admin_name' => $row['admin_name']
+        'admin_name' => isset($row['admin_name']) ? $row['admin_name'] : 'Unknown'
 
     ];
 }
@@ -110,13 +110,13 @@ $rules = [
                                     <div class="flex items-center gap-2 mb-2">
                                         <i class="fas fa-circle-info text-indigo-600"></i>
                                     <div class="flex items-center text-sm text-gray-600 mb-2">
-                                        <i class="fas fa-user mr-2"></i>
-                                        <span><?php echo htmlspecialchars($announcement['admin_name']); ?></span>
-                                        <i class="fas fa-calendar-alt mx-2"></i>
-                                        <span><?php echo htmlspecialchars($announcement['date']); ?></span>
+                                    <i class="fas fa-user mr-2"></i>
+                                    <span><?php echo htmlspecialchars(isset($announcement['admin_name']) ? $announcement['admin_name'] : 'Unknown'); ?></span>
+                                    <i class="fas fa-calendar-alt mx-2"></i>
+                                    <span><?php echo htmlspecialchars($announcement['date']); ?></span>
                                     </div>
                                      <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
-                                </div>
+                                    </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
