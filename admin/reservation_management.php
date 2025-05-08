@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     if ($new_status !== 'completed' && $updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
-            $selectReservation = "SELECT idno, CONCAT(firstname, ' ', lastname) as full_name, lab_name, COALESCE(purpose, 'Default Reason') AS purpose, time_slot, reservation_date FROM reservations r JOIN users u ON r.idno = u.idno WHERE reservation_id = ?";
+            $selectReservation = "SELECT r.idno, COALESCE(r.full_name, CONCAT(u.firstname, ' ', u.lastname)) AS full_name, r.lab_name, COALESCE(r.purpose, 'Default Reason') AS purpose, r.time_slot, r.reservation_date FROM reservations r JOIN users u ON r.idno = u.idno WHERE r.reservation_id = ?";
             $selectStmt = $conn->prepare($selectReservation);
             $selectStmt->bind_param("i", $reservation_id);
             $selectStmt->execute();
@@ -41,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         }
             $updateStmt->execute();
 
-
         $conn->commit();
          $successMessage = "Reservation status updated successfully!";
     } else {
@@ -55,10 +54,11 @@ $date_filter = isset($_GET['date']) ? $_GET['date'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 
 // Prepare query with possible filters
-$query = "SELECT r.*, u.firstname, u.lastname 
-          FROM reservations r 
-          JOIN users u ON r.idno = u.idno 
+$query = "SELECT r.*, COALESCE(r.full_name, CONCAT(u.firstname, ' ', u.lastname)) AS full_name
+          FROM reservations r
+          JOIN users u ON r.idno = u.idno
           WHERE 1=1";
+
 $params = [];
 $types = "";
 
@@ -166,7 +166,7 @@ $labsResult = $conn->query($labsQuery);
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab & PC</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -179,8 +179,8 @@ $labsResult = $conn->query($labsQuery);
                                 <?php while ($reservation = $result->fetch_assoc()): ?>
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['firstname'] . ' ' . $reservation['lastname']); ?></div>
-                                            <div class="text-sm text-gray-500"><?php echo htmlspecialchars($reservation['idno']); ?></div>
+                                            <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['full_name']); ?></div>
+                                            <div class="text-sm text-gray-500">ID: <?php echo htmlspecialchars($reservation['idno']); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="font-medium text-gray-900"><?php echo htmlspecialchars($reservation['lab_name']); ?></div>
@@ -229,7 +229,7 @@ $labsResult = $conn->query($labsQuery);
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form>
-                                            
+
                                                 <?php else: ?>
                                                     -
                                                 <?php endif; ?>
@@ -266,4 +266,4 @@ $labsResult = $conn->query($labsQuery);
     });
 </script>
 
-<?php require_once '../shared/footer.php'; ?> 
+<?php require_once '../shared/footer.php'; ?>
