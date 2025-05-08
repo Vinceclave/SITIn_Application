@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $updateStmt = $conn->prepare($updateQuery);
     $updateStmt->bind_param("si", $new_status, $reservation_id);
 
-     if ($updateStmt->execute()) {
+    if ($updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
             $selectReservation = "SELECT r.idno, r.lab_name, COALESCE(r.purpose, 'Default Reason') AS purpose, r.time_slot, r.reservation_date FROM reservations r WHERE r.reservation_id = ?";
@@ -32,11 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
              // Adjust the values to match the sit_in table structure
             $insertSitIn = "INSERT INTO sit_in (idno, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, 1)";
             $insertStmt = $conn->prepare($insertSitIn);
-            $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['lab_name'], $reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
+            $insertStmt->bind_param("ssssss", $reservationResult['idno'], $reservationResult['lab_name'],$reservationResult['purpose'], $reservationResult['time_slot'], $reservationResult['reservation_date']);
 
             if (!$insertStmt->execute()) {
-                $conn->rollback();
-            }
+                 $conn->rollback();
+             }
         }
 
         $conn->commit();
@@ -54,24 +54,23 @@ $status_filter = isset($_GET['status']) ? $_GET['status'] : '';
 // Prepare query with possible filters
 $query = "SELECT r.* FROM reservations r";
 
-
 $params = [];
 $types = "";
 
 if (!empty($lab_filter)) {
-    $query .= " AND r.lab_name = ?";
+    $query .= " WHERE r.lab_name = ?";
     $params[] = $lab_filter;
     $types .= "s";
 }
 
 if (!empty($date_filter)) {
-    $query .= " AND r.reservation_date = ?";
+    $query .= (empty($types) ? " WHERE" : " AND")." r.reservation_date = ?";
     $params[] = $date_filter;
     $types .= "s";
 }
 
 if (!empty($status_filter)) {
-    $query .= " AND r.status = ?";
+    $query .= (empty($types) ? " WHERE" : " AND")." r.status = ?";
     $params[] = $status_filter;
     $types .= "s";
 }
@@ -94,7 +93,7 @@ $labsResult = $conn->query($labsQuery);
 <div class="flex min-h-screen bg-gray-50 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
     <main class="flex-1 pt-10 p-6"">
-        <div class="max-w-[1400px] mx-auto">
+        <div class="max-w-[1400px] mx-auto" >
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h1 class="text-3xl font-semibold text-gray-800">Reservation Management</h1>
@@ -120,7 +119,7 @@ $labsResult = $conn->query($labsQuery);
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
                 <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div>
-                        <label for="lab" class="block text-sm font-medium text-gray-700 mb-2">Lab</label>
+                        <label for="lab" class="block text-sm font-medium text-gray-700 mb-2" >Lab</label>
                         <select id="lab" name="lab" class="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             <option value="">All Labs</option>
                             <?php while ($lab = $labsResult->fetch_assoc()): ?>
@@ -223,11 +222,11 @@ $labsResult = $conn->query($labsQuery);
                                                         <button type="submit" name="update_status" class="text-red-600 hover:text-red-900" title="Reject">
                                                             <i class="fas fa-times"></i>
                                                         </button>
-                                                    </form>
+                                                    </form >
                                                  <?php elseif ($reservation['status'] === 'approved'): ?>
                                                       <form method="POST" class="inline">
                                                         <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
-                                                        <input type="hidden" name="new_status" value="completed">
+                                                        <input type="hidden" name="new_status" value="completed" >
                                                         <button type="submit" name="update_status" class="text-blue-600 hover:text-blue-900" title="Mark as Completed">
                                                             <i class="fas fa-check-double"></i>
                                                         </button>
