@@ -20,7 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $updateStmt = $conn->prepare($updateQuery);
     $updateStmt->bind_param("si", $new_status, $reservation_id);
     
-    if ($updateStmt->execute()) {
+    if ($new_status !== 'completed' && $updateStmt->execute()) {
         // If the status is approved, insert data into sit_in table
         if ($new_status == 'approved') {
             $selectReservation = "SELECT idno, CONCAT(firstname, ' ', lastname) as full_name, lab_name, COALESCE(purpose, 'Default Reason') AS purpose, time_slot, reservation_date FROM reservations r JOIN users u ON r.idno = u.idno WHERE reservation_id = ?";
@@ -39,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
                 $errorMessage = "Error inserting into sit_in: " . $insertStmt->error;
             }
         }
+            $updateStmt->execute();
+
 
         $conn->commit();
          $successMessage = "Reservation status updated successfully!";
@@ -227,14 +229,7 @@ $labsResult = $conn->query($labsQuery);
                                                             <i class="fas fa-times"></i>
                                                         </button>
                                                     </form>
-                                                <?php elseif ($reservation['status'] === 'approved'): ?>
-                                                    <form method="POST" class="inline">
-                                                        <input type="hidden" name="reservation_id" value="<?php echo $reservation['reservation_id']; ?>">
-                                                        <input type="hidden" name="new_status" value="completed">
-                                                        <button type="submit" name="update_status" class="text-blue-600 hover:text-blue-900" title="Mark as Completed">
-                                                            <i class="fas fa-check-double"></i>
-                                                        </button>
-                                                    </form>
+                                            
                                                 <?php else: ?>
                                                     -
                                                 <?php endif; ?>
