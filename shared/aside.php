@@ -1,14 +1,14 @@
 <?php
-    // Database connection details (replace with your actual credentials)
-    include '../config/config.php';
+// Database connection details (replace with your actual credentials)
+include '../config/config.php';
 
-    // Fetching the latest 5 pending reservations
-    $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
-    $result = $conn->query($sql);
+// Fetching the latest 5 pending reservations for admin
+$sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
+$result = $conn->query($sql);
 
-    // Fetching the latest 5 announcements
-    $sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
-    $result_announcements = $conn->query($sql_announcements);
+// Fetching the latest 5 announcements for student
+$sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
+$result_announcements = $conn->query($sql_announcements);
     
         // Array to hold the fetched announcements
         $announcements = [];
@@ -20,18 +20,18 @@
                 ];
             }
         }
-    // Array to hold the fetched notifications
-    $notifications = [];
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-             $notifications[] = [
-                'full_name' => $row['full_name'],
-                'lab_name' => $row['lab_name'],
-                'time_slot' => $row['time_slot']
-            ];
-        }
+// Array to hold the fetched notifications
+$notifications = [];
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+         $notifications[] = [
+            'full_name' => $row['full_name'],
+            'lab_name' => $row['lab_name'],
+            'time_slot' => $row['time_slot']
+        ];
     }
-    $conn->close();
+}
+$conn->close();
 ?>
 <?php if ($_SESSION['role'] == 'Student'): ?>
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
@@ -57,9 +57,8 @@
                             <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>
                         </div>
                         <?php endforeach; ?>
-                        <?php else: ?>
-                        <p class="p-3 text-gray-600">No new notifications</p>
-                    <?php endif; ?>
+                    <?php else: ?>
+                        <p class="p-3 text-gray-600">No new announcements</p>
                     <?php endif; ?>
                </div>
             </div>
@@ -162,10 +161,10 @@
                                 </div>
                             <?php endforeach; ?>
                                 <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                                        View All
-                                    </a>
+                                    View All
+                                </a>
                             <?php else: ?>
-                                <p class="p-3 text-gray-600">No new notifications</p>
+                            <p class="p-3 text-gray-600">No new notifications</p>
                             <?php endif; ?>
                             <?php
                                 $notificationCount = count($notifications);
@@ -173,7 +172,6 @@
                      </div>
                 </div>
                 <!-- Desktop Navigation -->
-
                 <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
             <nav id="adminNav" class="hidden md:flex items-center space-x-6">
             <h2 class="text-xl font-bold text-gray-800 md:hidden">Admin Panel</h2>
@@ -216,9 +214,9 @@
             <a href="dashboard.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
                             </a>
-            <a href="manage_users.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-users mr-3 w-6"></i>Manage Users
-                            </a>
+                <a href="manage_users.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-users mr-3 w-6"></i>Manage Users
+                </a>
             <div class="relative group">
                     <button class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors"><i class="fas fa-database mr-3 w-6"></i>Records</button>
                     <div class="absolute hidden group-hover:block left-0 mt-1 w-full bg-white border border-gray-200/50 rounded-md shadow-md z-10">
@@ -228,9 +226,9 @@
                 </div>
                <a href="admin_feedback.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
                    <i class="fas fa-comments mr-3 w-6"></i>View Feedback
-                            </a>
+                </a>
              <button id="openSearchModal" class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                  <i class="fas fa-search mr-3 w-6"></i>Search Student
+                    <i class="fas fa-search mr-3 w-6"></i>Search Student
              </button>
         </div>
     </nav>
