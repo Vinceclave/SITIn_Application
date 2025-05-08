@@ -1,12 +1,25 @@
 <?php
     // Database connection details (replace with your actual credentials)
     include '../config/config.php';
-    
 
     // Fetching the latest 5 pending reservations
     $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5";
     $result = $conn->query($sql);
 
+    // Fetching the latest 5 announcements
+        $sql_announcements = "SELECT message, created_at FROM announcements ORDER BY created_at DESC LIMIT 5";
+        $result_announcements = $conn->query($sql_announcements);
+    
+        // Array to hold the fetched announcements
+        $announcements = [];
+        if ($result_announcements->num_rows > 0) {
+            while ($row = $result_announcements->fetch_assoc()) {
+                $announcements[] = [
+                    'message' => $row['message'],
+                    'created_at' => $row['created_at']
+                ];
+            }
+        }
     // Array to hold the fetched notifications
     $notifications = [];
     if ($result->num_rows > 0) {
@@ -36,12 +49,20 @@
                     <span id="notificationBadge" class="badge hidden">0</span>
                 </button>
                 <!-- Notification Dropdown -->
-                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-60 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
-                    <p class="p-3 text-gray-600">No new notifications</p>
-                </div>
+             <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">
+                <?php if (!empty($announcements)): ?>
+                   <?php foreach ($announcements as $announcement): ?>
+                     <div class="px-4 py-2 border-b border-gray-100">
+                         <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
+                         <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['created_at'])) ?></p>
+                     </div>
+                     <?php endforeach; ?>
+                        <?php else: ?>
+                         <p class="p-3 text-gray-600">No new notifications</p>
+                    <?php endif; ?>
+               </div>
             </div>
-            
-            <!-- Desktop Navigation -->
+                 <!-- Desktop Navigation -->
             <nav id="studentNav" class="hidden md:flex items-center space-x-6">
                <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
                     <i class="fas fa-home mr-2"></i>Home
@@ -112,7 +133,7 @@
         }
 
     });
-</script>
+  </script>
 <?php endif; ?>
 <!-- Admin -->
 <?php if ($_SESSION['role'] == 'Admin'): ?>
@@ -147,7 +168,6 @@
                             <?php endif; ?>
                             <?php
                                 $notificationCount = count($notifications);
-                                // $displayMessage = ($notificationCount > 0) ? $notificationCount. " Pending reservation" : "No new notifications";
                         ?>
                      </div>
                  </div>
