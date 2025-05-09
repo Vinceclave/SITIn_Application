@@ -4,8 +4,6 @@ require_once '../config/config.php';
 session_start();
 
 require_once '../shared/header.php';
-
-require_once '../shared/header.php';
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../login.php");

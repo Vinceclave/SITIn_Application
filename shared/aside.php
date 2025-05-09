@@ -1,18 +1,17 @@
 <?php
-    // Database connection details (replace with your actual credentials)
-    include '../config/config.php';
+
 
     // Fetching the latest 5 pending reservations for admin
     $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5"; //for admin
-    $result = $conn->query($sql);
+    $result = $GLOBALS['conn']->query($sql);
 
     // Fetching the latest 5 announcements for student
     $sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
-    $result_announcements = $conn->query($sql_announcements);
+    $result_announcements = $GLOBALS['conn']->query($sql_announcements);
         
     // Array to hold the fetched announcements
     $announcements = [];
-    if ($result_announcements->num_rows > 0) {
+    if ($result_announcements->num_rows > 0) { 
         while ($row = $result_announcements->fetch_assoc()) {
             $announcements[] = [
                 'message' => $row['message'], 
@@ -31,7 +30,7 @@
             ];
         }
     }
-    $conn->close();
+
 ?>
 <?php if ($_SESSION['role'] == 'Student'): ?>
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
