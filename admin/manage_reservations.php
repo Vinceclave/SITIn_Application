@@ -26,6 +26,8 @@ if (strcasecmp($role, 'Admin') !== 0) {
     header("Location: home.php");
     exit;
 }
+require_once '../shared/header.php';
+require_once '../shared/aside.php';
 
 // Pagination
 $limit = 10;
