@@ -57,26 +57,21 @@ if ($reservationData && $status == 'approved') {
     }
     $insertStmt->close();
 }
+else {
+    if($success){
+        $updateStmt = $conn->prepare("UPDATE reservations SET status = ? WHERE reservation_id = ?");
+        $updateStmt->bind_param("si", $status, $reservation_id);
+        $updateStmt->execute();
+        $updateStmt->close();
+    }
+}
 
-if($success){
-    $updateStmt = $conn->prepare("UPDATE reservations SET status = ? WHERE reservation_id = ?");
-    $updateStmt->bind_param("si", $status, $reservation_id);
-    $updateStmt->execute();
-    $updateStmt->close();
+if(!$reservationData){
+    $success = false;
+    $message = "Error updating reservation status or reservation not found";
 }
 
 echo json_encode(['success' => $success, 'message' => $message]);
 $conn->close();
-} else {
-    echo json_encode(['success' => false, 'message' => 'Error updating reservation status or reservation not found']);
-}
-
-$conn->close();
 ?>
-} else {
-    echo json_encode(['success' => false, 'message' => 'Error updating reservation status']);
-}
-
-$stmt->close();
-$conn->close();
 ?>
