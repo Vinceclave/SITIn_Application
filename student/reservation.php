@@ -231,6 +231,9 @@ $reservationsResult = $reservationsStmt->get_result();
                                                     <i class="fas fa-clock mr-1"></i>
                                                     <?php echo $reservation['time_slot']; ?>
                                                 </p>
+                                                <p class="text-gray-600">
+                                                    <i class="fas fa-file-alt mr-1"></i> Reason: <?php echo $reservation['purpose']; ?>
+                                                </p>
                                             </div>
                                             <div>
                                                 <?php if ($reservation['status'] === 'pending'): ?>
@@ -253,12 +256,13 @@ $reservationsResult = $reservationsStmt->get_result();
                                             </div>
                                         </div>
                                         <div class="flex justify-end mt-3">
-                                            <?php if ($reservation['status'] === 'pending'): ?>
-                                                <button class="group text-red-500 hover:text-red-700 text-sm"
+                                              <?php if ($reservation['status'] === 'pending'): ?>
+                                                  <button class="group text-red-500 hover:text-red-700 text-sm"
                                                        onclick="cancelReservation(<?php echo $reservation['reservation_id']; ?>)">
-                                                    <i class="fas fa-times-circle mr-1"></i> Cancel
-                                                </button>
-                                            <?php endif; ?>
+                                                      <i class="fas fa-times-circle mr-1"></i> Cancel
+                                                  </button>
+                                              <?php endif; ?>
+
                                             <span class="text-gray-500 text-xs">
                                                 Created on <?php echo date('M j, Y g:i A', strtotime($reservation['created_at'])); ?>
                                             </span>
