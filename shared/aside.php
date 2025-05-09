@@ -189,6 +189,9 @@
                         <a href="sitting_records.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
                             <i class="fas fa-chair mr-2 w-4"></i>Sitting Records
                         </a>
+                        <a href="manage_reservations.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                           <i class="fas fa-calendar-check mr-2 w-4"></i>Manage Reservations
+                        </a>
                     </div>
                 </div>
                 <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
@@ -218,7 +221,9 @@
                     <div class="absolute hidden group-hover:block left-0 mt-1 w-full bg-white border border-gray-200/50 rounded-md shadow-md z-10">
                         <a href="reports.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-file-alt mr-3 w-6"></i>Reports</a>
                             <a href="sitting_records.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-chair mr-3 w-6"></i>Sitting Records</a>
-                        </div>
+                            <a href="manage_reservations.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-calendar-check mr-3 w-6"></i>Manage Reservations</a>
+                    </div>
+                    
                 </div>
                <a href="admin_feedback.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
                    <i class="fas fa-comments mr-3 w-6"></i>View Feedback
