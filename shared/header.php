@@ -16,7 +16,7 @@
     </style>
 </head>
 <body class="min-h-screen text-gray-900">
-<?php if (basename($_SERVER['PHP_SELF']) != 'login.php' && (basename($_SERVER['PHP_SELF']) != 'manage_reservation.php' && basename($_SERVER['PHP_SELF']) != 'register.php' && basename($_SERVER['PHP_SELF']) != 'dashboard.php' && basename($_SERVER['PHP_SELF']) != 'history.php' && basename($_SERVER['PHP_SELF']) != 'manage_users.php' && basename($_SERVER['PHP_SELF']) != 'home.php' && basename($_SERVER['PHP_SELF']) != 'profile.php'  && basename($_SERVER['PHP_SELF']) != 'sitting_records.php' && basename($_SERVER['PHP_SELF']) != 'reservation.php'  && basename($_SERVER['PHP_SELF']) != 'announcement.php' && basename($_SERVER['PHP_SELF']) != 'reports.php' && basename($_SERVER['PHP_SELF']) != 'admin_feedback.php') : ?>
+<?php if (basename($_SERVER['PHP_SELF']) != 'login.php' && basename($_SERVER['PHP_SELF']) != 'register.php' && basename($_SERVER['PHP_SELF']) != 'dashboard.php' && basename($_SERVER['PHP_SELF']) != 'manage_reservations.php' && basename($_SERVER['PHP_SELF']) != 'history.php' && basename($_SERVER['PHP_SELF']) != 'manage_users.php' && basename($_SERVER['PHP_SELF']) != 'home.php' && basename($_SERVER['PHP_SELF']) != 'profile.php'  && basename($_SERVER['PHP_SELF']) != 'sitting_records.php' && basename($_SERVER['PHP_SELF']) != 'reservation.php'  && basename($_SERVER['PHP_SELF']) != 'announcement.php' && basename($_SERVER['PHP_SELF']) != 'reports.php' && basename($_SERVER['PHP_SELF']) != 'admin_feedback.php') : ?>
     <header class="fixed w-full backdrop-blur-sm border-b border-gray-200/50">
         <nav>
             <div class="container mx-auto px-4 py-4 flex justify-between items-center">
