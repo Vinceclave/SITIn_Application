@@ -1,5 +1,6 @@
 php
 <?php
+require_once '../shared/header.php';
 session_start();
 require_once '../config/config.php';
 
@@ -26,7 +27,6 @@ if (strcasecmp($role, 'Admin') !== 0) {
     header("Location: home.php");
     exit;
 }
-require_once '../shared/header.php';
 require_once '../shared/aside.php';
 
 // Pagination
