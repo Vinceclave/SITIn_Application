@@ -1,4 +1,3 @@
-php
 <?php
 require_once '../config/config.php';
 
@@ -73,5 +72,3 @@ if(!$reservationData){
 
 echo json_encode(['success' => $success, 'message' => $message]);
 $conn->close();
-?>
-?>
