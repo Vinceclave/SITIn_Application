@@ -1,6 +1,9 @@
+php
 <?php
+
 // Start session to manage user data
 session_start();
+
 // Check if the user is logged in and has the 'Admin' role
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     header("Location: ../login.php");
@@ -10,6 +13,22 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
 // Include necessary files for database configuration and header
 require_once '../config/config.php';
 require_once '../shared/header.php';
+
+// Function to output error message
+function outputErrorMessage($errorMessage) {
+    echo "<div class=\"mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md\" role=\"alert\">";
+    echo "<p class=\"font-medium\">Error!</p>";
+    echo "<p>$errorMessage</p>";
+    echo "</div>";
+}
+
+// Function to output success message
+function outputSuccessMessage($successMessage) {
+    echo "<div class=\"mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md\" role=\"alert\">";
+    echo "<p class=\"font-medium\">Success!</p>";
+    echo "<p>$successMessage</p>";
+    echo "</div>";
+}
 
 // Process reservation status updates if form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
@@ -40,13 +59,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 
             if (!$insertStmt->execute()) {
                  $conn->rollback();
+                 $errorMessage = "Error inserting sit in: " . $insertStmt->error;
+                 outputErrorMessage($errorMessage);
+                 exit();
+
              }
         }
 
         $conn->commit();
          $successMessage = "Reservation status updated successfully!";
+         outputSuccessMessage($successMessage);
+
     } else {
-        $errorMessage = "Error updating reservation: " . $updateStmt->error;
+       $errorMessage = "Error updating reservation: " . $updateStmt->error;
+       outputErrorMessage($errorMessage);
     }
 }
 
@@ -110,20 +136,7 @@ $labsResult = $conn->query($labsQuery);
                     <p class="text-lg text-gray-600">Approve, reject, or mark reservations as completed</p>
                </div>
             </div>
-            <!-- Display success message if set -->
-            <?php if (isset($successMessage)): ?>
-                <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
-                    <p class="font-medium">Success!</p>
-                    <p><?php echo $successMessage; ?></p>
-                </div>
-            <?php endif; ?>
             
-              <?php if (isset($errorMessage)): ?>
-                <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
-                    <p class="font-medium">Error!</p>
-                    <p><?php echo $errorMessage; ?></p>
-                </div> 
-            <?php endif; ?>
 
             <!-- Filters -->
             <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
@@ -276,9 +289,10 @@ $labsResult = $conn->query($labsQuery);
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', function(e) {
             const status = this.querySelector('input[name="new_status"]').value;
+            const reservationId = this.querySelector('input[name="reservation_id"]').value;
             const statusText = status.charAt(0).toUpperCase() + status.slice(1);
             
-            if (!confirm(`Are you sure you want to change the status to "${statusText}"?`)) {
+            if (!confirm(`Are you sure you want to change the status of reservation ${reservationId} to "${statusText}"?`)) {
                 e.preventDefault();
             }
         });
