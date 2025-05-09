@@ -1,18 +1,17 @@
 <?php
-    // Database connection details (replace with your actual credentials)
-    include '../config/config.php';
+
 
     // Fetching the latest 5 pending reservations for admin
     $sql = "SELECT r.full_name, r.lab_name, r.time_slot FROM reservations r WHERE r.status = 'pending' ORDER BY r.created_at DESC LIMIT 5"; //for admin
-    $result = $conn->query($sql);
+    $result = $GLOBALS['conn']->query($sql);
 
     // Fetching the latest 5 announcements for student
     $sql_announcements = "SELECT message, date FROM announcements ORDER BY date DESC LIMIT 5";
-    $result_announcements = $conn->query($sql_announcements);
+    $result_announcements = $GLOBALS['conn']->query($sql_announcements);
         
     // Array to hold the fetched announcements
     $announcements = [];
-    if ($result_announcements->num_rows > 0) {
+    if ($result_announcements->num_rows > 0) { 
         while ($row = $result_announcements->fetch_assoc()) {
             $announcements[] = [
                 'message' => $row['message'], 
@@ -31,7 +30,7 @@
             ];
         }
     }
-    $conn->close();
+
 ?>
 <?php if ($_SESSION['role'] == 'Student'): ?>
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
@@ -189,6 +188,9 @@
                         <a href="sitting_records.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
                             <i class="fas fa-chair mr-2 w-4"></i>Sitting Records
                         </a>
+                        <a href="manage_reservations.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                           <i class="fas fa-calendar-check mr-2 w-4"></i>Manage Reservations
+                        </a>
                     </div>
                 </div>
                 <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
@@ -218,7 +220,9 @@
                     <div class="absolute hidden group-hover:block left-0 mt-1 w-full bg-white border border-gray-200/50 rounded-md shadow-md z-10">
                         <a href="reports.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-file-alt mr-3 w-6"></i>Reports</a>
                             <a href="sitting_records.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-chair mr-3 w-6"></i>Sitting Records</a>
-                        </div>
+                            <a href="manage_reservations.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-calendar-check mr-3 w-6"></i>Manage Reservations</a>
+                    </div>
+                    
                 </div>
                <a href="admin_feedback.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
                    <i class="fas fa-comments mr-3 w-6"></i>View Feedback
