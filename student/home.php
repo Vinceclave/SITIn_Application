@@ -3,7 +3,7 @@ session_start();
 require_once '../config/config.php';
 require_once '../shared/header.php';
 
-if(isset($_SESSION['success'])): // Added success alert block
+if(isset($_SESSION['success'])): 
 ?>
 <script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 <script>
@@ -38,8 +38,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $announcements[] = [
         'message' => $row['message'],
         'date' => date('Y-M-d', strtotime($row['date'])),
-        'admin_name' => isset($row['admin_name']) ? $row['admin_name'] : 'Unknown'
-
+        'admin_name' => isset($row['admin_name']) ? $row['admin_name'] : 'Admin'
     ];
 }
 
@@ -69,85 +68,212 @@ $rules = [
     'Second and Subsequent Offenses - A recommendation for a heavier sanction will be endorsed to the Guidance Center'
 ];
 
+// Get upcoming sessions
+$current_date = date('Y-m-d');
+$idno = $user['idno']; // Get the student's ID number
+$query = "SELECT r.*, l.lab_name FROM reservations r 
+          JOIN labs l ON r.lab_name = l.lab_name
+          WHERE r.idno = ? AND (r.reservation_date > ? OR (r.reservation_date = ? AND r.status = 'pending')) 
+          ORDER BY r.reservation_date ASC, r.time_slot ASC 
+          LIMIT 3";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("iss", $idno, $current_date, $current_date);
+$stmt->execute();
+$result = $stmt->get_result();
+$upcoming_sessions = [];
+while ($row = $result->fetch_assoc()) {
+    $upcoming_sessions[] = $row;
+}
 ?>
 <!-- Include Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 
-<div class="container max-w-[1400px] mx-auto mt-20 px-6 py-8 md:px-8 lg:px-10">
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="my-4">
-        <section class="py-6">
-            <!-- Welcome Header -->
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-8 text-white mb-10 shadow-lg">
-                <div class="flex items-center gap-6">
-                    <i class="fas fa-user-circle text-4xl sm:text-5xl opacity-90"></i>
+    <main class="flex-1 p-6 pt-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- Welcome Section -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                        <i class="fas fa-user text-2xl text-indigo-600"></i>
+                    </div>
                     <div>
-                        <h1 class="text-3xl sm:text-4xl font-bold">
-                            Welcome back, <span class="text-indigo-200"><?php echo htmlspecialchars($user['username']); ?></span>!
-                        </h1>
-                        <p class="text-indigo-100 mt-2">Manage your laboratory sessions and stay updated with announcements.</p>
+                        <h1 class="text-3xl font-bold text-gray-800">Student Home</h1>
+                        <p class="text-lg text-gray-600">Welcome, <span class="font-medium text-indigo-600"><?php echo htmlspecialchars($user['username']); ?></span>!</p>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Announcements Card -->
-                <div class="bg-white rounded-xl shadow-md border border-gray-200/50 backdrop-blur-sm overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                    <div class="border-b border-gray-200/50 px-6 py-5 flex items-center gap-3">
-                        <i class="fas fa-bullhorn text-indigo-600"></i>
-                        <h2 class="text-xl font-semibold">Announcements</h2>
+            <!-- Quick Links Section -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <a href="reservation.php" class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-indigo-100">Make Reservation</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-calendar-plus text-xl"></i>
+                        </div>
                     </div>
-                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-5">
+                    <p class="text-indigo-200 text-sm mt-3">Reserve a lab session</p>
+                </a>
+                
+                <a href="history.php" class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-emerald-100">Session History</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-history text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-emerald-200 text-sm mt-3">View past sessions</p>
+                </a>
+                
+                <a href="profile.php" class="bg-gradient-to-br from-amber-500 to-amber-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-amber-100">Profile</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-user-edit text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-amber-200 text-sm mt-3">Update your information</p>
+                </a>
+                
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-blue-100">Help</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-question-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-blue-200 text-sm mt-3">Support and resources</p>
+                </div>
+            </div>
+
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Announcements Section -->
+                <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-bullhorn text-amber-500 mr-2"></i>
+                        Announcements
+                    </h2>
+                    <div class="overflow-y-auto max-h-[400px] space-y-4 pr-2">
                         <?php if (empty($announcements)): ?>
                             <div class="text-center py-8">
                                 <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
                                 <p class="text-gray-500">No announcements available.</p>
                             </div>
-                        <?php else: ?>
-                        <?php foreach ($announcements as $announcement): ?>
-                            <div class="bg-gray-50 rounded-lg p-5 hover:shadow-md transition-shadow duration-200">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <i class="fas fa-circle-info text-indigo-600"></i>
-                                    <div class="flex items-center text-sm text-gray-600 mb-2">
-                                        <i class="fas fa-user mr-2"></i>
-                                        <span><?php echo htmlspecialchars(isset($announcement['admin_name']) ? $announcement['admin_name'] : 'Unknown'); ?></span>
-                                        <i class="fas fa-calendar-alt mx-2"></i>
-                                        <span><?php echo htmlspecialchars($announcement['date']); ?></span>
+                        <?php else: 
+                            foreach ($announcements as $announcement): ?>
+                            <div class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                <div class="flex items-start">
+                                    <div class="bg-amber-100 p-2 rounded-full mr-3">
+                                        <i class="fas fa-bullhorn text-amber-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-gray-800"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
+                                        <div class="flex items-center justify-between mt-2 text-sm">
+                                            <span class="text-gray-500">
+                                                <i class="fas fa-user-shield mr-1"></i>
+                                                <?php echo isset($announcement['admin_name']) ? htmlspecialchars($announcement['admin_name']) : 'Admin'; ?>
+                                            </span>
+                                            <span class="text-gray-500">
+                                                <i class="far fa-calendar-alt mr-1"></i>
+                                                <?php echo htmlspecialchars($announcement['date']); ?>
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                                <p class="text-gray-700"><?php echo nl2br(htmlspecialchars($announcement['message'])); ?></p>
                             </div>
-                        <?php endforeach; ?>
-                        <?php endif; ?>
+                        <?php endforeach;
+                        endif; ?>
                     </div>
                 </div>
-
-                <!-- Rules and Regulations Card -->
-                <div class="bg-white rounded-xl shadow-md border border-gray-200/50 backdrop-blur-sm overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                    <div class="border-b border-gray-200/50 px-6 py-5 flex items-center gap-3">
-                        <i class="fas fa-book text-indigo-600"></i>
-                        <h2 class="text-xl font-semibold">Rules and Regulations</h2>
-                    </div>
-                    <div class="p-6 overflow-y-auto max-h-[500px] space-y-4">
-                        <?php foreach ($rules as $index => $rule): ?>
-                            <?php if ($index <= 2): ?>
-                                <h3 class="text-lg font-semibold text-indigo-600 mb-3"><?php echo htmlspecialchars($rule); ?></h3>
-                            <?php else: ?>
-                                <div class="flex items-start gap-4 hover:bg-gray-50 p-3 rounded-lg transition-colors">
-                                    <?php if (strpos($rule, '.') !== false): ?>
-                                        <i class="fas fa-check-circle text-indigo-600 mt-1"></i>
-                                    <?php else: ?>
-                                        <i class="fas fa-arrow-right text-gray-400 mt-1"></i>
-                                    <?php endif; ?>
-                                    <p class="text-gray-700"><?php echo htmlspecialchars($rule); ?></p>
+                
+                <!-- Quick Actions -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-calendar text-indigo-600 mr-2"></i>
+                        Upcoming Sessions
+                    </h2>
+                    <div class="space-y-4">
+                        <?php if (empty($upcoming_sessions)): ?>
+                            <div class="text-center py-8">
+                                <i class="fas fa-calendar-xmark text-4xl text-gray-400 mb-3"></i>
+                                <p class="text-gray-500">No upcoming reservations.</p>
+                                <a href="reservation.php" class="mt-3 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">
+                                    Make a Reservation
+                                </a>
+                            </div>
+                        <?php else: 
+                            foreach ($upcoming_sessions as $session): ?>
+                            <div class="flex items-start p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                                <div class="bg-indigo-100 p-2 rounded-lg mr-4">
+                                    <i class="fas fa-calendar-day text-indigo-600"></i>
                                 </div>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
+                                <div class="flex-1">
+                                    <h3 class="font-medium text-gray-800"><?php echo htmlspecialchars($session['lab_name']); ?></h3>
+                                    <p class="text-sm text-gray-500">
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        <?php echo date('F d, Y', strtotime($session['reservation_date'])); ?>
+                                        <i class="fas fa-clock ml-2 mr-1"></i>
+                                        <?php echo htmlspecialchars($session['time_slot']); ?>
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        <i class="fas fa-desktop mr-1"></i>
+                                        PC #<?php echo htmlspecialchars($session['pc_number']); ?>
+                                    </p>
+                                    <?php if($session['status'] == 'pending'): ?>
+                                        <div class="mt-2">
+                                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">
+                                                Pending Approval
+                                            </span>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="mt-2">
+                                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">
+                                                Approved
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach;
+                        endif; ?>
                     </div>
                 </div>
             </div>
-        </section>
+
+            <!-- Lab Rules Section -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-book text-blue-500 mr-2"></i>
+                        Laboratory Rules and Regulations
+                    </h2>
+                </div>
+                <div class="overflow-y-auto max-h-[400px] pr-2 space-y-4">
+                    <?php foreach ($rules as $index => $rule): ?>
+                        <?php if ($index <= 2): ?>
+                            <h3 class="text-lg font-semibold text-indigo-600 mb-3"><?php echo htmlspecialchars($rule); ?></h3>
+                        <?php else: ?>
+                            <div class="flex items-start gap-4 hover:bg-gray-50 p-3 rounded-lg transition-colors">
+                                <?php if (strpos($rule, '.') !== false): ?>
+                                    <div class="bg-blue-100 p-1 rounded-full">
+                                        <i class="fas fa-check-circle text-blue-600"></i>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="bg-gray-100 p-1 rounded-full">
+                                        <i class="fas fa-arrow-right text-gray-500"></i>
+                                    </div>
+                                <?php endif; ?>
+                                <p class="text-gray-700"><?php echo htmlspecialchars($rule); ?></p>
+                            </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
     </main>
 </div>
 
@@ -181,7 +307,6 @@ $rules = [
 .hover\:shadow-lg:hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
-
 </style>
 
 <?php require_once '../shared/footer.php'; ?>

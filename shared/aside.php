@@ -36,68 +36,77 @@
 <header id="studentHeader" class="fixed top-0 left-0 z-30 w-full backdrop-blur-sm border-b border-gray-200/50 transition-all duration-300">
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
-            <button id="menuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
+            <button id="studentMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
             
-                 <!-- Notification Bell -->
-            <div class="relative">
-                <button id="notificationBtn" class="text-gray-600 hover:text-indigo-600 focus:outline-none transition-colors">
-                    <i class="fas fa-bell text-xl"></i>
-                    <span id="notificationBadge" class="badge hidden">0</span>
-                </button>
-                <!-- Notification Dropdown -->
-                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[300px] overflow-y-auto">   
-                    <?php if (!empty($announcements)): ?>           
-                        <?php foreach ($announcements as $announcement): ?>                     
-                            <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
-                                <p class="text-xs text-gray-500 mt-1"><?= date('M d, Y', strtotime($announcement['date'])) ?></p>       
-                            </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <p class="p-3 text-gray-600">No new announcements</p>
-                        <?php endif; ?>
-                    
-               </div>
-            </div>
-                 <!-- Desktop Navigation -->
-            <nav id="studentNav" class="hidden md:flex items-center space-x-6">
-               <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-home mr-2"></i>Home
+            <!-- Desktop Navigation -->
+            <nav id="studentDesktopNav" class="hidden md:flex items-center space-x-6">
+                <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-home mr-2 text-indigo-500"></i>Home
                 </a>
-                <a href="profile.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-user mr-2"></i>Profile
+                <a href="profile.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-user mr-2 text-indigo-500"></i>Profile
                 </a>
-                <a href="history.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-history mr-2"></i>History
+                <a href="history.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-history mr-2 text-indigo-500"></i>History
                 </a>
-                <a href="reservation.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-calendar-check mr-2"></i>Reservation
+                <a href="reservation.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-calendar-check mr-2 text-indigo-500"></i>Reservation
                 </a>
             </nav>
             
+            <!-- Notification Bell -->
+            <div class="relative">
+                <button id="notificationBtn" class="text-gray-600 hover:text-indigo-600 focus:outline-none transition-colors p-2 rounded-full hover:bg-indigo-50">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center hidden">0</span>
+                </button>
+                <!-- Notification Dropdown -->
+                <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-[300px] overflow-y-auto divide-y divide-gray-100">   
+                    <div class="p-3 bg-gradient-to-r from-indigo-50 to-white border-b border-gray-100">
+                        <h3 class="font-medium text-indigo-700">Announcements</h3>
+                    </div>
+                    <?php if (!empty($announcements)): ?>           
+                        <?php foreach ($announcements as $announcement): ?>                     
+                            <div class="px-4 py-3 hover:bg-indigo-50 transition-colors">
+                                <p class="text-sm text-gray-700"><?= htmlspecialchars($announcement['message']) ?></p>
+                                <p class="text-xs text-gray-500 mt-1 flex items-center">
+                                    <i class="fas fa-clock mr-1 text-indigo-400"></i>
+                                    <?= date('M d, Y', strtotime($announcement['date'])) ?>
+                                </p>       
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="p-4 text-center">
+                            <i class="fas fa-bell-slash text-gray-400 text-xl mb-2"></i>
+                            <p class="text-gray-600">No new announcements</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <!-- Logout Button -->
-            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors md:flex">
+            <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 hover:bg-red-50 transition-all px-3 py-1.5 rounded-lg">
                 <i class="fas fa-sign-out-alt mr-2"></i>Log Out
             </a>
         </div>
     </div>
-    <!-- Mobile Navigation -->
     
-    <nav id="studentNav" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
+    <!-- Mobile Navigation -->
+    <nav id="studentMobileNav" class="md:hidden absolute top-full left-0 w-full bg-white/95 border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300 shadow-md">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
-            <a href="home.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-home mr-3 w-6"></i>Home
+            <a href="home.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-home mr-3 w-6 text-indigo-500"></i>Home
             </a>
-            <a href="profile.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-user mr-3 w-6"></i>Profile
+            <a href="profile.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-user mr-3 w-6 text-indigo-500"></i>Profile
             </a>
-            <a href="history.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-history mr-3 w-6"></i>History
+            <a href="history.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-history mr-3 w-6 text-indigo-500"></i>History
             </a>
-            <a href="reservation.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-calendar-check mr-3 w-6"></i>Reservation
+            <a href="reservation.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-calendar-check mr-3 w-6 text-indigo-500"></i>Reservation
             </a>
         </div>
     </nav>
@@ -112,11 +121,12 @@
             header.classList.remove('bg-white/80');
         }
     });
-    document.getElementById('menuToggle').addEventListener('click', function () {
-        let menu = document.getElementById('studentNav');
+    
+    document.getElementById('studentMenuToggle').addEventListener('click', function () {
+        let menu = document.getElementById('studentMobileNav');
         menu.classList.toggle('hidden');
-        }
-    );
+    });
+    
     document.getElementById('notificationBtn').addEventListener('click', function () {
         let dropdown = document.getElementById('notificationDropdown');
         dropdown.classList.toggle('hidden');
@@ -124,14 +134,13 @@
     
     // Close the dropdown if the user clicks outside of it
     window.addEventListener('click', function (event) {
-
         let dropdown = document.getElementById('notificationDropdown');
         let button = document.getElementById('notificationBtn');
         if (!button.contains(event.target) && !dropdown.contains(event.target)) {
             dropdown.classList.add('hidden');
         }
     });
-  </script>
+</script>
 <?php endif; ?>
 <!-- Admin -->
 <?php if ($_SESSION['role'] == 'Admin'): ?>
@@ -139,106 +148,136 @@
     <div class="container max-w-[1400px] mx-auto px-4 py-3">
         <div class="flex justify-between items-center">
             <!-- Mobile Menu Button for admin -->
-            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors ">
+            <button id="adminMenuToggle" class="md:hidden p-2 text-gray-600 hover:text-indigo-600 transition-colors">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-              <!-- Notification Bell -->
-                <div class="relative">
-                    <button id="notificationBtn" class="text-gray-600 hover:text-indigo-600 focus:outline-none transition-colors">
-                        <i class="fas fa-bell text-xl"></i>
-                        <span id="notificationBadge" class="badge hidden">0</span>
-                    </button>
-                    <!-- Notification Dropdown -->
-                     <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-md shadow-md z-10 max-h-[200px] overflow-y-auto">
-                     <?php if (!empty($notifications)): ?>
-                            <?php foreach ($notifications as $notification): ?>
-                            <div class="px-4 py-2 border-b border-gray-100">
-                                <p class="text-sm text-gray-700"><?= htmlspecialchars($notification['full_name']) ?> reserved <?= htmlspecialchars($notification['lab_name']) ?> at <?= htmlspecialchars($notification['time_slot']) ?></p>
-                            </div>
-                        <?php endforeach; ?>
-                        <a href="reservation_management.php" class="block px-4 py-2 text-center text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                            View All
-                        </a>
-                        <?php else: ?>
-                        <p class="p-3 text-gray-600">No new notifications</p>
-                    <?php endif; ?>
-                    <?php $notificationCount = count($notifications);
-                        ?>
-                     </div>
-                </div>
-                <!-- Desktop Navigation -->
-                <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
+            
+            <!-- Desktop Navigation -->
+            <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
             <nav id="adminNav" class="hidden md:flex items-center space-x-6">
-            <h2 class="text-xl font-bold text-gray-800 md:hidden">Admin Panel</h2>
-                <a href="dashboard.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-chart-bar mr-2"></i>Dashboard
+                <a href="dashboard.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-chart-bar mr-2 text-indigo-500"></i>Dashboard
                 </a>
-                <a href="manage_users.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-users mr-2"></i>Manage Users
+                <a href="manage_users.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-users mr-2 text-indigo-500"></i>Manage Users
                 </a>
                 <!-- Dropdown -->
                 <div class="relative group">
-                    <button class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                        <i class="fas fa-database mr-2"></i>Records <i class="fas fa-caret-down ml-1"></i>
+                    <button class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                        <i class="fas fa-database mr-2 text-indigo-500"></i>Records <i class="fas fa-caret-down ml-1"></i>
                     </button>
-                    <div class="absolute hidden group-hover:block mt-1 bg-white border border-gray-200/50 rounded-md shadow-md z-10">
-                        <a href="reports.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                            <i class="fas fa-file-alt mr-2 w-4"></i>Reports
+                    <div class="absolute hidden group-hover:block mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-48">
+                        <a href="reports.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap rounded-t-lg">
+                            <i class="fas fa-file-alt mr-2 w-4 text-indigo-400"></i>Reports
                         </a>
                         <a href="sitting_records.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                            <i class="fas fa-chair mr-2 w-4"></i>Sitting Records
+                            <i class="fas fa-chair mr-2 w-4 text-indigo-400"></i>Sitting Records
                         </a>
-                        <a href="manage_reservations.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
-                           <i class="fas fa-calendar-check mr-2 w-4"></i>Manage Reservations
+                        <a href="manage_reservations.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap rounded-b-lg">
+                           <i class="fas fa-calendar-check mr-2 w-4 text-indigo-400"></i>Manage Reservations
                         </a>
                     </div>
                 </div>
-                <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-comments mr-2"></i>View Feedback
+                <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-comments mr-2 text-indigo-500"></i>View Feedback
                 </a>
-                 <button id="openSearchModal" class="flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                        <i class="fas fa-search mr-2"></i>Search Student
+                <button id="openSearchModal" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-search mr-2 text-indigo-500"></i>Search Student
+                </button>
+            </nav>
+
+            <!-- Right Side Elements -->
+            <div class="flex items-center space-x-4">
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button id="notificationBtn" class="text-gray-600 hover:text-indigo-600 focus:outline-none transition-colors p-2 rounded-full hover:bg-indigo-50">
+                        <i class="fas fa-bell text-xl"></i>
+                        <span id="notificationBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center <?php echo (!empty($notifications)) ? '' : 'hidden'; ?>"><?php echo count($notifications); ?></span>
                     </button>
+                    
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-[300px] overflow-y-auto divide-y divide-gray-100">
+                        <div class="p-3 bg-gradient-to-r from-indigo-50 to-white border-b border-gray-100">
+                            <h3 class="font-medium text-indigo-700">Pending Reservations</h3>
+                        </div>
+                        <?php if (!empty($notifications)): ?>
+                            <?php foreach ($notifications as $notification): ?>
+                                <div class="px-4 py-3 hover:bg-indigo-50 transition-colors">
+                                    <p class="text-sm text-gray-700">
+                                        <span class="font-medium"><?= htmlspecialchars($notification['full_name']) ?></span> reserved <span class="font-medium"><?= htmlspecialchars($notification['lab_name']) ?></span>
+                                    </p>
+                                    <p class="text-xs text-gray-500 mt-1 flex items-center">
+                                        <i class="fas fa-clock mr-1 text-indigo-400"></i>
+                                        <?= htmlspecialchars($notification['time_slot']) ?>
+                                    </p>
+                                </div>
+                            <?php endforeach; ?>
+                            <a href="manage_reservations.php" class="block px-4 py-2 text-center text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 transition-colors font-medium">
+                                View All Reservations
+                            </a>
+                        <?php else: ?>
+                            <div class="p-4 text-center">
+                                <i class="fas fa-calendar-xmark text-gray-400 text-xl mb-2"></i>
+                                <p class="text-gray-600">No pending reservations</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <!-- Logout Button -->
-                <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 transition-colors">
+                <a href="../logout.php" class="flex items-center text-red-600 hover:text-red-700 hover:bg-red-50 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-sign-out-alt mr-2"></i>Log Out
                 </a>
-            </nav>
+            </div>
         </div>
     </div>
-      <!-- Mobile Navigation -->
-     <nav id="adminMenu" class="md:hidden absolute top-full left-0 w-full bg-white border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300">
+    
+    <!-- Mobile Navigation -->
+    <nav id="adminMobileNav" class="md:hidden absolute top-full left-0 w-full bg-white/95 border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300 shadow-md">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
-            <a href="dashboard.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                <i class="fas fa-chart-bar mr-3 w-6"></i>Dashboard
-                            </a>
-                <a href="manage_users.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                    <i class="fas fa-users mr-3 w-6"></i>Manage Users
-                </a>
-            <div class="relative group">
-                    <button class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors"><i class="fas fa-database mr-3 w-6"></i>Records</button>
-                    <div class="absolute hidden group-hover:block left-0 mt-1 w-full bg-white border border-gray-200/50 rounded-md shadow-md z-10">
-                        <a href="reports.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-file-alt mr-3 w-6"></i>Reports</a>
-                            <a href="sitting_records.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-chair mr-3 w-6"></i>Sitting Records</a>
-                            <a href="manage_reservations.php" class="flex items-center px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors w-full"><i class="fas fa-calendar-check mr-3 w-6"></i>Manage Reservations</a>
-                    </div>
-                    
+            <h2 class="text-lg font-semibold text-gray-800 px-4 py-2 border-b border-gray-100">Admin Panel</h2>
+            
+            <a href="dashboard.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-chart-bar mr-3 w-6 text-indigo-500"></i>Dashboard
+            </a>
+            <a href="manage_users.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-users mr-3 w-6 text-indigo-500"></i>Manage Users
+            </a>
+            
+            <!-- Collapsible Records Section -->
+            <div class="records-dropdown">
+                <button class="flex items-center w-full py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1" onclick="toggleRecords()">
+                    <i class="fas fa-database mr-3 w-6 text-indigo-500"></i>Records
+                    <i class="fas fa-chevron-down ml-auto transition-transform" id="recordsIcon"></i>
+                </button>
+                <div id="recordsDropdown" class="hidden pl-4 border-l-2 border-indigo-100 ml-4 my-1">
+                    <a href="reports.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                        <i class="fas fa-file-alt mr-3 w-6 text-indigo-400"></i>Reports
+                    </a>
+                    <a href="sitting_records.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                        <i class="fas fa-chair mr-3 w-6 text-indigo-400"></i>Sitting Records
+                    </a>
+                    <a href="manage_reservations.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                        <i class="fas fa-calendar-check mr-3 w-6 text-indigo-400"></i>Manage Reservations
+                    </a>
                 </div>
-               <a href="admin_feedback.php" class="flex items-center py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-                   <i class="fas fa-comments mr-3 w-6"></i>View Feedback
-               </a>
-             <button id="openSearchModal" class="flex items-center w-full py-3 text-gray-600 hover:text-indigo-600 transition-colors">
-               <i class="fas fa-search mr-3 w-6"></i>Search Student
-             </button>
+            </div>
+            
+            <a href="admin_feedback.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-comments mr-3 w-6 text-indigo-500"></i>View Feedback
+            </a>
+            <button id="openSearchModalMobile" class="flex items-center w-full py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-search mr-3 w-6 text-indigo-500"></i>Search Student
+            </button>
+            <a href="../logout.php" class="flex items-center py-3 px-4 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-sign-out-alt mr-3 w-6"></i>Log Out
+            </a>
         </div>
     </nav>
 </header>
+
 <script>
-        // script for the admin header
-    document.getElementById('adminMenuToggle').addEventListener('click', function () {
-                let menu = document.getElementById('adminMenu');
-                menu.classList.toggle('hidden');
-            });
+    // Admin header scripts
     window.addEventListener('scroll', function () {
         const header = document.getElementById('adminHeader');
         if (window.scrollY > 50) {
@@ -247,18 +286,37 @@
             header.classList.remove('bg-white/80');
         }
     });
+    
+    document.getElementById('adminMenuToggle').addEventListener('click', function () {
+        let menu = document.getElementById('adminMobileNav');
+        menu.classList.toggle('hidden');
+    });
+    
     document.getElementById('notificationBtn').addEventListener('click', function () {
         let dropdown = document.getElementById('notificationDropdown');
         dropdown.classList.toggle('hidden');
     });
-
+    
     // Close the dropdown if the user clicks outside of it
     window.addEventListener('click', function (event) {
         let dropdown = document.getElementById('notificationDropdown');
         let button = document.getElementById('notificationBtn');
         if (!button.contains(event.target) && !dropdown.contains(event.target)) {
-           dropdown.classList.add('hidden');
+            dropdown.classList.add('hidden');
         }
+    });
+    
+    // Mobile Records dropdown functionality
+    function toggleRecords() {
+        const dropdown = document.getElementById('recordsDropdown');
+        const icon = document.getElementById('recordsIcon');
+        dropdown.classList.toggle('hidden');
+        icon.classList.toggle('rotate-180');
+    }
+    
+    // Make mobile search button also open the search modal
+    document.getElementById('openSearchModalMobile')?.addEventListener('click', function() {
+        document.getElementById('searchModal').classList.remove('hidden');
     });
 </script>
 <?php endif; ?>

@@ -8,6 +8,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
 require_once '../config/config.php';
 require_once '../shared/header.php';
 
+// Set pagination parameters
+$recordsPerPage = 10;
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$offset = ($page - 1) * $recordsPerPage;
+
 // Fetch lab data
 $labQuery = "SELECT lab, COUNT(*) as count FROM sit_in GROUP BY lab";
 $labResult = mysqli_query($conn, $labQuery);
@@ -28,42 +33,59 @@ while ($row = mysqli_fetch_assoc($reasonResult)) {
     $reasonCounts[] = $row['count'];
 }
 
-// Fetch all sit-in records for the table
-$sitInQuery = "SELECT sit_in_id, idno, full_name, reason, lab, in_time, out_time, sit_date FROM sit_in ORDER BY sit_in_id DESC";
-$sitInResult = mysqli_query($conn, $sitInQuery);
+// Get total number of records for pagination
+$countQuery = "SELECT COUNT(*) as total FROM sit_in";
+$countResult = mysqli_query($conn, $countQuery);
+$countRow = mysqli_fetch_assoc($countResult);
+$totalRecords = $countRow['total'];
+$totalPages = ceil($totalRecords / $recordsPerPage);
+
+// Fetch paginated sit-in records for the table
+$sitInQuery = "SELECT sit_in_id, idno, full_name, reason, lab, in_time, out_time, sit_date FROM sit_in ORDER BY sit_in_id DESC LIMIT ?, ?";
+$stmt = $conn->prepare($sitInQuery);
+$stmt->bind_param("ii", $offset, $recordsPerPage);
+$stmt->execute();
+$sitInResult = $stmt->get_result();
 $sitInRecords = [];
 while ($row = mysqli_fetch_assoc($sitInResult)) {
     $sitInRecords[] = $row;
 }
 ?>
 
-<div class="mt-10 flex min-h-screen bg-gray-50 text-gray-900 pb-14">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="flex-1 pt-10 p-6">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h1 class="text-3xl font-semibold text-gray-800">Sit-in Reports</h1>
-                    <p class="text-lg text-gray-600">View and analyze sit-in records</p>
-                </div>
+    <main class="flex-1 p-6 pt-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- Welcome Section -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-xl shadow-md p-6 mb-8 border border-gray-100">
                 <div class="flex items-center space-x-4">
-                    <button id="exportPDF" 
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        <i class="fas fa-file-pdf mr-2"></i>Export PDF
-                    </button>
-                    <button id="printTable" 
-                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        <i class="fas fa-print mr-2"></i>Print
-                    </button>
-                    <button id="exportExcel" 
-                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                        <i class="fas fa-file-export mr-2"></i>Export Excel
-                    </button>
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-2xl text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Sit-in Reports</h1>
+                        <p class="text-lg text-gray-600">View and analyze sit-in records</p>
+                    </div>
+                    <div class="flex items-center space-x-3 ml-auto">
+                        <button id="exportPDF" 
+                                class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200 shadow-sm flex items-center">
+                            <i class="fas fa-file-pdf mr-2"></i>PDF
+                        </button>
+                        <button id="printTable" 
+                                class="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-200 shadow-sm flex items-center">
+                            <i class="fas fa-print mr-2"></i>Print
+                        </button>
+                        <button id="exportExcel" 
+                                class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition-all duration-200 shadow-sm flex items-center">
+                            <i class="fas fa-file-export mr-2"></i>Excel
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Search Bar -->
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100 mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -81,13 +103,13 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                         <button type="button" 
                                 id="searchButton"
                                 onclick="filterTable()" 
-                                class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                                class="flex-1 flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                             <i class="fas fa-search mr-2"></i>Search
                         </button>
                         <button type="button" 
                                 id="clearButton" 
                                 onclick="clearSearch()" 
-                                class="flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                class="flex-1 flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
                             <i class="fas fa-eraser mr-2"></i>Clear
                         </button>
                     </div>
@@ -99,27 +121,25 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
 
             <!-- Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Sit-ins per Lab</h3>
-                        <div class="flex items-center space-x-2">
-                            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-chart-pie text-indigo-600 mr-2"></i>
+                            Sit-ins per Lab
+                        </h3>
+                        <div class="text-sm text-gray-500">Overall Distribution</div>
                     </div>
                     <div class="h-[300px]">
                         <canvas id="labChart" class="w-full h-full"></canvas>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800">Sit-ins per Reason</h3>
-                        <div class="flex items-center space-x-2">
-                            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-chart-pie text-emerald-600 mr-2"></i>
+                            Sit-ins per Reason
+                        </h3>
+                        <div class="text-sm text-gray-500">Overall Distribution</div>
                     </div>
                     <div class="h-[300px]">
                         <canvas id="reasonChart" class="w-full h-full"></canvas>
@@ -128,14 +148,15 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
             </div>
 
             <!-- Leaderboard Section -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+            <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 mb-6">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 leaderboard-header">Student Session Leaderboard</h3>
-                    <div class="flex items-center space-x-2">
-                        <button id="refreshLeaderboard" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center leaderboard-header">
+                        <i class="fas fa-trophy text-amber-500 mr-2"></i>
+                        Student Session Leaderboard
+                    </h3>
+                    <button id="refreshLeaderboard" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                 </div>
                 
                 <!-- Top 3 Podium -->
@@ -193,15 +214,28 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" id="leaderboardTableBody">
                             <tr>
-                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">Loading leaderboard data...</td>
+                                <td colspan="4" class="px-4 py-4 text-center text-gray-500">
+                                    <i class="fas fa-spinner fa-spin mr-2"></i> Loading leaderboard data...
+                                </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <!-- Table with Pagination -->
+            <div class="bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                        <i class="fas fa-list text-blue-600 mr-2"></i>
+                        Detailed Sit-in Records
+                    </h3>
+                    <div class="text-sm text-gray-500">
+                        Showing <?php echo min(($page - 1) * $recordsPerPage + 1, $totalRecords); ?> to 
+                        <?php echo min($page * $recordsPerPage, $totalRecords); ?> of 
+                        <?php echo $totalRecords; ?> records
+                    </div>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full" id="sitInTable">
                         <thead class="bg-gray-50">
@@ -219,7 +253,7 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                             <?php
                             if (!empty($sitInRecords)) {
                                 foreach ($sitInRecords as $row) {
-                                    echo "<tr class='border-b hover:bg-gray-50'>
+                                    echo "<tr class='hover:bg-gray-50 transition-colors'>
                                         <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['idno']) . "</td>
                                         <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['full_name']) . "</td>
                                         <td class='px-6 py-4 whitespace-nowrap'>" . htmlspecialchars($row['reason']) . "</td>
@@ -238,14 +272,68 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 </div>
             </div>
             
-            <!-- Pagination -->
-            <div id="pagination" class="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100"></div>
+            <!-- Pagination Controls -->
+            <div id="pagination" class="flex justify-between items-center mt-6 bg-white p-4 rounded-xl shadow-md border border-gray-100">
+                <div class="text-sm text-gray-500">
+                    Page <?php echo $page; ?> of <?php echo $totalPages; ?>
+                </div>
+                <div class="flex space-x-2">
+                    <?php if($page > 1): ?>
+                        <a href="?page=1" class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-angle-double-left"></i>
+                        </a>
+                        <a href="?page=<?php echo $page - 1; ?>" class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-chevron-left mr-1"></i> Previous
+                        </a>
+                    <?php endif; ?>
+                    
+                    <?php
+                    // Display page numbers with ellipsis for large number of pages
+                    $maxVisiblePages = 5;
+                    $startPage = max(1, $page - floor($maxVisiblePages / 2));
+                    $endPage = min($totalPages, $startPage + $maxVisiblePages - 1);
+                    
+                    // Adjust startPage if needed
+                    if ($endPage - $startPage + 1 < $maxVisiblePages && $startPage > 1) {
+                        $startPage = max(1, $endPage - $maxVisiblePages + 1);
+                    }
+                    
+                    // First page and ellipsis if needed
+                    if ($startPage > 1) {
+                        echo "<a href='?page=1' class='px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors'>1</a>";
+                        if ($startPage > 2) {
+                            echo "<span class='px-3 py-2 text-gray-500'>...</span>";
+                        }
+                    }
+                    
+                    // Page numbers
+                    for ($i = $startPage; $i <= $endPage; $i++) {
+                        $activeClass = ($i == $page) ? "bg-indigo-600 text-white" : "bg-gray-200 hover:bg-gray-300";
+                        echo "<a href='?page=$i' class='px-3 py-2 $activeClass rounded-md transition-colors'>$i</a>";
+                    }
+                    
+                    // Last page and ellipsis if needed
+                    if ($endPage < $totalPages) {
+                        if ($endPage < $totalPages - 1) {
+                            echo "<span class='px-3 py-2 text-gray-500'>...</span>";
+                        }
+                        echo "<a href='?page=$totalPages' class='px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors'>$totalPages</a>";
+                    }
+                    ?>
+                    
+                    <?php if($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                            Next <i class="fas fa-chevron-right ml-1"></i>
+                        </a>
+                        <a href="?page=<?php echo $totalPages; ?>" class="px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors">
+                            <i class="fas fa-angle-double-right"></i>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
         </div>
     </main>
 </div>
-
-<!-- Include Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
@@ -264,11 +352,11 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 label: 'Sit-ins per Lab',
                 data: <?php echo json_encode($labCounts); ?>,
                 backgroundColor: [
-                    'rgba(99, 102, 241, 0.6)',
-                    'rgba(16, 185, 129, 0.6)',
-                    'rgba(245, 158, 11, 0.6)',
-                    'rgba(239, 68, 68, 0.6)',
-                    'rgba(139, 92, 246, 0.6)'
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(139, 92, 246, 0.7)'
                 ],
                 borderColor: [
                     'rgba(99, 102, 241, 1)',
@@ -287,8 +375,21 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 legend: {
                     position: 'right',
                     labels: {
-                        padding: 20
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#1e293b',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    padding: 10,
+                    boxPadding: 5,
+                    usePointStyle: true
                 }
             }
         }
@@ -304,15 +405,15 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 label: 'Sit-ins per Reason',
                 data: <?php echo json_encode($reasonCounts); ?>,
                 backgroundColor: [
-                    'rgba(99, 102, 241, 0.6)',
-                    'rgba(16, 185, 129, 0.6)',
-                    'rgba(245, 158, 11, 0.6)',
-                    'rgba(239, 68, 68, 0.6)',
-                    'rgba(139, 92, 246, 0.6)'
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(99, 102, 241, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(139, 92, 246, 0.7)'
                 ],
                 borderColor: [
-                    'rgba(99, 102, 241, 1)',
                     'rgba(16, 185, 129, 1)',
+                    'rgba(99, 102, 241, 1)',
                     'rgba(245, 158, 11, 1)',
                     'rgba(239, 68, 68, 1)',
                     'rgba(139, 92, 246, 1)'
@@ -327,8 +428,21 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 legend: {
                     position: 'right',
                     labels: {
-                        padding: 20
+                        padding: 20,
+                        font: {
+                            size: 12
+                        }
                     }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#1e293b',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    padding: 10,
+                    boxPadding: 5,
+                    usePointStyle: true
                 }
             }
         }
@@ -342,6 +456,7 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
     }
 
     function filterTable() {
+        // Get the search input
         let input = document.getElementById("searchInput").value.toLowerCase();
         let table = document.getElementById("sitInTable");
         let rows = table.getElementsByTagName("tr");
@@ -389,15 +504,26 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
             }
         }
         
-        // Update search stats
+        // Update search stats and hide pagination when filtering
         const searchStats = document.getElementById("searchStats");
         const resultCountElement = document.getElementById("resultCount");
+        const paginationElement = document.getElementById("pagination");
         
         if (input) {
             searchStats.classList.remove("hidden");
             resultCountElement.textContent = resultCount;
+            
+            // Hide pagination when filtering
+            if (paginationElement) {
+                paginationElement.classList.add("hidden");
+            }
         } else {
             searchStats.classList.add("hidden");
+            
+            // Show pagination when not filtering
+            if (paginationElement) {
+                paginationElement.classList.remove("hidden");
+            }
         }
     }
 
@@ -406,6 +532,12 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
         searchInput.value = "";
         filterTable();
         searchInput.focus();
+        
+        // Show pagination again
+        const paginationElement = document.getElementById("pagination");
+        if (paginationElement) {
+            paginationElement.classList.remove("hidden");
+        }
     }
 
     // Add event listeners when the DOM is loaded
@@ -415,45 +547,48 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
         const clearSearchButton = document.getElementById("clearSearchButton");
         
         // Add event listener for input changes and Enter key in the search box
-        searchInput.addEventListener("keyup", function(event) {
-            if (event.key === "Enter") {
-                filterTable();
-            } else {
-                // Debounce for live typing
-                debounceSearch(filterTable, 300);
-            }
-        });
+        if (searchInput) {
+            searchInput.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    filterTable();
+                } else {
+                    // Debounce for live typing
+                    debounceSearch(filterTable, 300);
+                }
+            });
+            
+            // Add focus/blur events to enhance UX
+            searchInput.addEventListener("focus", function() {
+                this.placeholder = "Type to search...";
+            });
+            
+            searchInput.addEventListener("blur", function() {
+                this.placeholder = "Search records...";
+            });
+        }
         
         // Add event listener for the clear search icon
         if (clearSearchButton) {
             clearSearchButton.addEventListener("click", clearSearch);
         }
         
-        // Add focus/blur events to enhance UX
-        searchInput.addEventListener("focus", function() {
-            this.placeholder = "Type to search...";
-        });
+        // Preserve search parameters when navigating pagination
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchQuery = urlParams.get('search');
+        if (searchQuery && searchInput) {
+            searchInput.value = searchQuery;
+            filterTable();
+        }
         
-        searchInput.addEventListener("blur", function() {
-            this.placeholder = "Search records...";
-        });
-        
-        // Initial load of charts and data
-        console.log('Initializing page components...');
-        
-        // Auto-focus search on page load for better UX
-        setTimeout(() => {
-            const searchInput = document.getElementById("searchInput");
-            if (searchInput) {
-                // Only focus if not on mobile (screen width > 768px)
-                if (window.innerWidth > 768) {
-                    searchInput.focus();
-                }
+        // Add the search parameter to all pagination links
+        document.querySelectorAll('#pagination a').forEach(link => {
+            if (searchQuery) {
+                // If there's a search query, add it to all pagination links
+                const url = new URL(link.href);
+                url.searchParams.set('search', searchQuery);
+                link.href = url.toString();
             }
-        }, 500);
-        
-        // Initialize charts (already done via PHP, this is a reminder)
-        console.log('Charts initialized');
+        });
         
         // Update leaderboard
         updateLeaderboard();
@@ -567,7 +702,7 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
         // Add header to print content
         let header = `
             <div class="header">
-                <h1>Sit-in Records Report</h1>
+                <h1>University of Cebu CCS Laboratory0 Records Report</h1>
                 <p>Generated on: ${new Date().toLocaleString()}</p>
                 ${filterInfo}
             </div>
@@ -833,13 +968,6 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
         ];
         ws['!cols'] = colWidths;
 
-        // Add some styling
-        ws['!rows'] = [
-            {hpt: 25}, // Header row height
-            {hpt: 5},  // Spacing row height
-            {hpt: 25}  // Column headers height
-        ];
-
         XLSX.utils.book_append_sheet(wb, ws, "Sit-in Records");
 
         // Download Excel with a timestamp in the filename for uniqueness
@@ -849,29 +977,20 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
 
     // Leaderboard functionality
     function updateLeaderboard() {
-        console.log('Starting leaderboard update...'); // Debug log
-        
         const refreshBtn = document.getElementById('refreshLeaderboard');
-        if (!refreshBtn) {
-            console.error('Refresh button not found!');
-            return;
+        if (refreshBtn) {
+            refreshBtn.classList.add('animate-spin');
         }
-        refreshBtn.classList.add('spinning');
         
-        console.log('Fetching leaderboard data...'); // Debug log
         fetch('leaderboard_fetch.php')
             .then(response => {
-                console.log('Response received:', response.status); // Debug log
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Leaderboard data received:', data); // Debug log
-                
                 if (!Array.isArray(data)) {
-                    console.error('Invalid data format:', data); // Debug log
                     throw new Error('Invalid data format received');
                 }
 
@@ -882,12 +1001,6 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 const secondPlacePoints = document.getElementById('secondPlacePoints');
                 const thirdPlaceName = document.getElementById('thirdPlaceName');
                 const thirdPlacePoints = document.getElementById('thirdPlacePoints');
-                
-                if (!firstPlaceName || !firstPlacePoints || !secondPlaceName || 
-                    !secondPlacePoints || !thirdPlaceName || !thirdPlacePoints) {
-                    console.error('One or more podium elements not found!');
-                    return;
-                }
 
                 // Update podium
                 if (data.length >= 1) {
@@ -916,38 +1029,35 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
 
                 // Update table
                 const tableBody = document.getElementById('leaderboardTableBody');
-                if (!tableBody) {
-                    console.error('Leaderboard table body not found!');
-                    return;
-                }
-                
-                console.log('Updating table with', data.length, 'records'); // Debug log
-                tableBody.innerHTML = '';
-                
-                if (data.length === 0) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td colspan="4" class="px-4 py-4 text-center text-gray-500">No leaderboard data available</td>`;
-                    tableBody.appendChild(row);
-                    return;
-                }
-                
-                data.forEach((student, index) => {
-                    const row = document.createElement('tr');
+                if (tableBody) {
+                    tableBody.innerHTML = '';
                     
-                    // Add special styling for top 3
-                    if (index < 3) {
-                        row.className = 'bg-gray-50';
+                    if (data.length === 0) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td colspan="4" class="px-4 py-4 text-center text-gray-500">No leaderboard data available</td>`;
+                        tableBody.appendChild(row);
+                    } else {
+                        data.forEach((student, index) => {
+                            const row = document.createElement('tr');
+                            
+                            // Add special styling for top 3
+                            if (index < 3) {
+                                row.className = 'bg-gray-50';
+                            } else {
+                                row.className = 'hover:bg-gray-50 transition-colors';
+                            }
+                            
+                            row.innerHTML = `
+                                <td class="px-4 py-3 text-sm text-gray-900">${index + 1}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${student.idno}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">${student.full_name}</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 font-semibold">${student.total_sessions}</td>
+                            `;
+                            
+                            tableBody.appendChild(row);
+                        });
                     }
-                    
-                    row.innerHTML = `
-                        <td class="px-4 py-3 text-sm text-gray-900">${index + 1}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${student.idno}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${student.full_name}</td>
-                        <td class="px-4 py-3 text-sm text-gray-900">${student.total_sessions}</td>
-                    `;
-                    
-                    tableBody.appendChild(row);
-                });
+                }
                 
                 // Add a note about ranking based on sessions
                 const rankingNote = document.querySelector('.session-ranking-note');
@@ -960,12 +1070,9 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                         leaderboardHeader.insertAdjacentElement('afterend', newNote);
                     }
                 }
-                
-                console.log('Leaderboard update completed successfully'); // Debug log
             })
             .catch(error => {
                 console.error('Error fetching leaderboard data:', error);
-                alert('Error loading leaderboard data. Please try again.');
                 
                 // Reset the podium and table to show error state
                 const elements = {
@@ -990,19 +1097,19 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 }
             })
             .finally(() => {
-                refreshBtn.classList.remove('spinning');
+                if (refreshBtn) {
+                    refreshBtn.classList.remove('animate-spin');
+                }
             });
     }
 
     // Initial leaderboard load
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded, initializing leaderboard...'); // Debug log
         updateLeaderboard();
     });
 
     // Refresh leaderboard when button is clicked
     document.getElementById('refreshLeaderboard').addEventListener('click', function() {
-        console.log('Refresh button clicked'); // Debug log
         this.classList.add('animate-spin');
         updateLeaderboard();
         setTimeout(() => this.classList.remove('animate-spin'), 1000);

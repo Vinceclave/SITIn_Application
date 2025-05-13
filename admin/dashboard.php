@@ -67,132 +67,201 @@ if(isset($_SESSION['success'])):
 </script>
 <?php unset($_SESSION['success']); endif; ?>
 
-<div class="mt-10 flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
+<?php if(isset($_SESSION['error'])): ?>
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+<script>
+    Notiflix.Notify.failure("<?php echo addslashes($_SESSION['error']); ?>");
+</script>
+<?php unset($_SESSION['error']); endif; ?>
+
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="flex-1 pt-10 p-6 ">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Admin Dashboard</h1>
-                    <p class="text-lg text-gray-600">Manage and monitor your system's performance</p>
-                </div>
+    <main class="flex-1 p-6 pt-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- Welcome Section -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-xl shadow-md p-6 mb-8 border border-gray-100">
                 <div class="flex items-center space-x-4">
-                    <span class="text-sm bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
-                        <i class="fas fa-clock mr-2 text-indigo-600"></i>
-                        Last updated: <?php echo date('M d, Y h:i A'); ?>
-                    </span>
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                        <i class="fas fa-user-shield text-2xl text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+                        <p class="text-lg text-gray-600">Welcome, <span class="font-medium text-indigo-600"><?php echo htmlspecialchars($user['username']); ?></span>!</p>
+                    </div>
                 </div>
             </div>
 
             <!-- Totals Section -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3 bg-indigo-50 rounded-lg">
-                            <i class="fas fa-users text-indigo-600 text-2xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-medium text-gray-600">Total Students</h2>
-                            <p class="text-3xl font-bold text-gray-800"><?php echo $totalStudents; ?></p>
-                            <p class="text-sm text-gray-500 mt-1">Registered students in the system</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-indigo-100">Total Students</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-user-graduate text-xl"></i>
                         </div>
                     </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalStudents); ?></p>
+                    <p class="text-indigo-200 text-sm mt-1">Active students in the system</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3 bg-green-50 rounded-lg">
-                            <i class="fas fa-calendar-check text-green-600 text-2xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-medium text-gray-600">Total Sessions</h2>
-                            <p class="text-3xl font-bold text-gray-800"><?php echo $totalSessions; ?></p>
-                            <p class="text-sm text-gray-500 mt-1">Completed sit-in sessions</p>
+                
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-emerald-100">Total Sessions</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-laptop-code text-xl"></i>
                         </div>
                     </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalSessions); ?></p>
+                    <p class="text-emerald-200 text-sm mt-1">Sessions conducted to date</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3 bg-blue-50 rounded-lg">
-                            <i class="fas fa-bookmark text-blue-600 text-2xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-medium text-gray-600">Total Reservations</h2>
-                            <p class="text-3xl font-bold text-gray-800"><?php echo $totalReservations; ?></p>
-                            <p class="text-sm text-gray-500 mt-1">Active lab reservations</p>
+                
+                <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-amber-100">Total Reservations</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-calendar-check text-xl"></i>
                         </div>
                     </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalReservations); ?></p>
+                    <p class="text-amber-200 text-sm mt-1">Lab reservations made</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 transform hover:-translate-y-1">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-3 bg-purple-50 rounded-lg">
-                            <i class="fas fa-building text-purple-600 text-2xl"></i>
-                        </div>
-                        <div>
-                            <h2 class="text-lg font-medium text-gray-600">Total Labs</h2>
-                            <p class="text-3xl font-bold text-gray-800"><?php echo $totalLabs; ?></p>
-                            <p class="text-sm text-gray-500 mt-1">Available computer labs</p>
+                
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-blue-100">Total Labs</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-building text-xl"></i>
                         </div>
                     </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalLabs); ?></p>
+                    <p class="text-blue-200 text-sm mt-1">Active computer labs</p>
                 </div>
             </div>
 
             <!-- Chart Section -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800">Sessions Overview</h2>
-                            <p class="text-sm text-gray-500 mt-1">Monthly session distribution</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                        </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                            <i class="fas fa-chart-bar text-indigo-600 mr-2"></i>
+                            Sessions Overview
+                        </h2>
+                        <div class="text-sm text-gray-500">Last 7 days</div>
                     </div>
-                    <div class="h-[300px]">
-                        <canvas id="sessionChart" class="w-full h-full"></canvas>
+                    <div class="h-80">
+                        <canvas id="sessionChart"></canvas>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <h2 class="text-xl font-semibold text-gray-800">Create Announcement</h2>
-                            <p class="text-sm text-gray-500 mt-1">Post important updates for students</p>
-                        </div>
+                
+                <!-- Quick Actions -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
+                        <i class="fas fa-bolt text-amber-500 mr-2"></i>
+                        Quick Actions
+                    </h2>
+                    <div class="space-y-4">
+                        <a href="manage_users.php" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                            <div class="bg-indigo-100 p-2 rounded-lg mr-4">
+                                <i class="fas fa-users text-indigo-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800">Manage Users</h3>
+                                <p class="text-sm text-gray-500">Add, edit or remove users</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 ml-auto"></i>
+                        </a>
+                        
+                        <a href="manage_reservations.php" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                            <div class="bg-emerald-100 p-2 rounded-lg mr-4">
+                                <i class="fas fa-calendar-alt text-emerald-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800">Reservations</h3>
+                                <p class="text-sm text-gray-500">View and approve reservations</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 ml-auto"></i>
+                        </a>
+                        
+                        <a href="reports.php" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                            <div class="bg-blue-100 p-2 rounded-lg mr-4">
+                                <i class="fas fa-chart-line text-blue-600"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-medium text-gray-800">Reports</h3>
+                                <p class="text-sm text-gray-500">View detailed analytics</p>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400 ml-auto"></i>
+                        </a>
                     </div>
-                    <form method="POST" class="space-y-4">
-                        <textarea name="message" required 
-                                class="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none" 
-                                rows="4" 
-                                placeholder="Type your announcement here..."></textarea>
-                        <div class="flex justify-end">
-                            <button type="submit" name="add_announcement" 
-                                    class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-300 transform hover:-translate-y-0.5">
-                                <i class="fas fa-paper-plane mr-2"></i>Post Announcement
-                            </button>
-                        </div>
-                    </form>
                 </div>
             </div>
 
             <!-- Announcements Section -->
-            <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-xl font-semibold text-gray-800">Recent Announcements</h2>
-                        <p class="text-sm text-gray-500 mt-1">Latest updates and notifications</p>
-                    </div>
-                    <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors" onclick="loadAnnouncements()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-1 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bullhorn text-red-500 mr-2"></i>
+                        Create Announcement
+                    </h2>
+                    <form method="POST" class="space-y-4">
+                        <textarea name="message" required class="w-full p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow" 
+                            rows="5" placeholder="Type your announcement here..."></textarea>
+                        <button type="submit" name="add_announcement" 
+                            class="w-full px-5 py-3 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm flex items-center justify-center">
+                            <i class="fas fa-paper-plane mr-2"></i>
+                            Post Announcement
+                        </button>
+                    </form>
                 </div>
-                <ul id="announcementList" class="space-y-4"></ul>
-                <div id="loadingMessage" class="text-center text-gray-500 py-4 hidden">
-                    <div class="flex items-center justify-center space-x-2">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <span>Loading announcements...</span>
+
+                <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2 border border-gray-100">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-bell text-amber-500 mr-2"></i>
+                        Recent Announcements
+                    </h2>
+                    <div class="overflow-y-auto max-h-[350px] pr-2">
+                        <ul id="announcementList" class="space-y-4">
+                            <!-- Announcements will be loaded here -->
+                        </ul>
                     </div>
+                    <div id="loadingMessage" class="text-center py-4 text-gray-500 hidden">
+                        <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                        Loading more...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Feedback Section -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8 border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-comment-alt text-blue-500 mr-2"></i>
+                        Recent Student Feedback
+                    </h2>
+                    <a href="admin_feedback.php" class="text-sm text-indigo-600 hover:text-indigo-800 flex items-center">
+                        <span>View All</span>
+                        <i class="fas fa-chevron-right ml-1 text-xs"></i>
+                    </a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentFeedbackTable" class="divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="4" class="px-4 py-3 text-center text-gray-500">
+                                    <i class="fas fa-circle-notch fa-spin mr-2"></i>
+                                    Loading feedback...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -200,10 +269,6 @@ if(isset($_SESSION['success'])):
 </div>
 
 <?php require_once '../shared/footer.php'; ?>
-
-<!-- Include Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 <script>
     tailwind.config = {
         theme: {
@@ -218,37 +283,48 @@ if(isset($_SESSION['success'])):
         }
     }
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Static chart data (replace these with real static data)
+// Chart data 
 const chartData = {
-    labels: ['Session 1', 'Session 2', 'Session 3', 'Session 4'],
-    sessions: [120, 250, 300, 500]
+    labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    sessions: [120, 250, 300, 180, 250, 70, 40]
 };
 
 document.addEventListener("DOMContentLoaded", function () {
     const ctx = document.getElementById('sessionChart').getContext('2d');
+    
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(79, 70, 229, 0.6)');
+    gradient.addColorStop(1, 'rgba(79, 70, 229, 0.1)');
+    
     new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: chartData.labels,
             datasets: [{
                 label: 'Sessions Used',
                 data: chartData.sessions,
-                backgroundColor: 'rgba(99, 102, 241, 0.6)',
-                borderColor: 'rgba(99, 102, 241, 1)',
-                borderWidth: 1,
-                borderRadius: 4
+                backgroundColor: gradient,
+                borderColor: 'rgba(79, 70, 229, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: 'rgba(79, 70, 229, 1)',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                tension: 0.3,
+                fill: true
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-                y: {
+                y: { 
                     beginAtZero: true,
                     grid: {
+                        drawBorder: false,
                         color: 'rgba(0, 0, 0, 0.05)'
                     }
                 },
@@ -261,6 +337,24 @@ document.addEventListener("DOMContentLoaded", function () {
             plugins: {
                 legend: {
                     display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    titleColor: '#1e293b',
+                    bodyColor: '#1e293b',
+                    borderColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 1,
+                    padding: 10,
+                    boxPadding: 5,
+                    usePointStyle: true,
+                    callbacks: {
+                        title: function(tooltipItem) {
+                            return tooltipItem[0].label;
+                        },
+                        label: function(context) {
+                            return `Sessions: ${context.raw}`;
+                        }
+                    }
                 }
             }
         }
@@ -273,19 +367,61 @@ const limit = 5;
 let loading = false;
 let allLoaded = false;
 
+function formatAnnouncement(announcement) {
+    const date = new Date(announcement.date);
+    const formattedDate = date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    return `
+    <li class="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+        <div class="flex items-start">
+            <div class="bg-indigo-100 p-2 rounded-full mr-3">
+                <i class="fas fa-bullhorn text-indigo-600"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-gray-800">${announcement.message}</p>
+                <div class="flex items-center justify-between mt-2 text-sm">
+                    <span class="text-gray-500">
+                        <i class="fas fa-user-edit mr-1"></i>
+                        ${announcement.admin_name}
+                    </span>
+                    <span class="text-gray-500">
+                        <i class="far fa-clock mr-1"></i>
+                        ${formattedDate}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </li>
+    `;
+}
+
 function loadAnnouncements() {
     if (loading || allLoaded) return;
     loading = true;
     document.getElementById("loadingMessage").classList.remove("hidden");
 
     fetch(`fetch_announcements.php?offset=${offset}&limit=${limit}`)
-        .then(response => response.text())
+        .then(response => response.json())
         .then(data => {
-            data = data.trim();
-            if (!data) {
+            if (!data || data.length === 0) {
                 allLoaded = true;
+                if (offset === 0) {
+                    document.getElementById("announcementList").innerHTML = `
+                        <li class="text-center p-6 text-gray-500">
+                            <i class="fas fa-info-circle text-xl mb-2"></i>
+                            <p>No announcements found</p>
+                        </li>
+                    `;
+                }
             } else {
-                document.getElementById("announcementList").insertAdjacentHTML("beforeend", data);
+                const html = data.map(announcement => formatAnnouncement(announcement)).join('');
+                document.getElementById("announcementList").insertAdjacentHTML("beforeend", html);
                 offset += limit;
             }
 
@@ -296,14 +432,46 @@ function loadAnnouncements() {
             console.error("Error loading announcements:", error);
             loading = false;
             document.getElementById("loadingMessage").classList.add("hidden");
+            document.getElementById("announcementList").innerHTML += `
+                <li class="text-center p-4 text-red-500">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Error loading announcements
+                </li>
+            `;
+        });
+}
+
+// Load recent feedback
+function loadRecentFeedback() {
+    fetch('get_recent_feedback.php?limit=5')
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("recentFeedbackTable").innerHTML = data;
+        })
+        .catch(error => {
+            console.error("Error loading feedback:", error);
+            document.getElementById("recentFeedbackTable").innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-4 py-3 text-center text-red-500">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Error loading feedback
+                    </td>
+                </tr>
+            `;
         });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+    // Load announcements
     loadAnnouncements();
 
-    window.addEventListener("scroll", function () {
-        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+    // Load recent feedback
+    loadRecentFeedback();
+
+    // Detect when user scrolls to bottom of announcements container
+    const announcementContainer = document.querySelector('.overflow-y-auto');
+    announcementContainer.addEventListener("scroll", function() {
+        if (announcementContainer.scrollTop + announcementContainer.clientHeight >= announcementContainer.scrollHeight - 50) {
             loadAnnouncements();
         }
     });
