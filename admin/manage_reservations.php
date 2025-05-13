@@ -144,30 +144,7 @@ $reservationsResult = $reservationsStmt->get_result();
                             </tr>
                         </thead>
  <tbody id="reservationsTableBody" class="divide-y divide-gray-200"></tbody>
-                    </table>
-        
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        fetchData(); // Reload data via AJAX on success
-                    } else {
-                        alert('Error updating reservation status: ' + response.message);
-                    }
-                } catch (e) {
-                    alert('Error parsing response from server: ' + xhr.responseText);
-                } else {
-                    alert('Error updating reservation status: ' + xhr.responseText);
-                }
-            }
-        };
-        
-        // Send the POST request
-        xhr.send('reservation_id=' + reservationId + '&status=' + status);
-    }
-
-    // --- New JavaScript for Data Fetching and Pagination (similar to sit-in) ---
+ </table>
 
     document.addEventListener("DOMContentLoaded", function () {
         let currentPage = 1; // Track the current page
