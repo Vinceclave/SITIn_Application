@@ -5,6 +5,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Admin') {
     exit();
 }
 
+
 require_once '../config/config.php';
 require_once '../shared/header.php';
 

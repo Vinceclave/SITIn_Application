@@ -51,6 +51,9 @@
                 <a href="history.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-history mr-2 text-indigo-500"></i>History
                 </a>
+                <a href="resources.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-history mr-2 text-indigo-500"></i>Resources
+                </a>
                 <a href="reservation.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-calendar-check mr-2 text-indigo-500"></i>Reservation
                 </a>
@@ -104,6 +107,9 @@
             </a>
             <a href="history.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-history mr-3 w-6 text-indigo-500"></i>History
+            </a>
+            <a href="resources.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-history mr-3 w-6 text-indigo-500"></i>Resources
             </a>
             <a href="reservation.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-calendar-check mr-3 w-6 text-indigo-500"></i>Reservation
@@ -178,6 +184,9 @@
                         </a>
                     </div>
                 </div>
+                <a href="resources.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-comments mr-2 text-indigo-500"></i>Resources
+                </a>
                 <a href="admin_feedback.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-comments mr-2 text-indigo-500"></i>View Feedback
                 </a>
@@ -262,8 +271,9 @@
                     </a>
                 </div>
             </div>
-            
             <a href="admin_feedback.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-comments mr-3 w-6 text-indigo-500"></i>Resources
+            </a>            <a href="admin_feedback.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-comments mr-3 w-6 text-indigo-500"></i>View Feedback
             </a>
             <button id="openSearchModalMobile" class="flex items-center w-full py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
