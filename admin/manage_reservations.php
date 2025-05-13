@@ -156,8 +156,10 @@ $reservationsResult = $reservationsStmt->get_result();
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right">
+                                            <?php if ($reservation['status'] === 'pending'): ?>
                                             <button class="accept-btn bg-green-500 text-white px-4 py-2 rounded-md" data-id="<?php echo $reservation['reservation_id']; ?>">Accept</button>
                                             <button class="reject-btn bg-red-500 text-white px-4 py-2 rounded-md" data-id="<?php echo $reservation['reservation_id']; ?>">Reject</button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endwhile; ?>
