@@ -72,7 +72,7 @@ $reservationsQuery = "
 $reservationsStmt = $conn->prepare($reservationsQuery);
 
 if (!empty($params)) {
-    $params[] = $limit;
+    $params[] = $limit; // Assuming the limit is a number (integer)
     $params[] = $offset;
     $types .= 'ii';
     $reservationsStmt->bind_param($types, ...$params);
@@ -82,13 +82,25 @@ if (!empty($params)) {
 
 $reservationsStmt->execute();
 $reservationsResult = $reservationsStmt->get_result();
+
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+ header("Location: ../login.php");
+ exit;
+}
 ?>
 
-<div class="mt-10 flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="flex-1 pt-10 p-6">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="flex items-center justify-between mb-8">
+    <main class="flex-1 p-6 pt-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- Welcome Section -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                        <i class="fas fa-calendar-check text-2xl text-indigo-600"></i>
+                    </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">Manage Reservations</h1>
                     <p class="text-lg text-gray-600">Review and manage lab reservations</p>
@@ -96,7 +108,7 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
 
             <!-- Filter Section -->
-            <div class="mb-6">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
                 <form method="GET" class="flex items-center space-x-4">
                     <select name="status" class="border border-gray-300 rounded-md px-4 py-2">
                         <option value="">All Statuses</option>
@@ -113,17 +125,16 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
 
             <!-- Reservations Table Section -->
-            <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 mb-8">
+            <div class="bg-white rounded-xl shadow-md mb-6 border border-gray-100 overflow-hidden">
                 <div class="flex items-center justify-between mb-6">
                     <div>
                         <h2 class="text-xl font-semibold text-gray-800">All Reservations</h2>
                         <p class="text-sm text-gray-500 mt-1">Review and manage incoming and past lab reservations</p>
                     </div>
                 </div>
-
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
@@ -133,63 +144,16 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Slot</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php if ($reservationsResult->num_rows > 0): ?>
-                                <?php while ($reservation = $reservationsResult->fetch_assoc()): ?>
-                                    <tr class="hover:bg-gray-100" data-id="<?php echo $reservation['reservation_id']; ?>">
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['idno']; ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['full_name']; ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['lab_name']; ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['pc_number']; ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo date('M d, Y', strtotime($reservation['reservation_date'])); ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['time_slot']; ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['purpose']; ?></td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                <?php echo ($reservation['status'] == 'pending') ? 'bg-yellow-100 text-yellow-800' : 
-                                                    (($reservation['status'] == 'approved') ? 'bg-green-100 text-green-800' : 
-                                                    (($reservation['status'] == 'rejected') ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800')) ?>">
-                                                <?php echo ucfirst($reservation['status']); ?>
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right">
-                                            <?php if ($reservation['status'] === 'pending'): ?>
-                                            <button class="accept-btn bg-green-500 text-white px-4 py-2 rounded-md" data-id="<?php echo $reservation['reservation_id']; ?>">Accept</button>
-                                            <button class="reject-btn bg-red-500 text-white px-4 py-2 rounded-md" data-id="<?php echo $reservation['reservation_id']; ?>">Reject</button>
-                                            <?php endif; ?>
-                                        </td>
-                                    </tr>
-                                <?php endwhile; ?>
-                            <?php else: ?>
-                                <tr><td colspan="9" class="text-center py-4 text-gray-500">No reservations found</td></tr>
-                            <?php endif; ?>
-                        </tbody>
+                        <tbody id="reservationsTableBody" class="divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
-
-                <!-- Pagination -->
-                <div class="mt-4 flex justify-between">
-                    <nav>
-                        <ul class="inline-flex space-x-2">
-                            <li>
-                                <a href="?page=1" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-l-lg">First</a>
-                            </li>
-                            <li>
-                                <a href="?page=<?php echo max(1, $page - 1); ?>" class="px-4 py-2 text-gray-700 border border-gray-300">Prev</a>
-                            </li>
-                            <li>
-                                <a href="?page=<?php echo min($totalPages, $page + 1); ?>" class="px-4 py-2 text-gray-700 border border-gray-300">Next</a>
-                            </li>
-                            <li>
-                                <a href="?page=<?php echo $totalPages; ?>" class="px-4 py-2 text-gray-700 border border-gray-300 rounded-r-lg">Last</a>
-                            </li>
-                        </ul>
-                    </nav>
-                </div>
             </div>
+            
+            <!-- Pagination -->
+            <div id="pagination" class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md border border-gray-100"></div>
         </div>
     </main>
 </div>
@@ -225,7 +189,7 @@ $conn->close();
                 try {
                     const response = JSON.parse(xhr.responseText);
                     if (response.success) {
-                        location.reload(); // Reload on success
+                        fetchData(); // Reload data via AJAX on success
                     } else {
                         alert('Error updating reservation status: ' + response.message);
                     }
@@ -240,4 +204,90 @@ $conn->close();
         // Send the POST request
         xhr.send('reservation_id=' + reservationId + '&status=' + status);
     }
+
+    // --- New JavaScript for Data Fetching and Pagination (similar to sit-in) ---
+
+    document.addEventListener("DOMContentLoaded", function () {
+        // Function to fetch reservation records data
+        function fetchData(page = 1) {
+            let statusFilter = document.querySelector('select[name="status"]').value;
+
+            fetch(`fetch_reservations.php?page=${page}&status=${encodeURIComponent(statusFilter)}`)
+                .then(response => response.json())
+                .then(data => {
+                    displayReservations(data.reservations);
+                    createPagination(data.pagination);
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    // Display an error message in the table body
+                    document.getElementById("reservationsTableBody").innerHTML = `
+                        <tr>
+                            <td colspan="9" class="text-center py-4 text-red-500">
+                                <i class="fas fa-exclamation-triangle mr-2"></i> Error loading reservations.
+                            </td>
+                        </tr>
+                    `;
+                });
+        }
+
+        // Function to display reservations in the table
+        function displayReservations(reservations) {
+            const tbody = document.getElementById("reservationsTableBody");
+            tbody.innerHTML = ''; // Clear existing rows
+
+            if (reservations.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-4 text-gray-500">No reservations found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            reservations.forEach(reservation => {
+                const row = document.createElement('tr');
+                row.classList.add("hover:bg-gray-100");
+                row.setAttribute('data-id', reservation.reservation_id);
+
+                const statusClass = (reservation.status === 'pending') ? 'bg-yellow-100 text-yellow-800' :
+                                    ((reservation.status === 'approved') ? 'bg-green-100 text-green-800' :
+                                    ((reservation.status === 'rejected') ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'));
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.idno}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.full_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.pc_number}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.time_slot}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.purpose}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
+                            ${reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-left">
+                        ${reservation.status === 'pending' ? `
+                        <button class="accept-btn bg-green-500 text-white px-4 py-2 rounded-md" data-id="${reservation.reservation_id}">Accept</button>
+                        <button class="reject-btn bg-red-500 text-white px-4 py-2 rounded-md" data-id="${reservation.reservation_id}">Reject</button>
+                        ` : ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Re-attach event listeners to the new buttons
+            attachButtonListeners();
+        }
+
+        // Function to create pagination controls (copy from sit-in records and adapt)
+        function createPagination(pagination) {
+            // ... (Implementation will be similar to the createPagination function in the provided sit-in records code) ...
+            // Need to adapt event listener to call fetchData(page)
+        }
+
+        // Initial fetch when the page loads
+        fetchData();
+    });
 </script>
