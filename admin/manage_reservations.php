@@ -41,7 +41,7 @@ $params = [];
 $types = '';
 
 if (!empty($statusFilter)) {
-    $whereClause = "WHERE status = ?";
+    $whereClause = "WHERE r.status = ?";
     $params[] = $statusFilter;
     $types .= 's';
 }
@@ -60,7 +60,17 @@ $totalRecords = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRecords / $limit);
 
 // Fetch reservations
-$reservationsQuery = "SELECT * FROM reservations " . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$reservationsQuery = "
+    SELECT 
+        r.*, 
+        u.id_number as idno,
+        u.full_name as full_name
+    FROM 
+        reservations r
+    JOIN 
+        users u ON r.user_id = u.id
+    " . $whereClause . " 
+    ORDER BY r.created_at DESC LIMIT ? OFFSET ?";
 $reservationsStmt = $conn->prepare($reservationsQuery);
 
 if (!empty($params)) {
@@ -75,7 +85,9 @@ if (!empty($params)) {
 $reservationsStmt->execute();
 $reservationsResult = $reservationsStmt->get_result();
 ?>
-<main class="flex-1 pt-10 p-6">
+<div class="mt-10 flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
+    <?php include '../shared/aside.php'; ?>
+    <main class="flex-1 pt-10 p-6">
     <div class="max-w-[1400px] mx-auto">
         <div class="flex items-center justify-between mb-8">
             <div>
@@ -102,12 +114,20 @@ $reservationsResult = $reservationsStmt->get_result();
         </div>
 
         <!-- Reservations Table -->
-        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100">
+        <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 mb-8">
+             <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">All Reservations</h2>
+                        <p class="text-sm text-gray-500 mt-1">Review and manage incoming and past lab reservations</p>
+                    </div>
+                    <button class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID Number</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab Name</th>
@@ -123,7 +143,6 @@ $reservationsResult = $reservationsStmt->get_result();
                         <?php if ($reservationsResult->num_rows > 0): ?>
                             <?php while ($reservation = $reservationsResult->fetch_assoc()): ?>
                                 <tr class="hover:bg-gray-100" data-id="<?php echo $reservation['reservation_id']; ?>">
-                                    <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['reservation_id']; ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['idno']; ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['full_name']; ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['lab_name']; ?></td>
@@ -133,7 +152,7 @@ $reservationsResult = $reservationsStmt->get_result();
                                     <td class="px-6 py-4 whitespace-nowrap"><?php echo $reservation['purpose']; ?></td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo ($reservation['status'] == 'pending') ? 'bg-yellow-100 text-yellow-800' : (($reservation['status'] == 'approved') ? 'bg-green-100 text-green-800' : (($reservation['status'] == 'rejected') ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')); ?>">
-                                            <?php echo ucfirst($reservation['status']); ?>
+                                             <?php echo ucfirst(htmlspecialchars($reservation['status'])); ?>
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -147,7 +166,7 @@ $reservationsResult = $reservationsStmt->get_result();
                         <?php else: ?>
                             <tr>
                                 <td colspan="10" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No reservations found.</td>
-                            </tr>
+                            </tr> 
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -185,7 +204,13 @@ $reservationsResult = $reservationsStmt->get_result();
             </div>
         <?php endif; ?>
     </div>
-</main>
+    </main>
+</div>
+
+<?php require_once '../shared/footer.php'; ?>
+
+<!-- Include Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const acceptButtons = document.querySelectorAll('.accept-btn');
