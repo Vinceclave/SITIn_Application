@@ -27,6 +27,10 @@ $selectStmt->bind_param("i", $reservation_id);
 $selectStmt->execute();
 $selectResult = $selectStmt->get_result();
 $reservationData = $selectResult->fetch_assoc();
+if (!$reservationData) {
+ echo json_encode(['success' => false, 'message' => 'Reservation not found']);
+ exit;
+}
 $selectStmt->close();
 
 $success = true;
@@ -43,26 +47,33 @@ if ($reservationData) {
         $in_time = date('Y-m-d H:i:s'); // Current timestamp for initial insertion
         $sit_in_status = 'sitting'; // Initial status for sit_in table
 
-        // Insert into sit_in table
-        $insertStmt = $conn->prepare("INSERT INTO sit_in (idno, full_name, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $insertStmt->bind_param("sssssss", $idno, $full_name, $lab, $reason, $in_time, $sit_date, $sit_in_status);
-        if(!$insertStmt->execute()){
+ // Update the reservation status to approved
+        $updateStmt = $conn->prepare("UPDATE reservations SET status = ? WHERE reservation_id = ?");
+        $updateStmt->bind_param("si", $status, $reservation_id);
+ if (!$updateStmt->execute()) {
             $success = false;
-            $message = 'Error inserting into sit_in table';
+ $message = 'Error updating reservation status: ' . $conn->error;
         }
-        $insertStmt->close();
+ $updateStmt->close();
 
-        // Update the reservation status to approved
+        // Insert into sit_in table
+ if ($success) { // Only insert into sit_in if reservation status update was successful
+            $insertStmt = $conn->prepare("INSERT INTO sit_in (idno, full_name, lab, reason, in_time, sit_date, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+ $insertStmt->bind_param("sssssss", $idno, $full_name, $lab, $reason, $in_time, $sit_date, $sit_in_status);
+ if (!$insertStmt->execute()) {
+                $success = false;
+ $message = 'Error inserting into sit_in table: ' . $conn->error;
+            }
+ $insertStmt->close();
+        }
+    } else { // For other statuses like rejected or completed
         $updateStmt = $conn->prepare("UPDATE reservations SET status = ? WHERE reservation_id = ?");
         $updateStmt->bind_param("si", $status, $reservation_id);
-        $updateStmt->execute();
-        $updateStmt->close();
-    }
-    else { // For other statuses like rejected or completed
-        $updateStmt = $conn->prepare("UPDATE reservations SET status = ? WHERE reservation_id = ?");
-        $updateStmt->bind_param("si", $status, $reservation_id);
-        $updateStmt->execute();
-        $updateStmt->close();
+ if (!$updateStmt->execute()) {
+            $success = false;
+ $message = 'Error updating reservation status: ' . $conn->error;
+        }
+ $updateStmt->close();
     }
 }
 
