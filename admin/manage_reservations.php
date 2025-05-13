@@ -220,9 +220,15 @@ $conn->close();
         
         xhr.onload = function() {
             if (xhr.status === 200) {
-                if (xhr.responseText === 'success') {
-                    // Reload the page to reflect the status change
-                    location.reload();
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        location.reload(); // Reload on success
+                    } else {
+                        alert('Error updating reservation status: ' + response.message);
+                    }
+                } catch (e) {
+                    alert('Error parsing response from server: ' + xhr.responseText);
                 } else {
                     alert('Error updating reservation status: ' + xhr.responseText);
                 }
