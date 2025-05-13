@@ -1,8 +1,12 @@
 <?php if (basename($_SERVER['PHP_SELF']) != 'login.php' && basename($_SERVER['PHP_SELF']) != 'register.php'): ?>
-    <footer class="backdrop-blur-sm border-t border-gray-200/50 p-4 text-center w-full fixed bottom-0 
-        <?php echo ($_SESSION['role'] == 'Admin') ? 'pl-52' : ''; ?>">
-        <div class="container mx-auto px-4">
-            <p class="text-gray-700">&copy; 2023 SITIn Application. All rights reserved.</p>
+<footer class="fixed bottom-0 inset-x-0 z-40 border-t border-slate-200/10 dark:border-slate-700/10 backdrop-blur-lg <?php echo ($_SESSION['role'] == 'Admin') ? 'pl-64' : ''; ?>">
+    <div class="absolute inset-0 bg-white/70 dark:bg-slate-900/70"></div>
+    <div class="container mx-auto px-4 py-3 relative">
+        <div class="flex items-center justify-center">
+            <span class="text-sm text-slate-600 dark:text-slate-400">
+                &copy; <?php echo date('Y'); ?> SITIn Application
+            </span>
         </div>
-    </footer>
+    </div>
+</footer>
 <?php endif; ?>

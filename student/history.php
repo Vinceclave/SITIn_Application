@@ -27,111 +27,179 @@ $sitInStmt->bind_param("s", $idno);
 $sitInStmt->execute();
 $sitInResult = $sitInStmt->get_result();
 ?>
-<!-- Include Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
 
-<div class="container max-w-[1400px] mx-auto mt-20 p-6 flex">
+<?php if(isset($_SESSION['success'])): ?>
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+<script>
+    Notiflix.Notify.success("<?php echo addslashes($_SESSION['success']); ?>");
+</script>
+<?php unset($_SESSION['success']); endif; ?>
+
+<?php if(isset($_SESSION['error'])): ?>
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+<script>
+    Notiflix.Notify.failure("<?php echo addslashes($_SESSION['error']); ?>");
+</script>
+<?php unset($_SESSION['error']); endif; ?>
+
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="w-full p-4 sm:p-6 md:p-8 lg:p-10">
-        <!-- Header Section -->
-        <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 sm:p-8 text-white mb-8 shadow-lg">
-            <div class="flex items-center gap-4">
-                <i class="fas fa-history text-4xl opacity-90"></i>
-                <div>
-                    <h1 class="text-3xl sm:text-4xl font-bold">Lab Session History</h1>
-                    <p class="text-indigo-100 mt-2">Track your laboratory usage and sessions</p>
+    <main class="flex-1 p-6 pt-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- Welcome Section -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                        <i class="fas fa-history text-2xl text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Lab Session History</h1>
+                        <p class="text-lg text-gray-600">Welcome, <span class="font-medium text-indigo-600"><?php echo htmlspecialchars($user['username']); ?></span>!</p>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Success/Error Messages -->
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="mb-4 p-4 bg-green-100 border border-green-200 text-green-700 rounded-lg flex items-center">
-                <i class="fas fa-check-circle mr-2"></i>
-                <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
-            </div>
-        <?php endif; ?>
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="mb-4 p-4 bg-red-100 border border-red-200 text-red-700 rounded-lg flex items-center">
-                <i class="fas fa-exclamation-circle mr-2"></i>
-                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
-            </div>
-        <?php endif; ?>
+            <!-- Stats Section -->
+            <?php
+            // Get total sessions count
+            $totalSessionsQuery = "SELECT COUNT(*) as total FROM sit_in WHERE idno = ?";
+            $totalSessionsStmt = $conn->prepare($totalSessionsQuery);
+            $totalSessionsStmt->bind_param("s", $idno);
+            $totalSessionsStmt->execute();
+            $totalSessions = $totalSessionsStmt->get_result()->fetch_assoc()['total'];
 
-        <!-- History Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200/50 backdrop-blur-sm overflow-hidden">
-            <div class="border-b border-gray-200/50 px-6 py-4 flex items-center gap-3">
-                <i class="fas fa-table text-indigo-600"></i>
-                <h2 class="text-xl font-semibold">Session History</h2>
+            // Get total labs visited
+            $totalLabsQuery = "SELECT COUNT(DISTINCT lab) as total FROM sit_in WHERE idno = ?";
+            $totalLabsStmt = $conn->prepare($totalLabsQuery);
+            $totalLabsStmt->bind_param("s", $idno);
+            $totalLabsStmt->execute();
+            $totalLabs = $totalLabsStmt->get_result()->fetch_assoc()['total'];
+
+            // Get total feedback submitted
+            $totalFeedbackQuery = "SELECT COUNT(*) as total FROM feedback WHERE idno = ?";
+            $totalFeedbackStmt = $conn->prepare($totalFeedbackQuery);
+            $totalFeedbackStmt->bind_param("s", $idno);
+            $totalFeedbackStmt->execute();
+            $totalFeedback = $totalFeedbackStmt->get_result()->fetch_assoc()['total'];
+            ?>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-indigo-100">Total Sessions</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-laptop-code text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalSessions); ?></p>
+                    <p class="text-indigo-200 text-sm mt-1">Laboratory sessions attended</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-emerald-100">Labs Visited</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-building text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalLabs); ?></p>
+                    <p class="text-emerald-200 text-sm mt-1">Unique laboratories visited</p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-white p-6 rounded-xl shadow-md hover:shadow-xl transform hover:scale-105 transition duration-200">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold text-amber-100">Feedback Given</h2>
+                        <div class="bg-white/20 p-2 rounded-lg">
+                            <i class="fas fa-comments text-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-3xl font-bold mt-2"><?php echo number_format($totalFeedback); ?></p>
+                    <p class="text-amber-200 text-sm mt-1">Total feedback submitted</p>
+                </div>
             </div>
-            <div class="p-6">
-                <?php if ($sitInResult->num_rows > 0): ?>
-                    <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="bg-gray-50 text-left">
-                                    <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
-                                        <i class="fas fa-laptop-code mr-2"></i>Lab
-                                    </th>
-                                    <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
-                                        <i class="fas fa-clipboard-list mr-2"></i>Reason
-                                    </th>
-                                    <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
-                                        <i class="fas fa-clock mr-2"></i>In Time
-                                    </th>
-                                    <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
-                                        <i class="fas fa-clock mr-2"></i>Out Time
-                                    </th>
-                                    <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
-                                        <i class="fas fa-cogs mr-2"></i>Actions
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <?php 
-                                $sitInStmt->execute();
-                                $sitInResult = $sitInStmt->get_result();
-                                while ($row = $sitInResult->fetch_assoc()): 
-                                ?>
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4"><?php echo htmlspecialchars($row['lab']); ?></td>
-                                        <td class="px-6 py-4"><?php echo htmlspecialchars($row['reason']); ?></td>
-                                        <td class="px-6 py-4"><?php echo htmlspecialchars($row['in_time']); ?></td>
-                                        <td class="px-6 py-4"><?php echo htmlspecialchars($row['out_time']); ?></td>
-                                        <td class="px-6 py-4">
-                                            <button 
-                                                onclick="openModalWithLab('<?php echo htmlspecialchars($row['lab']); ?>')" 
-                                                class="inline-flex items-center px-3 py-1.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-all duration-200 shadow-sm hover:shadow-md">
-                                                <i class="fas fa-flag mr-1"></i>
-                                                Report Issue
-                                            </button>
-                                        </td>
+
+            <!-- History Table Section -->
+            <div class="bg-white rounded-xl shadow-md border border-gray-100">
+                <div class="p-6 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-100 p-2 rounded-lg">
+                                <i class="fas fa-table text-indigo-600"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-gray-800">Session History</h2>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-6">
+                    <?php if ($sitInResult->num_rows > 0): ?>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50 text-left">
+                                        <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
+                                            <i class="fas fa-laptop-code mr-2"></i>Lab
+                                        </th>
+                                        <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
+                                            <i class="fas fa-clipboard-list mr-2"></i>Reason
+                                        </th>
+                                        <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
+                                            <i class="fas fa-clock mr-2"></i>In Time
+                                        </th>
+                                        <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
+                                            <i class="fas fa-clock mr-2"></i>Out Time
+                                        </th>
+                                        <th class="px-6 py-3 text-gray-600 font-semibold tracking-wider">
+                                            <i class="fas fa-cogs mr-2"></i>Actions
+                                        </th>
                                     </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="text-center py-8">
-                        <i class="fas fa-inbox text-4xl text-gray-400 mb-3"></i>
-                        <p class="text-gray-600">No session history found.</p>
-                    </div>
-                <?php endif; ?>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <?php while ($row = $sitInResult->fetch_assoc()): ?>
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($row['lab']); ?></td>
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($row['reason']); ?></td>
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($row['in_time']); ?></td>
+                                            <td class="px-6 py-4"><?php echo htmlspecialchars($row['out_time']); ?></td>
+                                            <td class="px-6 py-4">
+                                                <button 
+                                                    onclick="openModalWithLab('<?php echo htmlspecialchars($row['lab']); ?>')" 
+                                                    class="inline-flex items-center px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200">
+                                                    <i class="fas fa-flag mr-1"></i>
+                                                    Report Issue
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endwhile; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-12">
+                            <div class="bg-gray-100 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-history text-2xl text-gray-400"></i>
+                            </div>
+                            <h3 class="text-xl font-medium text-gray-600 mb-2">No Session History</h3>
+                            <p class="text-gray-500">You haven't attended any laboratory sessions yet.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </main>
 </div>
 
 <!-- Feedback Modal -->
-<div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center backdrop-blur-sm">
+<div id="feedbackModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center backdrop-blur-sm z-50">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 transform transition-all">
         <div class="p-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-2xl font-semibold flex items-center">
-                    <i class="fas fa-flag text-indigo-600 mr-2"></i>
-                    Submit Feedback
-                </h2>
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-indigo-100 p-2 rounded-lg">
+                        <i class="fas fa-flag text-indigo-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Submit Feedback</h2>
+                </div>
                 <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
@@ -139,26 +207,29 @@ $sitInResult = $sitInStmt->get_result();
             <form action="submit_feedback.php" method="POST" id="feedbackForm">
                 <input type="hidden" name="idno" value="<?php echo htmlspecialchars($idno); ?>">
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-laptop-code mr-2"></i>Lab
-                    </label>
-                    <input type="text" name="lab" 
-                           class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
-                           required>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">
+                            <i class="fas fa-laptop-code mr-2"></i>Lab
+                        </label>
+                        <input type="text" name="lab" 
+                               class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                               required readonly>
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-medium mb-2">
+                            <i class="fas fa-comment-alt mr-2"></i>Message
+                        </label>
+                        <textarea name="message" 
+                                  class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                                  rows="4" 
+                                  required
+                                  placeholder="Describe the issue you encountered..."></textarea>
+                    </div>
                 </div>
 
-                <div class="mb-6">
-                    <label class="block text-gray-700 font-medium mb-2">
-                        <i class="fas fa-comment-alt mr-2"></i>Message
-                    </label>
-                    <textarea name="message" 
-                              class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
-                              rows="4" 
-                              required></textarea>
-                </div>
-
-                <div class="flex justify-end space-x-3">
+                <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" onclick="closeModal()" 
                             class="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-all">
                         Cancel
