@@ -83,11 +83,6 @@ if (!empty($params)) {
 $reservationsStmt->execute();
 $reservationsResult = $reservationsStmt->get_result();
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
- header("Location: ../login.php");
- exit;
-}
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -101,6 +96,7 @@ if (!isset($_SESSION['user_id'])) {
                     <div class="bg-indigo-100 p-3 rounded-full">
                         <i class="fas fa-calendar-check text-2xl text-indigo-600"></i>
                     </div>
+                </div>
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800 mb-2">Manage Reservations</h1>
                     <p class="text-lg text-gray-600">Review and manage lab reservations</p>
@@ -108,7 +104,7 @@ if (!isset($_SESSION['user_id'])) {
             </div>
 
             <!-- Filter Section -->
-            <div class="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100" id="filterSection">
                 <form method="GET" class="flex items-center space-x-4">
                     <select name="status" class="border border-gray-300 rounded-md px-4 py-2">
                         <option value="">All Statuses</option>
@@ -116,7 +112,7 @@ if (!isset($_SESSION['user_id'])) {
                         <option value="approved" <?php echo ($statusFilter == 'approved') ? 'selected' : ''; ?>>Approved</option>
                         <option value="rejected" <?php echo ($statusFilter == 'rejected') ? 'selected' : ''; ?>>Rejected</option>
                         <option value="completed" <?php echo ($statusFilter == 'completed') ? 'selected' : ''; ?>>Completed</option>
-                    </select>
+ </select>
                     <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors">Filter</button>
                     <?php if (!empty($statusFilter)): ?>
                         <a href="manage_reservations.php" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-colors">Clear Filter</a>
@@ -147,42 +143,8 @@ if (!isset($_SESSION['user_id'])) {
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="reservationsTableBody" class="divide-y divide-gray-200"></tbody>
+ <tbody id="reservationsTableBody" class="divide-y divide-gray-200"></tbody>
                     </table>
-                </div>
-            </div>
-            
-            <!-- Pagination -->
-            <div id="pagination" class="flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md border border-gray-100"></div>
-        </div>
-    </main>
-</div>
-
-<?php
-// Close database connection
-$conn->close();
-?>
-
-<script>
-    // Handle Accept and Reject actions via AJAX
-    document.querySelectorAll('.accept-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            let reservationId = this.getAttribute('data-id');
-            updateReservationStatus(reservationId, 'approved');
-        });
-    });
-
-    document.querySelectorAll('.reject-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            let reservationId = this.getAttribute('data-id');
-            updateReservationStatus(reservationId, 'rejected');
-        });
-    });
-
-    function updateReservationStatus(reservationId, status) {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'update_reservation_status.php', true);
-        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -208,7 +170,7 @@ $conn->close();
     // --- New JavaScript for Data Fetching and Pagination (similar to sit-in) ---
 
     document.addEventListener("DOMContentLoaded", function () {
-        // Function to fetch reservation records data
+        let currentPage = 1; // Track the current page
         function fetchData(page = 1) {
             let statusFilter = document.querySelector('select[name="status"]').value;
 
@@ -250,6 +212,11 @@ $conn->close();
                 row.classList.add("hover:bg-gray-100");
                 row.setAttribute('data-id', reservation.reservation_id);
 
+                const reservationDate = new Date(reservation.reservation_date);
+                const formattedDate = reservationDate.toLocaleDateString('en-US', {
+                    month: 'short', day: 'numeric', year: 'numeric'
+                });
+
                 const statusClass = (reservation.status === 'pending') ? 'bg-yellow-100 text-yellow-800' :
                                     ((reservation.status === 'approved') ? 'bg-green-100 text-green-800' :
                                     ((reservation.status === 'rejected') ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'));
@@ -260,7 +227,7 @@ $conn->close();
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.pc_number}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${reservation.time_slot}</td>
+ <td class="px-6 py-4 whitespace-nowrap">${formattedDate}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
@@ -269,8 +236,8 @@ $conn->close();
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-left">
                         ${reservation.status === 'pending' ? `
-                        <button class="accept-btn bg-green-500 text-white px-4 py-2 rounded-md" data-id="${reservation.reservation_id}">Accept</button>
-                        <button class="reject-btn bg-red-500 text-white px-4 py-2 rounded-md" data-id="${reservation.reservation_id}">Reject</button>
+                        <button class="accept-btn bg-green-500 text-white px-4 py-2 rounded-md text-xs mr-2" data-id="${reservation.reservation_id}">Accept</button>
+                        <button class="reject-btn bg-red-500 text-white px-4 py-2 rounded-md text-xs" data-id="${reservation.reservation_id}">Reject</button>
                         ` : ''}
                     </td>
                 `;
@@ -278,16 +245,146 @@ $conn->close();
             });
             
             // Re-attach event listeners to the new buttons
-            attachButtonListeners();
+            attachActionListener();
+        }
+
+        // Function to attach event listeners to action buttons (Accept/Reject)
+        function attachActionListener() {
+            document.querySelectorAll('.accept-btn').forEach(button => {
+                button.removeEventListener('click', handleActionListener); // Prevent duplicate listeners
+                button.addEventListener('click', handleActionListener);
+            });
+            document.querySelectorAll('.reject-btn').forEach(button => {
+                button.removeEventListener('click', handleActionListener); // Prevent duplicate listeners
+                button.addEventListener('click', handleActionListener);
+            });
+        }
+
+        // Unified handler for Accept/Reject button clicks
+        function handleActionListener() {
+            const reservationId = this.getAttribute('data-id');
+            const status = this.classList.contains('accept-btn') ? 'approved' : 'rejected';
+            updateReservationStatus(reservationId, status);
+        }
+
+        function updateReservationStatus(reservationId, status) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'update_reservation_status.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            // Refresh data via AJAX on success
+                            fetchData(currentPage); 
+                        } else {
+                            alert('Error updating reservation status: ' + response.message);
+                        }
+                    } catch (e) {
+                        alert('Error parsing response from server: ' + xhr.responseText);
+                    }
+                } else {
+                    alert('Error updating reservation status: Server returned status ' + xhr.status);
+                }
+            };
+            
+            xhr.onerror = function() {
+                alert('Network error occurred while updating reservation status.');
+            };
+
+            // Send the POST request
+            xhr.send('reservation_id=' + reservationId + '&status=' + status);
         }
 
         // Function to create pagination controls (copy from sit-in records and adapt)
         function createPagination(pagination) {
-            // ... (Implementation will be similar to the createPagination function in the provided sit-in records code) ...
-            // Need to adapt event listener to call fetchData(page)
+            const paginationElement = document.getElementById('pagination');
+            paginationElement.innerHTML = ''; // Clear existing pagination
+
+            if (pagination.totalPages <= 1) {
+                return; // No pagination needed
+            }
+
+            currentPage = pagination.currentPage; // Update current page tracker
+
+            // Create info text
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'text-sm text-gray-500';
+            infoDiv.textContent = `Page ${pagination.currentPage} of ${pagination.totalPages} (${pagination.totalRecords} records)`;
+            paginationElement.appendChild(infoDiv);
+
+            // Create a container for the pagination buttons
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'flex space-x-2';
+
+            // Previous button
+            if (pagination.currentPage > 1) {
+                buttonsDiv.appendChild(createPaginationButton('Prev', pagination.currentPage - 1));
+            }
+
+            // Page number buttons (simplified for brevity, can add ellipsis logic)
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, pagination.currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(pagination.totalPages, startPage + maxVisiblePages - 1);
+            if (endPage - startPage + 1 < maxVisiblePages && startPage > 1) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            if (startPage > 1) {
+                buttonsDiv.appendChild(createPaginationButton('1', 1));
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'px-3 py-2 text-gray-500';
+                    ellipsis.textContent = '...';
+                    buttonsDiv.appendChild(ellipsis);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = createPaginationButton(i.toString(), i);
+                if (i === pagination.currentPage) {
+                    pageButton.classList.add('bg-indigo-600', 'text-white');
+                    pageButton.classList.remove('bg-gray-200', 'hover:bg-gray-300');
+                }
+                buttonsDiv.appendChild(pageButton);
+            }
+
+            if (endPage < pagination.totalPages) {
+                 if (endPage < pagination.totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'px-3 py-2 text-gray-500';
+                    ellipsis.textContent = '...';
+                    buttonsDiv.appendChild(ellipsis);
+                }
+                buttonsDiv.appendChild(createPaginationButton(pagination.totalPages.toString(), pagination.totalPages));
+            }
+
+            // Next button
+            if (pagination.currentPage < pagination.totalPages) {
+                buttonsDiv.appendChild(createPaginationButton('Next', pagination.currentPage + 1));
+            }
+
+            paginationElement.appendChild(buttonsDiv);
+        }
+
+        // Helper function to create pagination buttons
+        function createPaginationButton(text, page) {
+            const button = document.createElement('button');
+            button.className = 'px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors text-sm';
+            button.textContent = text;
+            button.addEventListener('click', function() {
+                fetchData(page);
+                 // Scroll to top of the table with smooth animation
+                 document.querySelector('.overflow-x-auto').scrollIntoView({ behavior: 'smooth' });
+            });
+            return button;
         }
 
         // Initial fetch when the page loads
         fetchData();
     });
 </script>
+
+<?php require_once '../shared/footer.php'; ?>
