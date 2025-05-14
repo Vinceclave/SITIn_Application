@@ -32,6 +32,7 @@ $limit = 10;
 $page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
 $offset = ($page - 1) * $limit;
 
+
 // Filter
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : '';
 $whereClause = '';
@@ -45,7 +46,7 @@ if (!empty($statusFilter)) {
 }
 
 // Count total records
-$countQuery = "SELECT COUNT(*) as total FROM reservations " . $whereClause;
+$countQuery = "SELECT COUNT(*) as total FROM reservations r " . $whereClause;
 $countStmt = $conn->prepare($countQuery);
 
 if (!empty($params)) {
@@ -143,9 +144,13 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
- <tbody id="reservationsTableBody" class="divide-y divide-gray-200"></tbody>
+                        <tbody id="reservationsTableBody" class="divide-y divide-gray-200"><!-- Reservation data will be loaded here by JavaScript --></tbody>
+                    </table>
+                </div>
+                <div id="pagination" class="p-6 flex justify-between items-center">
  </table>
-
+                </div>
+            </div>
     document.addEventListener("DOMContentLoaded", function () {
         let currentPage = 1; // Track the current page
         function fetchData(page = 1) {
@@ -201,7 +206,7 @@ $reservationsResult = $reservationsStmt->get_result();
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.idno}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.full_name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.pc_number}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
  <td class="px-6 py-4 whitespace-nowrap">${formattedDate}</td>
@@ -358,6 +363,7 @@ $reservationsResult = $reservationsStmt->get_result();
             });
             return button;
         }
+    });
 
         // Initial fetch when the page loads
         fetchData();
