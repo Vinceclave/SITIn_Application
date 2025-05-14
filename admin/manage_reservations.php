@@ -85,14 +85,16 @@ $reservationsStmt->execute();
 $reservationsResult = $reservationsStmt->get_result();
 
 // Fetch labs for displaying PC availability
-$labsQuery = "SELECT * FROM labs ORDER BY lab_name ASC";
+$labsQuery = "SELECT * FROM labs";
 $labsResult = $conn->query($labsQuery);
 $labs = [];
 while ($lab = $labsResult->fetch_assoc()) {
     $labs[] = $lab;
 }
 
-// Fetch current sit-in data
+// Fetch active sit-in sessions by joining sit_in and pcs tables
+// Corrected query based on database schema
+/*
 $currentSitInQuery = "SELECT pc_id, student_idno FROM current_sitin";
 $currentSitInResult = $conn->query($currentSitInQuery);
 $currentSitIns = [];
@@ -100,6 +102,23 @@ while ($sitin = $currentSitInResult->fetch_assoc()) {
     $currentSitIns[$sitin['pc_id']] = $sitin['student_idno'];
 }
 
+*/
+$activeSitinQuery = "
+    SELECT
+ pc.lab_name,
+ pc.pc_number,
+ si.idno AS student_idno
+    FROM
+ sit_in si
+ JOIN
+ pcs pc ON si.lab = pc.lab_name
+    WHERE
+ si.out_time IS NULL"; // Assuming out_time is NULL for active sessions
+$activeSitinResult = $conn->query($activeSitinQuery);
+$activeSitinPCs = [];
+while ($row = $activeSitinResult->fetch_assoc()) {
+    $activeSitinPCs[$row['lab_name'] . '-' . $row['pc_number']] = $row['student_idno'];
+}
 
 ?>
 
@@ -177,14 +196,14 @@ while ($sitin = $currentSitInResult->fetch_assoc()) {
                     <?php foreach ($labs as $lab): ?>
                         <div class="mb-6">
                             <h3 class="text-lg font-medium text-gray-700 mb-3"><?php echo htmlspecialchars($lab['lab_name']); ?></h3>
-                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                                <?php for ($i = 1; $i <= $lab['number_of_pcs']; $i++): ?>
+                            <div class="grid grid-cols-auto-fill-sm gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                <?php for ($i = 1; $i <= $lab['total_pcs']; $i++): ?>
                                     <?php
-                                    $pcId = $lab['id'] . '-' . $i;
-                                    $isOccupied = isset($currentSitIns[$pcId]);
-                                    $statusClass = $isOccupied ? 'bg-red-200 text-red-800 border-red-300' : 'bg-green-200 text-green-800 border-green-300 hover:bg-green-300 cursor-pointer';
+                                    $pcIdentifier = $lab['lab_name'] . '-' . $i;
+                                    $isOccupied = isset($activeSitinPCs[$pcIdentifier]);
+                                    $statusClass = $isOccupied ? 'bg-red-100 text-red-800 border-red-200 cursor-not-allowed' : 'bg-green-100 text-green-800 border-green-200 cursor-pointer hover:bg-green-200';
                                     $statusText = $isOccupied ? 'Occupied' : 'Available';
-                                    $studentIdno = $isOccupied ? $currentSitIns[$pcId] : '';
+                                    $studentIdno = $isOccupied ? $activeSitinPCs[$pcIdentifier] : '';
                                     ?>
                                     <div class="flex flex-col items-center justify-center p-4 rounded-md border shadow-sm text-center <?php echo $statusClass; ?>"
                                          data-pc-id="<?php echo htmlspecialchars($pcId); ?>"
@@ -196,7 +215,7 @@ while ($sitin = $currentSitInResult->fetch_assoc()) {
                                         <span class="text-xs"><?php echo $statusText; ?></span>
                                         <?php if ($isOccupied): ?>
                                             <span class="text-xs mt-1">Student ID: <?php echo htmlspecialchars($studentIdno); ?></span>
-                                            <button class="mt-2 px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600" onclick="event.stopPropagation(); endSitIn('<?php echo htmlspecialchars($pcId); ?>')">End Sit-in</button>
+                                            <button class="mt-2 px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600" onclick="event.stopPropagation(); endSitIn('<?php echo htmlspecialchars($pcIdentifier); ?>')">End Sit-in</button>
                                         <?php endif; ?>
                                     </div>
                                 <?php endfor; ?>
@@ -371,13 +390,13 @@ while ($sitin = $currentSitInResult->fetch_assoc()) {
                 row.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.idno}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.full_name}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name || 'N/A'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.pc_number}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.time_slot}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
-                            ${reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}
+                            ${reservation.status.charAt(0).toUpperCase() + reservation.status.slice(1)}                            
                         </span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-left">
