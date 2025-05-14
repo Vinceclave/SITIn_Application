@@ -148,7 +148,6 @@ $reservationsResult = $reservationsStmt->get_result();
                     </table>
                 </div>
                 <div id="pagination" class="p-6 flex justify-between items-center">
- </table>
                 </div>
             </div>
     document.addEventListener("DOMContentLoaded", function () {
