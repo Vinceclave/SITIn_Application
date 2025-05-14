@@ -84,6 +84,23 @@ if (!empty($params)) {
 $reservationsStmt->execute();
 $reservationsResult = $reservationsStmt->get_result();
 
+// Fetch labs for displaying PC availability
+$labsQuery = "SELECT * FROM labs ORDER BY lab_name ASC";
+$labsResult = $conn->query($labsQuery);
+$labs = [];
+while ($lab = $labsResult->fetch_assoc()) {
+    $labs[] = $lab;
+}
+
+// Fetch current sit-in data
+$currentSitInQuery = "SELECT pc_id, student_idno FROM current_sitin";
+$currentSitInResult = $conn->query($currentSitInQuery);
+$currentSitIns = [];
+while ($sitin = $currentSitInResult->fetch_assoc()) {
+    $currentSitIns[$sitin['pc_id']] = $sitin['student_idno'];
+}
+
+
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -138,7 +155,6 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lab Name</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PC Number</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reservation Date</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time Slot</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purpose</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -148,10 +164,156 @@ $reservationsResult = $reservationsStmt->get_result();
                     </table>
                 </div>
                 <div id="pagination" class="p-6 flex justify-between items-center">
+
                 </div>
             </div>
-    document.addEventListener("DOMContentLoaded", function () {
+
+            <!-- PC Availability Section -->
+            <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">PC Availability & Sit-in</h2>
+                <?php if (empty($labs)): ?>
+                    <p class="text-gray-500">No labs configured.</p>
+                <?php else: ?>
+                    <?php foreach ($labs as $lab): ?>
+                        <div class="mb-6">
+                            <h3 class="text-lg font-medium text-gray-700 mb-3"><?php echo htmlspecialchars($lab['lab_name']); ?></h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                <?php for ($i = 1; $i <= $lab['number_of_pcs']; $i++): ?>
+                                    <?php
+                                    $pcId = $lab['id'] . '-' . $i;
+                                    $isOccupied = isset($currentSitIns[$pcId]);
+                                    $statusClass = $isOccupied ? 'bg-red-200 text-red-800 border-red-300' : 'bg-green-200 text-green-800 border-green-300 hover:bg-green-300 cursor-pointer';
+                                    $statusText = $isOccupied ? 'Occupied' : 'Available';
+                                    $studentIdno = $isOccupied ? $currentSitIns[$pcId] : '';
+                                    ?>
+                                    <div class="flex flex-col items-center justify-center p-4 rounded-md border shadow-sm text-center <?php echo $statusClass; ?>"
+                                         data-pc-id="<?php echo htmlspecialchars($pcId); ?>"
+                                         data-lab-id="<?php echo htmlspecialchars($lab['id']); ?>"
+                                         data-pc-number="<?php echo htmlspecialchars($i); ?>"
+                                         <?php echo !$isOccupied ? 'onclick="openSitInModal(\'' . htmlspecialchars($pcId) . '\', \'' . htmlspecialchars($lab['lab_name']) . '\', \'' . htmlspecialchars($i) . '\')"' : ''; ?>>
+                                        <i class="fas fa-desktop text-2xl mb-2"></i>
+                                        <span class="font-semibold">PC <?php echo $i; ?></span>
+                                        <span class="text-xs"><?php echo $statusText; ?></span>
+                                        <?php if ($isOccupied): ?>
+                                            <span class="text-xs mt-1">Student ID: <?php echo htmlspecialchars($studentIdno); ?></span>
+                                            <button class="mt-2 px-3 py-1 bg-red-500 text-white text-xs rounded hover:bg-red-600" onclick="event.stopPropagation(); endSitIn('<?php echo htmlspecialchars($pcId); ?>')">End Sit-in</button>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endfor; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Sit-in Modal -->
+        <div id="sitInModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+            <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                <div class="mt-3 text-center">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Initiate Sit-in</h3>
+                    <div class="mt-2 px-7 py-3">
+                        <p class="text-sm text-gray-500" id="sitInModalDetails"></p>
+                        <form id="sitInForm" class="mt-4">
+                            <input type="hidden" id="modalPcId" name="pc_id">
+                            <div class="mb-4">
+                                <label for="studentIdno" class="block text-left text-sm font-medium text-gray-700">Student ID Number</label>
+                                <input type="text" id="studentIdno" name="student_idno" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                            </div>
+                            <div class="mb-4">
+                                <label for="reason" class="block text-left text-sm font-medium text-gray-700">Reason for Sit-in</label>
+                                <textarea id="reason" name="reason" rows="3" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                            </div>
+                            <div class="items-center px-4 py-3">
+                                <button type="submit" class="px-4 py-2 bg-green-500 text-white text-base font-medium rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300 mr-2">
+                                    Start Sit-in
+                                </button>
+                                <button type="button" onclick="closeSitInModal()" class="px-4 py-2 bg-gray-400 text-white text-base font-medium rounded-md shadow-sm hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
         let currentPage = 1;
+
+        // Function to open the sit-in modal
+        window.openSitInModal = function(pcId, labName, pcNumber) {
+            document.getElementById('modalPcId').value = pcId;
+            document.getElementById('sitInModalDetails').textContent = `Initiate sit-in for Lab: ${labName}, PC Number: ${pcNumber}`;
+            document.getElementById('sitInModal').classList.remove('hidden');
+        }
+
+        // Function to close the sit-in modal
+        window.closeSitInModal = function() {
+            document.getElementById('sitInModal').classList.add('hidden');
+            document.getElementById('sitInForm').reset(); // Reset form fields
+        }
+
+        // Handle Sit-in Form Submission
+        document.getElementById('sitInForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            initiateSitIn(formData);
+        });
+
+        // Function to initiate sit-in
+        function initiateSitIn(formData) {
+            fetch('sitting_process.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Sit-in initiated successfully!');
+                    closeSitInModal();
+                    // Refresh the PC availability section
+                    location.reload(); // Simple reload for now, can optimize later
+                } else {
+                    alert('Error initiating sit-in: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while initiating sit-in.');
+            });
+        }
+
+        // Function to end sit-in
+        window.endSitIn = function(pcId) {
+            if (confirm('Are you sure you want to end the sit-in for this PC?')) {
+                fetch('sit_in_end.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'pc_id=' + encodeURIComponent(pcId)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Sit-in ended successfully!');
+                        // Refresh the PC availability section
+                        location.reload(); // Simple reload for now
+                    } else {
+                        alert('Error ending sit-in: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while ending sit-in.');
+                });
+            }
+        }
 
         // Function to fetch reservation data
         function fetchReservations(page = 1) {
@@ -211,7 +373,6 @@ $reservationsResult = $reservationsStmt->get_result();
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.full_name}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.pc_number}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.time_slot}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
@@ -300,7 +461,7 @@ $reservationsResult = $reservationsStmt->get_result();
             const infoDiv = document.createElement('div');
             infoDiv.className = 'text-sm text-gray-500';
             infoDiv.textContent = `Page ${pagination.currentPage} of ${pagination.totalPages} (${pagination.totalRecords} records)`;
-            paginationElement.appendChild(infoDiv);
+                paginationElement.appendChild(infoDiv);
 
             // Create a container for the pagination buttons
             const buttonsDiv = document.createElement('div');
