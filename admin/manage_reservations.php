@@ -152,15 +152,18 @@ $reservationsResult = $reservationsStmt->get_result();
                 </div>
             </div>
     document.addEventListener("DOMContentLoaded", function () {
-        let currentPage = 1; // Track the current page
-        function fetchData(page = 1) {
+        let currentPage = 1;
+
+        // Function to fetch reservation data
+        function fetchReservations(page = 1) {
             let statusFilter = document.querySelector('select[name="status"]').value;
 
-            fetch(`fetch_reservations.php?page=${page}&status=${encodeURIComponent(statusFilter)}`)
+            fetch(`fetch_reservations.php?page=${page}&status=${encodeURIComponent(statusFilter)}`) // Updated URL
                 .then(response => response.json())
                 .then(data => {
                     displayReservations(data.reservations);
                     createPagination(data.pagination);
+                    attachActionListeners(); // Re-attach listeners after data load
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
@@ -175,7 +178,8 @@ $reservationsResult = $reservationsStmt->get_result();
                 });
         }
 
-        // Function to display reservations in the table
+        // Function to display reservations
+
         function displayReservations(reservations) {
             const tbody = document.getElementById("reservationsTableBody");
             tbody.innerHTML = ''; // Clear existing rows
@@ -209,7 +213,7 @@ $reservationsResult = $reservationsStmt->get_result();
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.lab_name || 'N/A'}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.pc_number}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${new Date(reservation.reservation_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
- <td class="px-6 py-4 whitespace-nowrap">${formattedDate}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${reservation.time_slot}</td>
                     <td class="px-6 py-4 whitespace-nowrap">${reservation.purpose}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">
@@ -225,14 +229,13 @@ $reservationsResult = $reservationsStmt->get_result();
                 `;
                 tbody.appendChild(row);
             });
-            
-            // Re-attach event listeners to the new buttons
-            attachActionListener();
         }
 
-        // Function to attach event listeners to action buttons (Accept/Reject)
-        function attachActionListener() {
+        // Function to attach event listeners
+
+        function attachActionListeners() {
             document.querySelectorAll('.accept-btn').forEach(button => {
+                // Remove existing listeners before adding new ones
                 button.removeEventListener('click', handleActionListener); // Prevent duplicate listeners
                 button.addEventListener('click', handleActionListener);
             });
@@ -242,12 +245,14 @@ $reservationsResult = $reservationsStmt->get_result();
             });
         }
 
-        // Unified handler for Accept/Reject button clicks
+        // Handler for action button clicks
+
         function handleActionListener() {
             const reservationId = this.getAttribute('data-id');
             const status = this.classList.contains('accept-btn') ? 'approved' : 'rejected';
             updateReservationStatus(reservationId, status);
         }
+        // Function to update reservation status
 
         function updateReservationStatus(reservationId, status) {
             const xhr = new XMLHttpRequest();
@@ -259,7 +264,7 @@ $reservationsResult = $reservationsStmt->get_result();
                     try {
                         const response = JSON.parse(xhr.responseText);
                         if (response.success) {
-                            // Refresh data via AJAX on success
+                            // Refresh data after successful update
                             fetchData(currentPage); 
                         } else {
                             alert('Error updating reservation status: ' + response.message);
@@ -280,7 +285,8 @@ $reservationsResult = $reservationsStmt->get_result();
             xhr.send('reservation_id=' + reservationId + '&status=' + status);
         }
 
-        // Function to create pagination controls (copy from sit-in records and adapt)
+        // Function to create pagination
+
         function createPagination(pagination) {
             const paginationElement = document.getElementById('pagination');
             paginationElement.innerHTML = ''; // Clear existing pagination
@@ -351,7 +357,8 @@ $reservationsResult = $reservationsStmt->get_result();
             paginationElement.appendChild(buttonsDiv);
         }
 
-        // Helper function to create pagination buttons
+        // Helper function for pagination button creation
+
         function createPaginationButton(text, page) {
             const button = document.createElement('button');
             button.className = 'px-3 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors text-sm';
@@ -364,10 +371,9 @@ $reservationsResult = $reservationsStmt->get_result();
             return button;
         }
     });
-
-        // Initial fetch when the page loads
-        fetchData();
-    });
+    // Initial fetch on page load
+    fetchReservations();
+});
 </script>
 
 <?php require_once '../shared/footer.php'; ?>
