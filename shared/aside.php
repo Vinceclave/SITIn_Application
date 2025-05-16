@@ -40,8 +40,7 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
             
-            <!-- Desktop Navigation -->
-            <nav id="studentDesktopNav" class="hidden md:flex items-center space-x-6">
+            <!-- Desktop Navigation -->            <nav id="studentDesktopNav" class="hidden md:flex items-center space-x-6">
                 <a href="home.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-home mr-2 text-indigo-500"></i>Home
                 </a>
@@ -53,6 +52,9 @@
                 </a>
                 <a href="reservation.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-calendar-check mr-2 text-indigo-500"></i>Reservation
+                </a>
+                <a href="resources.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                    <i class="fas fa-book mr-2 text-indigo-500"></i>Resources
                 </a>
             </nav>
             
@@ -93,8 +95,7 @@
         </div>
     </div>
     
-    <!-- Mobile Navigation -->
-    <nav id="studentMobileNav" class="md:hidden absolute top-full left-0 w-full bg-white/95 border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300 shadow-md">
+    <!-- Mobile Navigation -->    <nav id="studentMobileNav" class="md:hidden absolute top-full left-0 w-full bg-white/95 border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300 shadow-md">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
             <a href="home.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-home mr-3 w-6 text-indigo-500"></i>Home
@@ -107,6 +108,9 @@
             </a>
             <a href="reservation.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-calendar-check mr-3 w-6 text-indigo-500"></i>Reservation
+            </a>
+            <a href="resources.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                <i class="fas fa-book mr-3 w-6 text-indigo-500"></i>Resources
             </a>
         </div>
     </nav>
@@ -154,27 +158,33 @@
             
             <!-- Desktop Navigation -->
             <h2 class="text-xl font-bold text-gray-800 hidden md:block">Admin Panel</h2>
-            <nav id="adminNav" class="hidden md:flex items-center space-x-6">
-                <a href="dashboard.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+            <nav id="adminNav" class="hidden md:flex items-center space-x-6">                <a href="dashboard.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-chart-bar mr-2 text-indigo-500"></i>Dashboard
-                </a>
-                <a href="manage_users.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
+                </a>                <a href="manage_users.php" class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                     <i class="fas fa-users mr-2 text-indigo-500"></i>Manage Users
                 </a>
-                <!-- Dropdown -->
-                <div class="relative group">
+                
+                <!-- Records Dropdown -->                <div class="relative group">
                     <button class="flex items-center text-gray-600 hover:text-indigo-600 hover:scale-105 transition-all px-3 py-1.5 rounded-lg">
                         <i class="fas fa-database mr-2 text-indigo-500"></i>Records <i class="fas fa-caret-down ml-1"></i>
                     </button>
                     <div class="absolute hidden group-hover:block mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 w-48">
                         <a href="reports.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap rounded-t-lg">
                             <i class="fas fa-file-alt mr-2 w-4 text-indigo-400"></i>Reports
-                        </a>
-                        <a href="sitting_records.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                        </a>                        <a href="sitting_records.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
                             <i class="fas fa-chair mr-2 w-4 text-indigo-400"></i>Sitting Records
                         </a>
-                        <a href="manage_reservations.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap rounded-b-lg">
+                        <a href="manage_reservations.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
                            <i class="fas fa-calendar-check mr-2 w-4 text-indigo-400"></i>Manage Reservations
+                        </a>
+                        <a href="lab_management.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                           <i class="fas fa-building mr-2 w-4 text-indigo-400"></i>Lab Management
+                        </a>
+                        <a href="pc_management.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap">
+                           <i class="fas fa-desktop mr-2 w-4 text-indigo-400"></i>PC Management
+                        </a>
+                        <a href="manage_resources.php" class="block px-4 py-2 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap rounded-b-lg">
+                           <i class="fas fa-book mr-2 w-4 text-indigo-400"></i>Manage Resources
                         </a>
                     </div>
                 </div>
@@ -236,11 +246,9 @@
     <nav id="adminMobileNav" class="md:hidden absolute top-full left-0 w-full bg-white/95 border-b border-gray-200/50 backdrop-blur-sm hidden transition-all duration-300 shadow-md">
         <div class="container max-w-[1400px] mx-auto px-4 py-2">
             <h2 class="text-lg font-semibold text-gray-800 px-4 py-2 border-b border-gray-100">Admin Panel</h2>
-            
-            <a href="dashboard.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+              <a href="dashboard.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-chart-bar mr-3 w-6 text-indigo-500"></i>Dashboard
-            </a>
-            <a href="manage_users.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+            </a>            <a href="manage_users.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                 <i class="fas fa-users mr-3 w-6 text-indigo-500"></i>Manage Users
             </a>
             
@@ -249,16 +257,23 @@
                 <button class="flex items-center w-full py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1" onclick="toggleRecords()">
                     <i class="fas fa-database mr-3 w-6 text-indigo-500"></i>Records
                     <i class="fas fa-chevron-down ml-auto transition-transform" id="recordsIcon"></i>
-                </button>
-                <div id="recordsDropdown" class="hidden pl-4 border-l-2 border-indigo-100 ml-4 my-1">
+                </button>                <div id="recordsDropdown" class="hidden pl-4 border-l-2 border-indigo-100 ml-4 my-1">
                     <a href="reports.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                         <i class="fas fa-file-alt mr-3 w-6 text-indigo-400"></i>Reports
-                    </a>
-                    <a href="sitting_records.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                    </a>                    <a href="sitting_records.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                         <i class="fas fa-chair mr-3 w-6 text-indigo-400"></i>Sitting Records
                     </a>
                     <a href="manage_reservations.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
                         <i class="fas fa-calendar-check mr-3 w-6 text-indigo-400"></i>Manage Reservations
+                    </a>
+                    <a href="lab_management.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                        <i class="fas fa-building mr-3 w-6 text-indigo-400"></i>Lab Management
+                    </a>
+                    <a href="pc_management.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                        <i class="fas fa-desktop mr-3 w-6 text-indigo-400"></i>PC Management
+                    </a>
+                    <a href="manage_resources.php" class="flex items-center py-3 px-4 text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors my-1">
+                        <i class="fas fa-book mr-3 w-6 text-indigo-400"></i>Manage Resources
                     </a>
                 </div>
             </div>
@@ -304,9 +319,7 @@
         if (!button.contains(event.target) && !dropdown.contains(event.target)) {
             dropdown.classList.add('hidden');
         }
-    });
-    
-    // Mobile Records dropdown functionality
+    });      // Mobile Records dropdown functionality
     function toggleRecords() {
         const dropdown = document.getElementById('recordsDropdown');
         const icon = document.getElementById('recordsIcon');
@@ -323,7 +336,7 @@
     
 
 <!-- Search Modal -->
-<div id="searchModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden transition-all duration-300">
+<div id="searchModal" class="z-50 fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center hidden transition-all duration-300">
     <div class="bg-white rounded-xl shadow-lg w-full max-w-md mx-4 transform transition-all">
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">

@@ -273,7 +273,9 @@ require_once '../shared/header.php';
                         // Send AJAX request to sitting_process.php with action=end
                         fetch("sitting_process.php", {
                             method: "POST",
-                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            headers: { 
+                                "Content-Type": "application/x-www-form-urlencoded" 
+                            },
                             body: `idno=${idno}&action=end`
                         })
                         .then(response => response.json())
@@ -294,7 +296,7 @@ require_once '../shared/header.php';
                                 // Refresh the table data
                                 fetchData();
                             } else {
-                                Notiflix.Notify.failure(data.message);
+                                Notiflix.Notify.failure(data.message || "An error occurred");
                                 button.disabled = false;
                                 button.innerHTML = originalContent;
                             }
@@ -334,7 +336,9 @@ require_once '../shared/header.php';
                         
                         fetch("reset_student_session.php", {
                             method: "POST",
-                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            headers: { 
+                                "Content-Type": "application/x-www-form-urlencoded" 
+                            },
                             body: `idno=${idno}`
                         })
                         .then(response => response.json())
@@ -343,7 +347,7 @@ require_once '../shared/header.php';
                                 Notiflix.Notify.success(data.message);
                                 fetchData();
                             } else {
-                                Notiflix.Notify.failure(data.message);
+                                Notiflix.Notify.failure(data.message || "An error occurred");
                                 button.disabled = false;
                                 button.innerHTML = originalContent;
                             }
@@ -408,7 +412,7 @@ require_once '../shared/header.php';
                                 Notiflix.Notify.success(data.message);
                                 fetchData();
                             } else {
-                                Notiflix.Notify.failure(data.message);
+                                Notiflix.Notify.failure(data.message || "An error occurred");
                                 pointsButton.disabled = false;
                                 pointsButton.innerHTML = originalContent;
                             }
@@ -468,7 +472,7 @@ require_once '../shared/header.php';
                             Notiflix.Notify.success(data.message);
                             fetchData();
                         } else {
-                            Notiflix.Notify.failure(data.message);
+                            Notiflix.Notify.failure(data.message || "An error occurred");
                         }
                     })
                     .catch(error => {
@@ -500,4 +504,3 @@ require_once '../shared/header.php';
 </script>
 
 <?php require_once '../shared/footer.php'; ?>
-
