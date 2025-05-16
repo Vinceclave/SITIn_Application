@@ -121,37 +121,46 @@ while ($stat = $labStatsResult->fetch_assoc()) {
 }
 ?>
 
-<div class="flex min-h-screen bg-gray-50 text-gray-900 pb-14">
+<?php if(isset($successMessage)): ?>
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+<script>
+    Notiflix.Notify.success("<?php echo addslashes($successMessage); ?>");
+</script>
+<?php endif; ?>
+
+<?php if(isset($errorMessage)): ?>
+<script src="https://cdn.jsdelivr.net/npm/notiflix@3.2.5/dist/notiflix-aio-3.2.5.min.js"></script>
+<script>
+    Notiflix.Notify.failure("<?php echo addslashes($errorMessage); ?>");
+</script>
+<?php endif; ?>
+
+<div class="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900 pb-14">
     <?php include '../shared/aside.php'; ?>
-    <main class="flex-1 p-4 ml-64">
-        <div class="max-w-[1400px] mx-auto">
-            <div class="flex items-center justify-between mb-8">
-                <div>
-                    <h1 class="text-3xl font-semibold text-gray-800">Lab Management</h1>
-                    <p class="text-lg text-gray-600">Add, edit or disable computer laboratories</p>
+    <main class="flex-1 p-6 pt-24">
+        <div class="max-w-7xl mx-auto">
+            <!-- Welcome Section -->
+            <div class="bg-white bg-opacity-80 backdrop-blur-sm rounded-xl shadow-md p-6 mb-8 border border-gray-100">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-indigo-100 p-3 rounded-full">
+                        <i class="fas fa-flask text-2xl text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-800">Lab Management</h1>
+                        <p class="text-lg text-gray-600">Add, edit or disable computer laboratories</p>
+                    </div>
                 </div>
+            </div>
+            
+            <div class="flex justify-end mb-6">
                 <button id="addLabBtn" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                     <i class="fas fa-plus mr-2"></i>Add New Lab
                 </button>
             </div>
             
-            <?php if (isset($successMessage)): ?>
-                <div class="mb-6 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-md" role="alert">
-                    <p class="font-medium">Success!</p>
-                    <p><?php echo $successMessage; ?></p>
-                </div>
-            <?php endif; ?>
-            
-            <?php if (isset($errorMessage)): ?>
-                <div class="mb-6 bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md" role="alert">
-                    <p class="font-medium">Error!</p>
-                    <p><?php echo $errorMessage; ?></p>
-                </div>
-            <?php endif; ?>
-
             <!-- Add Lab Form (hidden by default) -->
-            <div id="addLabForm" class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6 hidden">
-                <h2 class="text-xl font-semibold mb-4">Add New Lab</h2>
+            <div id="addLabForm" class="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100 hidden">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Add New Lab</h2>
                 <form method="POST">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div>
@@ -183,10 +192,9 @@ while ($stat = $labStatsResult->fetch_assoc()) {
                         </button>
                     </div>
                 </form>
-            </div>
-
-            <!-- Labs Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            </div>            <!-- Labs Table -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6 border border-gray-100">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Labs Overview</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
@@ -252,8 +260,8 @@ while ($stat = $labStatsResult->fetch_assoc()) {
 
 <!-- Edit Lab Modal -->
 <div id="editLabModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-lg">
-        <h2 class="text-xl font-semibold mb-4">Edit Lab</h2>
+    <div class="bg-white rounded-xl p-6 w-full max-w-lg">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Edit Lab</h2>
         <form method="POST">
             <input type="hidden" id="edit_lab_id" name="lab_id">
             <div class="mb-4">
@@ -289,8 +297,8 @@ while ($stat = $labStatsResult->fetch_assoc()) {
 
 <!-- Delete Lab Confirmation Modal -->
 <div id="deleteLabModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50">
-    <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 class="text-xl font-semibold mb-4">Confirm Deletion</h2>
+    <div class="bg-white rounded-xl p-6 w-full max-w-md">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">Confirm Deletion</h2>
         <p class="mb-4">Are you sure you want to delete lab <span id="delete_lab_name" class="font-semibold"></span>? This action cannot be undone.</p>
         <form method="POST">
             <input type="hidden" id="delete_lab_id" name="lab_id">
@@ -383,4 +391,18 @@ while ($stat = $labStatsResult->fetch_assoc()) {
     });
 </script>
 
-<?php require_once '../shared/footer.php'; ?> 
+<?php require_once '../shared/footer.php'; ?>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    navy: "#24292e",
+                    darkblue: "#0366d6",
+                    steelblue: "#f6f8fa",
+                    bluegray: "#6a737d"
+                }
+            }
+        }
+    }
+</script>

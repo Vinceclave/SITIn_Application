@@ -1,7 +1,6 @@
 <?php
 session_start();
 require_once '../config/config.php';
-require_once '../shared/header.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -9,7 +8,132 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Fetch user details
+// Process reservation form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['lab_name'])) {
+    // Extract form data
+    $lab_name = $_POST['lab_name'];
+    $pc_number = $_POST['pc_number'];
+    $reservation_date = $_POST['reservation_date'];
+    $time_slot = $_POST['time_slot'];
+    $purpose = $_POST['purpose'];
+    
+    // Fetch user details
+    $user_id = $_SESSION['user_id'];
+    $user_query = "SELECT * FROM users WHERE id = ?";
+    $user_stmt = $conn->prepare($user_query);
+    $user_stmt->bind_param("i", $user_id);
+    $user_stmt->execute();
+    $user_result = $user_stmt->get_result();
+    $user = $user_result->fetch_assoc();
+    $idno = $user['idno'];
+    $full_name = $user['firstname'] . ' ' . $user['lastname'];
+
+    // Get lab ID
+    $labQuery = "SELECT lab_id FROM labs WHERE lab_name = ?";
+    $labStmt = $conn->prepare($labQuery);
+    $labStmt->bind_param("s", $lab_name);
+    $labStmt->execute();
+    $labResult = $labStmt->get_result();
+    
+    if ($labResult->num_rows === 0) {
+        $_SESSION['error'] = "Selected lab not found";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    $lab_id = $labResult->fetch_assoc()['lab_id'];
+
+    // Check if the student already has a pending reservation for the same date and time slot
+    $checkExistingQuery = "SELECT * FROM reservations WHERE idno = ? AND reservation_date = ? AND time_slot = ? AND status = 'pending'";
+    $checkStmt = $conn->prepare($checkExistingQuery);
+    $checkStmt->bind_param("iss", $idno, $reservation_date, $time_slot);
+    $checkStmt->execute();
+    $existingResult = $checkStmt->get_result();    
+    
+    if ($existingResult->num_rows > 0) {
+        $_SESSION['error'] = "You already have a pending reservation for this date and time slot.";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    // Check if the PC is available in the pcs table
+    $checkPcAvailabilityQuery = "SELECT status FROM pcs WHERE lab_id = ? AND pc_number = ?";
+    $checkPcAvailabilityStmt = $conn->prepare($checkPcAvailabilityQuery);
+    $checkPcAvailabilityStmt->bind_param("ii", $lab_id, $pc_number);
+    $checkPcAvailabilityStmt->execute();
+    $pcAvailabilityResult = $checkPcAvailabilityStmt->get_result();
+    
+    if ($pcAvailabilityResult->num_rows === 0) {
+        // PC doesn't exist in the database, insert it
+        $insertPcQuery = "INSERT INTO pcs (lab_id, pc_number, status) VALUES (?, ?, 'available')";
+        $insertPcStmt = $conn->prepare($insertPcQuery);
+        $insertPcStmt->bind_param("ii", $lab_id, $pc_number);
+        $insertPcStmt->execute();
+    } else {
+        $pcStatus = $pcAvailabilityResult->fetch_assoc()['status'];
+        if ($pcStatus !== 'available') {
+            $_SESSION['error'] = "The selected PC is not available.";
+            header("Location: reservation.php");
+            exit;
+        }
+    }
+
+    // Check if the PC is already reserved for the selected date and time slot
+    $checkPcQuery = "SELECT * FROM reservations WHERE lab_name = ? AND pc_number = ? AND reservation_date = ? AND time_slot = ? AND status IN ('pending', 'approved')";
+    $checkPcStmt = $conn->prepare($checkPcQuery);
+    $checkPcStmt->bind_param("siss", $lab_name, $pc_number, $reservation_date, $time_slot);
+    $checkPcStmt->execute();
+    $pcResult = $checkPcStmt->get_result();
+    
+    if ($pcResult->num_rows > 0) {
+        $_SESSION['error'] = "This PC is already reserved for the selected date and time slot.";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    // Check if the PC is currently in use (active sit-in session)
+    $checkActiveSessions = "SELECT * FROM sit_in WHERE lab = ? AND pc_number = ? AND status = 1 AND out_time IS NULL";
+    $checkActiveSessionsStmt = $conn->prepare($checkActiveSessions);
+    $checkActiveSessionsStmt->bind_param("si", $lab_name, $pc_number);
+    $checkActiveSessionsStmt->execute();
+    $activeSessionsResult = $checkActiveSessionsStmt->get_result();
+    
+    if ($activeSessionsResult->num_rows > 0) {
+        $_SESSION['error'] = "This PC is currently in use.";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    // Begin transaction
+    $conn->begin_transaction();
+    
+    try {
+        // Insert reservation
+        $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, purpose) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $insertStmt = $conn->prepare($insertQuery);
+        $insertStmt->bind_param("ississs", $idno, $full_name, $lab_name, $pc_number, $reservation_date, $time_slot, $purpose);
+        $insertStmt->execute();
+        
+        // Commit transaction
+        $conn->commit();
+        
+        $_SESSION['success'] = "Reservation submitted successfully!";
+        header("Location: reservation.php");
+        exit;
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $_SESSION['error'] = "Error: " . $e->getMessage();
+        header("Location: reservation.php");
+        exit;
+    }
+}
+
+// Include header AFTER all potential redirects
+require_once '../shared/header.php';
+
+// Fetch user details for display
 $user_id = $_SESSION['user_id'];
 $query = "SELECT * FROM users WHERE id = ?";
 $stmt = $conn->prepare($query);
@@ -100,6 +224,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     $purpose= $_POST['purpose'];
     $full_name = $user['firstname'] . ' ' . $user['lastname'];
 
+    // Get lab ID
+    $labQuery = "SELECT lab_id FROM labs WHERE lab_name = ?";
+    $labStmt = $conn->prepare($labQuery);
+    $labStmt->bind_param("s", $lab_name);
+    $labStmt->execute();
+    $labResult = $labStmt->get_result();
+    
+    if ($labResult->num_rows === 0) {
+        $_SESSION['error'] = "Selected lab not found";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    $lab_id = $labResult->fetch_assoc()['lab_id'];
+
     // Check if the student already has a pending reservation for the same date and time slot
     $checkExistingQuery = "SELECT * FROM reservations WHERE idno = ? AND reservation_date = ? AND time_slot = ? AND status = 'pending'";
     $checkStmt = $conn->prepare($checkExistingQuery);
@@ -108,29 +247,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_reservation'])
     $existingResult = $checkStmt->get_result();    
     
     if ($existingResult->num_rows > 0) {
-        $errorMessage = "You already have a pending reservation for this date and time slot.";
+        $_SESSION['error'] = "You already have a pending reservation for this date and time slot.";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    // Check if the PC is available in the pcs table
+    $checkPcAvailabilityQuery = "SELECT status FROM pcs WHERE lab_id = ? AND pc_number = ?";
+    $checkPcAvailabilityStmt = $conn->prepare($checkPcAvailabilityQuery);
+    $checkPcAvailabilityStmt->bind_param("ii", $lab_id, $pc_number);
+    $checkPcAvailabilityStmt->execute();
+    $pcAvailabilityResult = $checkPcAvailabilityStmt->get_result();
+    
+    if ($pcAvailabilityResult->num_rows === 0) {
+        // PC doesn't exist in the database, insert it
+        $insertPcQuery = "INSERT INTO pcs (lab_id, pc_number, status) VALUES (?, ?, 'available')";
+        $insertPcStmt = $conn->prepare($insertPcQuery);
+        $insertPcStmt->bind_param("ii", $lab_id, $pc_number);
+        $insertPcStmt->execute();
     } else {
-        // Check if the PC is already reserved for the selected date and time slot
-        $checkPcQuery = "SELECT * FROM reservations WHERE lab_name = ? AND pc_number = ? AND reservation_date = ? AND time_slot = ? AND status IN ('pending', 'approved')";
-         $checkPcStmt = $conn->prepare($checkPcQuery);
-         $checkPcStmt->bind_param("siss", $lab_name, $pc_number, $reservation_date, $time_slot);
-         $checkPcStmt->execute();
-         $pcResult = $checkPcStmt->get_result();
-        
-        if ($pcResult->num_rows > 0) {
-            $errorMessage = "This PC is already reserved for the selected date and time slot.";        } else {
-            // Insert reservation
-            $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, purpose) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)";
-            $insertStmt = $conn->prepare($insertQuery);
-            $insertStmt->bind_param("ississs", $idno, $full_name, $lab_name, $pc_number, $reservation_date, $time_slot, $purpose);
-
-            if ($insertStmt->execute()) {
-                $successMessage = "Reservation submitted successfully!";
-            } else {
-                $errorMessage = "Error: " . $insertStmt->error;
-            }
+        $pcStatus = $pcAvailabilityResult->fetch_assoc()['status'];
+        if ($pcStatus !== 'available') {
+            $_SESSION['error'] = "The selected PC is not available.";
+            header("Location: reservation.php");
+            exit;
         }
+    }
+
+    // Check if the PC is already reserved for the selected date and time slot
+    $checkPcQuery = "SELECT * FROM reservations WHERE lab_name = ? AND pc_number = ? AND reservation_date = ? AND time_slot = ? AND status IN ('pending', 'approved')";
+    $checkPcStmt = $conn->prepare($checkPcQuery);
+    $checkPcStmt->bind_param("siss", $lab_name, $pc_number, $reservation_date, $time_slot);
+    $checkPcStmt->execute();
+    $pcResult = $checkPcStmt->get_result();
+    
+    if ($pcResult->num_rows > 0) {
+        $_SESSION['error'] = "This PC is already reserved for the selected date and time slot.";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    // Check if the PC is currently in use (active sit-in session)
+    $checkActiveSessions = "SELECT * FROM sit_in WHERE lab = ? AND pc_number = ? AND status = 1 AND out_time IS NULL";
+    $checkActiveSessionsStmt = $conn->prepare($checkActiveSessions);
+    $checkActiveSessionsStmt->bind_param("si", $lab_name, $pc_number);
+    $checkActiveSessionsStmt->execute();
+    $activeSessionsResult = $checkActiveSessionsStmt->get_result();
+    
+    if ($activeSessionsResult->num_rows > 0) {
+        $_SESSION['error'] = "This PC is currently in use.";
+        header("Location: reservation.php");
+        exit;
+    }
+    
+    // Begin transaction
+    $conn->begin_transaction();
+    
+    try {
+        // Insert reservation
+        $insertQuery = "INSERT INTO reservations (idno, full_name, lab_name, pc_number, reservation_date, time_slot, purpose) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $insertStmt = $conn->prepare($insertQuery);
+        $insertStmt->bind_param("ississs", $idno, $full_name, $lab_name, $pc_number, $reservation_date, $time_slot, $purpose);
+        $insertStmt->execute();
+        
+        // Commit transaction
+        $conn->commit();
+        
+        $_SESSION['success'] = "Reservation submitted successfully!";
+        header("Location: reservation.php");
+        exit;
+    } catch (Exception $e) {
+        // Rollback transaction on error
+        $conn->rollback();
+        $_SESSION['error'] = "Error: " . $e->getMessage();
+        header("Location: reservation.php");
+        exit;
     }
 }
 
@@ -397,17 +589,44 @@ $reservationsResult = $reservationsStmt->get_result();
                                 <div class="time-slot px-4 py-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors text-center" data-value="5:00 PM - 7:00 PM">5:00 PM - 7:00 PM</div>
                             </div>
                             <input type="hidden" id="time_slot" name="time_slot" required>
-                        </div>
-
-                        <!-- PC Selection -->
+                        </div>                        <!-- PC Selection -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 <i class="fas fa-desktop mr-2"></i>Select PC
                             </label>
                             <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                                 <div class="overflow-x-auto">
-                                    <div class="lab-grid" id="pcGrid">
+                                    <!-- PC Selection Legend -->
+                                    <div class="flex flex-wrap gap-4 mb-4">
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-green-500 rounded-sm mr-2"></div>
+                                            <span class="text-sm">Available</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-red-500 rounded-sm mr-2"></div>
+                                            <span class="text-sm">Unavailable/In Use</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-yellow-500 rounded-sm mr-2"></div>
+                                            <span class="text-sm">Maintenance</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-blue-500 rounded-sm mr-2"></div>
+                                            <span class="text-sm">Reserved</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-purple-500 rounded-sm mr-2"></div>
+                                            <span class="text-sm">Selected</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- PC Grid -->
+                                    <div class="grid grid-cols-5 md:grid-cols-10 gap-2" id="pcGrid">
                                         <!-- PCs will be loaded here -->
+                                        <div class="col-span-full text-center py-8 text-gray-500">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            Please select a laboratory, date, and time slot to view available PCs
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -455,38 +674,6 @@ $reservationsResult = $reservationsStmt->get_result();
     background: #94a3b8;
 }
 
-/* PC Grid */
-.lab-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 1rem;
-    padding: 1rem;
-}
-
-.pc-item {
-    text-align: center;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-}
-
-.pc-item:not(.reserved):hover {
-    transform: translateY(-2px);
-}
-
-.pc-item.reserved {
-    background-color: #fee2e2;
-    border-color: #fecaca;
-    color: #991b1b;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.pc-item.selected {
-    background-color: #e0e7ff;
-    border-color: #818cf8;
-    color: #4f46e5;
-}
-
 /* Time slot styles */
 .time-slot.selected {
     @apply bg-indigo-600 text-white ring-2 ring-indigo-300;
@@ -517,22 +704,21 @@ $reservationsResult = $reservationsStmt->get_result();
         const timeSlots = document.querySelectorAll('.time-slot');
         const pcNumberInput = document.getElementById('pc_number');
         const timeSlotInput = document.getElementById('time_slot');
-        
-        // Function to generate the PC grid based on the selected lab
+          // Function to generate the PC grid based on the selected lab
         function generatePcGrid() {
             const selectedLab = labSelect.value;
-             const selectedDate = reservationDateInput.value;
+            const selectedDate = reservationDateInput.value;
             const selectedTimeSlot = timeSlotInput.value;
             
-           if (!selectedLab || !selectedDate || !selectedTimeSlot) return;
+            if (!selectedLab || !selectedDate || !selectedTimeSlot) return;
             
             // Clear existing grid
             pcGrid.innerHTML = '';
             
             // Create loading indicator
             const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'col-span-full text-center py-4';
-            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>';
+            loadingDiv.className = 'col-span-full text-center py-8';
+            loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Loading PC availability...';
             pcGrid.appendChild(loadingDiv);
             
             // Fetch reserved PCs from the server using AJAX
@@ -545,50 +731,69 @@ $reservationsResult = $reservationsStmt->get_result();
                     pcGrid.removeChild(loadingDiv);
                     
                     try {
-                        const reservedPCs = JSON.parse(xhr.responseText);
+                        const unavailablePCs = JSON.parse(xhr.responseText);
                         
-                       // Generate 50 PC items
-                        for (let i = 1; i <= 50; i++) {
-                            const pcItem = document.createElement('div');
-                            pcItem.className = 'pc-item pc-item px-3 py-2 border border-gray-300 rounded-lg cursor-pointer transition-all hover:bg-indigo-100 hover:scale-105';
-                            pcItem.dataset.pcNumber = i;
-                            pcItem.innerHTML = `<i class="fas fa-desktop mb-1"></i><br>PC ${i}`;
-                            
-                            // Check if this PC is reserved
-                             if (reservedPCs.includes(i)) {
-                                pcItem.classList.add('reserved');
-                                pcItem.title = 'This PC is already reserved';
-                            } else {
-                                pcItem.addEventListener('click', function() {
-                                 // Remove selected class from all PC items
-                                  document.querySelectorAll('.pc-item.selected').forEach(function(item) {
-                                      item.classList.remove('selected', 'bg-indigo-200', 'ring-2', 'ring-indigo-400');
-                                  });
-
-                                  // Add selected class to this PC item
-                                  this.classList.add('selected', 'bg-indigo-200', 'ring-2', 'ring-indigo-400');
-
-                                  // Update hidden input value
-                                  pcNumberInput.value = this.dataset.pcNumber;
-
-                                  // Update hidden input value
-                                  pcNumberInput.value = this.dataset.pcNumber;
-                                });
+                        // Calculate rows needed (5 rows for 50 PCs)
+                        const rows = 5;
+                        const pcPerRow = 10;
+                        const totalPCs = 50;
+                        let pcIndex = 1;
+                        
+                        for (let row = 1; row <= rows; row++) {
+                            // Lab entrance or aisle in the middle
+                            if (row == 3) {
+                                const aisleDiv = document.createElement('div');
+                                aisleDiv.className = 'col-span-full h-8 my-2 bg-gray-200 flex items-center justify-center text-sm text-gray-600';
+                                aisleDiv.textContent = 'Front entrance / Aisle';
+                                pcGrid.appendChild(aisleDiv);
                             }
                             
-                            pcGrid.appendChild(pcItem);
+                            // Create row of PCs
+                            for (let i = 0; i < pcPerRow && pcIndex <= totalPCs; i++, pcIndex++) {
+                                const pcItem = document.createElement('div');
+                                pcItem.className = 'relative aspect-square flex items-center justify-center text-white font-bold rounded-md shadow-sm text-xs md:text-sm';
+                                pcItem.dataset.pcNumber = pcIndex;
+                                
+                                // Check if this PC is unavailable
+                                if (unavailablePCs.includes(pcIndex)) {
+                                    pcItem.classList.add('bg-red-500', 'cursor-not-allowed');
+                                    pcItem.title = 'This PC is unavailable';
+                                    pcItem.innerHTML = '🖥️<span class="ml-1">' + pcIndex + '</span>';
+                                } else {
+                                    pcItem.classList.add('bg-green-500', 'hover:bg-green-600', 'cursor-pointer');
+                                    pcItem.title = 'PC #' + pcIndex + ' (Available)';
+                                    pcItem.innerHTML = '🖥️<span class="ml-1">' + pcIndex + '</span>';
+                                    
+                                    pcItem.addEventListener('click', function() {
+                                        // Remove selected class from all PC items
+                                        document.querySelectorAll('[data-pc-number].bg-purple-500').forEach(function(item) {
+                                            item.classList.remove('bg-purple-500', 'hover:bg-purple-600');
+                                            item.classList.add('bg-green-500', 'hover:bg-green-600');
+                                        });
+                                        
+                                        // Add selected class to this PC item
+                                        this.classList.remove('bg-green-500', 'hover:bg-green-600');
+                                        this.classList.add('bg-purple-500', 'hover:bg-purple-600');
+                                        
+                                        // Update hidden input value
+                                        pcNumberInput.value = this.dataset.pcNumber;
+                                    });
+                                }
+                                
+                                pcGrid.appendChild(pcItem);
+                            }
                         }
                     } catch (e) {
                         console.error('Error parsing response:', e);
-                        pcGrid.innerHTML = '<div class="col-span-full text-center py-4 text-red-500">Error loading PCs. Please try again.</div>';
+                        pcGrid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error loading PCs. Please try again.</div>';
                     }
                 } else {
-                    pcGrid.innerHTML = '<div class="col-span-full text-center py-4 text-red-500">Error loading PCs. Please try again.</div>';
+                    pcGrid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error loading PCs. Please try again.</div>';
                 }
             };
             
             xhr.onerror = function() {
-                pcGrid.innerHTML = '<div class="col-span-full text-center py-4 text-red-500">Network error. Please try again.</div>';
+                pcGrid.innerHTML = '<div class="col-span-full text-center py-8 text-red-500"><i class="fas fa-exclamation-circle mr-2"></i>Network error. Please try again.</div>';
             };
             
             xhr.send(`lab_name=${encodeURIComponent(selectedLab)}&reservation_date=${encodeURIComponent(selectedDate)}&time_slot=${encodeURIComponent(selectedTimeSlot)}`);

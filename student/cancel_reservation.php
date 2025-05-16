@@ -51,56 +51,116 @@ if (!$user || !isset($user['idno'])) {
 
 $idno = $user['idno'];
 
-// Check and prepare the query to verify reservation ownership and status
-if (!$checkStmt = $conn->prepare("SELECT reservation_id FROM reservations WHERE reservation_id = ? AND idno = ? AND status = 'pending'")) {
-    $_SESSION['error'] = "Database error: " . $conn->error;
-    header("Location: reservation.php");
-    exit;
-}
+// Begin transaction
+$conn->begin_transaction();
 
-if (!$checkStmt->bind_param("ii", $reservation_id, $idno)) {
-    $_SESSION['error'] = "Binding parameters failed: " . $checkStmt->error;
-    header("Location: reservation.php");
-    exit;
-}
-
-if (!$checkStmt->execute()) {
-    $_SESSION['error'] = "Execute failed: " . $checkStmt->error;
-    header("Location: reservation.php");
-    exit;
-}
-
-$checkResult = $checkStmt->get_result();
-if ($checkResult->num_rows !== 1) {
-    $_SESSION['error'] = "You cannot cancel this reservation. It may not exist, may not belong to you, or is no longer pending.";
-    header("Location: reservation.php");
+try {
+    // Get reservation details for PC update
+    $getReservationQuery = "SELECT lab_name, pc_number FROM reservations WHERE reservation_id = ?";
+    $getReservationStmt = $conn->prepare($getReservationQuery);
+    $getReservationStmt->bind_param("i", $reservation_id);
+    $getReservationStmt->execute();
+    $reservationResult = $getReservationStmt->get_result();
+    
+    if ($reservationResult->num_rows === 0) {
+        throw new Exception("Reservation not found");
+    }
+    
+    $reservation = $reservationResult->fetch_assoc();
+    $lab_name = $reservation['lab_name'];
+    $pc_number = $reservation['pc_number'];
+    
+    // Check and prepare the query to verify reservation ownership and status
+    $checkStmt = $conn->prepare("SELECT reservation_id FROM reservations WHERE reservation_id = ? AND idno = ? AND status = 'pending'");
+    if (!$checkStmt) {
+        throw new Exception("Database error: " . $conn->error);
+    }
+    
+    $checkStmt->bind_param("ii", $reservation_id, $idno);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
+    
+    if ($checkResult->num_rows !== 1) {
+        throw new Exception("You cannot cancel this reservation. It may not exist, may not belong to you, or is no longer pending.");
+    }
     $checkStmt->close();
-    exit;
-}
-$checkStmt->close();
-// Prepare and execute the update query to cancel the reservation
-if (!$updateStmt = $conn->prepare("UPDATE reservations SET status = 'rejected' WHERE reservation_id = ?")) {
-    $_SESSION['error'] = "Database error: " . $conn->error;
-    header("Location: reservation.php");
-    exit;
-}
-
-if (!$updateStmt->bind_param("i", $reservation_id)) {
-    $_SESSION['error'] = "Binding parameters failed: " . $updateStmt->error;
-    header("Location: reservation.php");
-    exit;
-}
-
-if ($updateStmt->execute()) {
+    
+    // Update the reservation status to rejected
+    $updateStmt = $conn->prepare("UPDATE reservations SET status = 'rejected' WHERE reservation_id = ?");
+    if (!$updateStmt) {
+        throw new Exception("Database error: " . $conn->error);
+    }
+    
+    $updateStmt->bind_param("i", $reservation_id);
+    $updateStmt->execute();
+    $updateStmt->close();
+    
+    // Update PC availability if needed
+    // Get lab ID
+    $labQuery = "SELECT lab_id FROM labs WHERE lab_name = ?";
+    $labStmt = $conn->prepare($labQuery);
+    $labStmt->bind_param("s", $lab_name);
+    $labStmt->execute();
+    $labResult = $labStmt->get_result();
+    
+    if ($labResult->num_rows > 0) {
+        $lab_id = $labResult->fetch_assoc()['lab_id'];
+        
+        // Check if there are any other pending/approved reservations for this PC
+        $otherReservationsQuery = "SELECT COUNT(*) as count FROM reservations 
+                                  WHERE lab_name = ? AND pc_number = ? 
+                                  AND status IN ('pending', 'approved') 
+                                  AND reservation_id != ?";
+        $otherReservationsStmt = $conn->prepare($otherReservationsQuery);
+        $otherReservationsStmt->bind_param("sii", $lab_name, $pc_number, $reservation_id);
+        $otherReservationsStmt->execute();
+        $otherReservationsResult = $otherReservationsStmt->get_result();
+        $reservationsCount = $otherReservationsResult->fetch_assoc()['count'];
+        
+        // Check if there are any active sit-in sessions for this PC
+        $activeSessionsQuery = "SELECT COUNT(*) as count FROM sit_in 
+                               WHERE lab = ? AND pc_number = ? 
+                               AND status = 1 AND out_time IS NULL";
+        $activeSessionsStmt = $conn->prepare($activeSessionsQuery);
+        $activeSessionsStmt->bind_param("si", $lab_name, $pc_number);
+        $activeSessionsStmt->execute();
+        $activeSessionsResult = $activeSessionsStmt->get_result();
+        $sessionsCount = $activeSessionsResult->fetch_assoc()['count'];
+        
+        // If no other reservations or active sessions, update PC status to available
+        if ($reservationsCount == 0 && $sessionsCount == 0) {
+            // Check if PC exists in the pcs table
+            $checkPcQuery = "SELECT pc_id FROM pcs WHERE lab_id = ? AND pc_number = ?";
+            $checkPcStmt = $conn->prepare($checkPcQuery);
+            $checkPcStmt->bind_param("ii", $lab_id, $pc_number);
+            $checkPcStmt->execute();
+            $checkPcResult = $checkPcStmt->get_result();
+            
+            if ($checkPcResult->num_rows > 0) {
+                // Update PC status to available
+                $updatePcQuery = "UPDATE pcs SET status = 'available' WHERE lab_id = ? AND pc_number = ?";
+                $updatePcStmt = $conn->prepare($updatePcQuery);
+                $updatePcStmt->bind_param("ii", $lab_id, $pc_number);
+                $updatePcStmt->execute();
+            } else {
+                // Insert the PC with status available
+                $insertPcQuery = "INSERT INTO pcs (lab_id, pc_number, status) VALUES (?, ?, 'available')";
+                $insertPcStmt = $conn->prepare($insertPcQuery);
+                $insertPcStmt->bind_param("ii", $lab_id, $pc_number);
+                $insertPcStmt->execute();
+            }
+        }
+    }
+    
+    // Commit the transaction
+    $conn->commit();
+    
     $_SESSION['success'] = "Reservation cancelled successfully.";
-} else {
-    $_SESSION['error'] = "Failed to cancel reservation: " . $updateStmt->error;
+} catch (Exception $e) {
+    // Rollback the transaction on error
+    $conn->rollback();
+    $_SESSION['error'] = $e->getMessage();
 }
-
-$updateStmt->close();
-
-// Close the database connection
-$conn->close();
 
 // Redirect to the reservation page
 header("Location: reservation.php");

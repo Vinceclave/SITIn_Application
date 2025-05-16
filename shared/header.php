@@ -116,7 +116,7 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
 <?php 
 $excludedPages = ['login.php', 'register.php', 'dashboard.php', 'manage_reservations.php', 'history.php', 
                  'manage_users.php', 'home.php', 'profile.php', 'sitting_records.php', 'reservation.php', 
-                 'announcement.php', 'reports.php', 'admin_feedback.php'];
+                 'announcement.php', 'reports.php', 'admin_feedback.php', 'lab_management.php', 'pc_management.php', 'resources.php', 'manage_resources.php',];
 
 if (!in_array(basename($_SERVER['PHP_SELF']), $excludedPages)): ?>
     <header class="fixed top-0 inset-x-0 z-50">

@@ -149,10 +149,9 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
 
             <!-- Leaderboard Section -->
             <div class="bg-white rounded-xl shadow-md border border-gray-100 p-6 mb-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-lg font-semibold text-gray-800 flex items-center leaderboard-header">
+                <div class="flex items-center justify-between mb-4">                    <h3 class="text-lg font-semibold text-gray-800 flex items-center leaderboard-header">
                         <i class="fas fa-trophy text-amber-500 mr-2"></i>
-                        Student Session Leaderboard
+                        Top 5 Student Session Leaderboard
                     </h3>
                     <button id="refreshLeaderboard" class="p-2 text-gray-400 hover:text-gray-600 transition-colors">
                         <i class="fas fa-sync-alt"></i>
@@ -1063,10 +1062,9 @@ while ($row = mysqli_fetch_assoc($sitInResult)) {
                 const rankingNote = document.querySelector('.session-ranking-note');
                 if (!rankingNote) {
                     const leaderboardHeader = document.querySelector('.leaderboard-header');
-                    if (leaderboardHeader) {
-                        const newNote = document.createElement('p');
+                    if (leaderboardHeader) {                        const newNote = document.createElement('p');
                         newNote.className = 'text-sm text-gray-500 mt-2 session-ranking-note';
-                        newNote.textContent = 'Students are ranked based on total number of completed sit-in sessions';
+                        newNote.textContent = 'Showing top 5 students ranked by total number of completed sit-in sessions';
                         leaderboardHeader.insertAdjacentElement('afterend', newNote);
                     }
                 }

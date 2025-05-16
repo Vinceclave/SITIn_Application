@@ -20,10 +20,9 @@ $query = "SELECT
             COUNT(DISTINCT sit_in_id) as total_sessions,
             0 as total_points
           FROM sit_in
-          WHERE status = 0 
-          GROUP BY idno, full_name
+          WHERE status = 0          GROUP BY idno, full_name
           ORDER BY total_sessions DESC
-          LIMIT 10";
+          LIMIT 5";
 
 $result = $conn->query($query);
 
